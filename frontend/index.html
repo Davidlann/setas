@@ -746,25 +746,136 @@
       font-size: 20px;
       cursor: pointer;
     }
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     .map-legend {
       position: absolute;
       z-index: 15;
-      top: 78px;
+      top: 74px;
       left: 16px;
-      width: min(280px, calc(100vw - 32px));
-      padding: 11px 13px;
+      width: min(300px, calc(100vw - 32px));
+      padding: 9px 12px;
       color: #514334;
       background: rgba(251, 248, 241, .97);
       border: 1px solid #e2d8c8;
-      border-radius: 12px;
-      box-shadow: 0 5px 18px rgba(61, 46, 31, .14);
-      pointer-events: none;
+      border-radius: 14px;
+      box-shadow: 0 5px 20px rgba(61, 46, 31, .15);
+      pointer-events: auto;
+      transition: max-height .2s ease;
+    }
+    .map-ctrl-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 7px;
+    }
+    .map-ctrl-species-wrap {
+      flex: 1;
+      min-width: 0;
+    }
+    .map-quick-select {
+      width: 100%;
+      height: 32px;
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #44372a;
+      background: #fffdf8;
+      border: 1px solid #dcd1c2;
+      border-radius: 9px;
+      cursor: pointer;
+      outline: none;
+    }
+    .map-quick-select:focus {
+      border-color: #9a7656;
+      box-shadow: 0 0 0 2px rgba(121, 83, 58, .15);
+    }
+    .map-legend-toggle {
+      flex: 0 0 28px;
+      width: 28px;
+      height: 32px;
+      padding: 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: #71685b;
+      background: #f4efe5;
+      border: 1px solid #dcd1c2;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .map-legend-toggle:hover {
+      background: #ede5d7;
+      color: #493524;
+    }
+    .map-legend.minimized .map-legend-content {
+      display: none;
+    }
+    .map-legend.minimized .map-ctrl-header {
+      margin-bottom: 0;
+    }
+    .map-legend-content {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .map-score-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 6px 9px;
+      background: #f5f0e6;
+      border: 1px solid #e7ded0;
+      border-radius: 9px;
+    }
+    .map-score-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .map-score-row strong {
+      color: #6e8053;
+      font-size: 11px;
+    }
+    .map-score-wrap input[type=range] {
+      width: 100%;
+      height: 4px;
+      margin: 3px 0 1px;
+      accent-color: #758653;
+      cursor: pointer;
+    }
+    .map-legend-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 5px;
     }
     .map-legend-title {
-      margin-bottom: 8px;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 750;
-      line-height: 1.35;
+      line-height: 1.25;
+      color: #514334;
+      margin: 0;
+    }
+    .map-stat-fav {
+      font-size: 10px;
+      font-weight: 700;
+      color: #6e8053;
+      white-space: nowrap;
     }
     .map-legend-bar {
       display: flex;
@@ -777,23 +888,23 @@
       display: flex;
       justify-content: space-between;
       gap: 5px;
-      margin-top: 5px;
+      margin-top: 4px;
       color: #766b5e;
       font-size: 9px;
-      line-height: 1.25;
+      line-height: 1.2;
     }
     .map-legend-labels span { text-align: center; }
     .map-legend-note {
-      margin-top: 6px;
+      margin-top: 5px;
       color: #82796d;
-      font-size: 9px;
-      line-height: 1.35;
+      font-size: 8.5px;
+      line-height: 1.3;
     }
     .map-legend.categorical .map-legend-bar { display: grid; height: auto; grid-template-columns: 1fr 1fr; gap: 5px 8px; overflow: visible; }
     .map-legend-category { display: flex; align-items: center; gap: 5px; font-size: 9px; line-height: 1.2; }
     .map-legend-swatch { width: 10px; height: 10px; flex: 0 0 10px; border-radius: 3px; }
     .map-legend.categorical .map-legend-labels { display: none; }
-    .maplibregl-ctrl-top-right { top: 76px !important; }
+    .maplibregl-ctrl-top-right { top: 74px !important; }
     @media (max-width: 700px) {
       .map-toolbar {
         top: 10px;
@@ -844,17 +955,17 @@
         font-size: 11px;
       }
       .map-legend {
-        top: 164px;
+        top: 102px;
         left: 10px;
-        width: min(250px, calc(100vw - 20px));
-        padding: 9px 11px;
+        width: min(290px, calc(100vw - 20px));
+        padding: 8px 10px;
       }
-      .map-legend-title { font-size: 10px; margin-bottom: 6px; }
+      .map-legend-title { font-size: 10px; }
       .map-legend-labels { font-size: 8px; }
-      .map-legend-note { font-size: 8px; margin-top: 4px; }
-      .maplibregl-ctrl-top-right { top: 112px !important; right: 10px !important; }
+      .map-legend-note { font-size: 8px; margin-top: 3px; }
+      .maplibregl-ctrl-top-right { top: 102px !important; right: 10px !important; }
       .maplibregl-ctrl-bottom-right { bottom: 62px !important; }
-      body.menu-open .map-hint { display: none; }
+      body.menu-open .map-hint, body.menu-open .map-legend { display: none; }
     }
     @media (max-width: 380px) {
       .sidebar { max-height: 72dvh; }
@@ -901,11 +1012,40 @@
     <span>Desplázate por el mapa y toca una celda para explorarla</span>
     <button id="map-hint-close" type="button" aria-label="Ocultar ayuda">×</button>
   </div>
-  <section id="map-legend" class="map-legend" aria-label="Leyenda de la capa del mapa">
-    <h2 id="map-legend-title" class="map-legend-title"></h2>
-    <div id="map-legend-bar" class="map-legend-bar" aria-hidden="true"></div>
-    <div id="map-legend-labels" class="map-legend-labels"></div>
-    <p id="map-legend-note" class="map-legend-note"></p>
+  <section id="map-legend" class="map-legend" aria-label="Controles del mapa y leyenda">
+    <div class="map-ctrl-header">
+      <div class="map-ctrl-species-wrap">
+        <label for="map-quick-species" class="visually-hidden">Seta</label>
+        <select id="map-quick-species" class="map-quick-select" aria-label="Elegir seta">
+          <option value="boletus_edulis">🍄 Boletus edulis (hongo blanco)</option>
+          <option value="boletus_pinophilus">🍄 B. pinophilus (pinícola)</option>
+          <option value="boletus_aereus">🍄 B. aereus (negro / bronce)</option>
+          <option value="boletus_reticulatus">🍄 B. reticulatus (verano)</option>
+          <option value="all">🍄 Todas las especies</option>
+        </select>
+      </div>
+      <button id="map-legend-toggle" class="map-legend-toggle" type="button" aria-label="Minimizar o expandir controles" title="Minimizar / expandir">▾</button>
+    </div>
+
+    <div id="map-legend-content" class="map-legend-content">
+      <div class="map-score-wrap">
+        <div class="map-score-row">
+          <span class="map-score-label" id="map-score-title">Puntuación mín:</span>
+          <strong id="map-score-val">0 (todas)</strong>
+        </div>
+        <input type="range" id="map-score-slider" min="0" max="80" step="5" value="0" aria-label="Filtrar celdas por puntuación mínima">
+      </div>
+
+      <div class="map-legend-body">
+        <div class="map-legend-info-row">
+          <h2 id="map-legend-title" class="map-legend-title"></h2>
+          <span id="map-stat-fav" class="map-stat-fav">—</span>
+        </div>
+        <div id="map-legend-bar" class="map-legend-bar" aria-hidden="true"></div>
+        <div id="map-legend-labels" class="map-legend-labels"></div>
+        <p id="map-legend-note" class="map-legend-note"></p>
+      </div>
+    </div>
   </section>
 
   <div class="sidebar">
@@ -978,11 +1118,11 @@
         </button>
         <button class="layer-btn" id="lbtn-forest" onclick="setLayer('forest')">
           <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 19 12 15 12 20 19 4 19 9 12 5 12 12 2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-          Masa Forestal MFE50
+          Masa forestal (árboles)
         </button>
         <button class="layer-btn" id="lbtn-ph" onclick="setLayer('ph')">
           <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M10 2v7.31L4.66 17.5A2 2 0 0 0 6.32 20.5h11.36a2 2 0 0 0 1.66-3L14 9.31V2"/></svg>
-          pH estimado (SoilGrids)
+          pH del suelo (acidez)
         </button>
       </div>
     </details>
@@ -1053,15 +1193,15 @@
         <summary>Más datos del lugar</summary>
         <div class="info-grid">
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M10 2v7.31L4.66 17.5A2 2 0 0 0 6.32 20.5h11.36a2 2 0 0 0 1.66-3L14 9.31V2"/></svg> pH SoilGrids (Q05–Q95): <button class="info-help-btn" type="button" aria-label="Información sobre pH del suelo" data-title="pH del suelo" data-info="Los Boletus edulis y B. pinophilus son marcadamente acidófilos (óptimo pH 4,5–6,0). En suelos calizos o básicos (pH > 7) su presencia es prácticamente nula, cediendo su lugar a otras especies.">i</button></span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M10 2v7.31L4.66 17.5A2 2 0 0 0 6.32 20.5h11.36a2 2 0 0 0 1.66-3L14 9.31V2"/></svg> pH del suelo: <button class="info-help-btn" type="button" aria-label="Información sobre pH del suelo" data-title="pH del suelo" data-info="Los Boletus edulis y pinófilos prefieren suelos ácidos (pH menor a 6,5). En suelos calizos o alcalinos con pH alto es muy raro encontrarlos.">i</button></span>
           <span id="c-ph">—</span>
         </div>
         <div class="info-item">
-          <span>Textura SoilGrids (5–15 cm): <button class="info-help-btn" type="button" aria-label="Información sobre textura del suelo" data-title="Textura del suelo" data-info="Determina la capacidad de retención de agua y oxigenación. Suelos equilibrados o franco-arenosos favorecen el avance del micelio sin encharcar. Suelos muy arcillosos asfixian o pudren los primordios.">i</button></span>
+          <span>Textura del suelo: <button class="info-help-btn" type="button" aria-label="Información sobre textura del suelo" data-title="Textura del suelo" data-info="Indica la proporción de arena, limo y arcilla. Los suelos equilibrados retienen la humedad adecuada sin llegar a encharcar ni asfixiar el micelio.">i</button></span>
           <span id="c-texture">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Lluvia últimos 14 días: <button class="info-help-btn" type="button" aria-label="Información sobre lluvia acumulada" data-title="Lluvia últimos 14 días" data-info="La precipitación acumulada es el activador hídrico esencial. Se necesita una recarga profunda (normalmente ≥35–45 mm en 10-14 días) para empapar el mantillo del bosque y permitir la salida de setas.">i</button></span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Lluvia últimos 14 días: <button class="info-help-btn" type="button" aria-label="Información sobre lluvia acumulada" data-title="Lluvia últimos 14 días" data-info="La lluvia acumulada en las dos últimas semanas empapa el suelo del bosque y es indispensable para que broten las setas.">i</button></span>
           <span id="c-rain">—</span>
         </div>
         <div class="info-item">
@@ -1073,11 +1213,11 @@
           <span id="c-topo">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> Humedad estimada del suelo: <button class="info-help-btn" type="button" aria-label="Información sobre humedad del suelo" data-title="Humedad del suelo" data-info="Porcentaje de humedad en las capas superficiales donde se forman los botones florales (primordios). Mantiene hidratada la estructura fúngica antes de emerger del sustrato.">i</button></span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> Humedad estimada del suelo: <button class="info-help-btn" type="button" aria-label="Información sobre humedad del suelo" data-title="Humedad del suelo" data-info="Humedad estimada en la capa donde nacen los botones de las setas, evitando que se sequen antes de asomar a la superficie.">i</button></span>
           <span id="c-moist">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Balance hídrico (P - ET0): <button class="info-help-btn" type="button" aria-label="Información sobre balance hídrico" data-title="Balance hídrico (P - ET0)" data-info="Diferencia entre lluvia acumulada y evapotranspiración. Si es negativo, el calor y el viento están evaporando el agua más rápido de lo que llovió, frenando el desarrollo miceliar.">i</button></span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Balance hídrico: <button class="info-help-btn" type="button" aria-label="Información sobre balance hídrico" data-title="Balance hídrico" data-info="Diferencia entre lluvia acumulada y evaporación natural del suelo. Si es negativo, el calor y el viento están secando el terreno más rápido de lo que llovió, frenando el micelio.">i</button></span>
           <span id="c-water-balance">—</span>
         </div>
         <div class="info-item">
@@ -1307,7 +1447,7 @@
         {
           title: 'Dónde buscarla',
           items: [
-            'Prioriza bosques cálidos de frondosas, sobre todo encinas, robles y otros Quercus; también puede asociarse a castaños en algunas zonas.',
+            'Prioriza bosques templados de árboles de hoja ancha, sobre todo encinas, robles y alcornoques; también puede asociarse a castaños en algunas zonas.',
             'Busca bajo la copa y en bordes o claros del bosque, en lugares templados que hayan recibido lluvia. No es una especie que se deba esperar por el mero hecho de estar cerca de una ciudad o de una encina aislada.',
             'Es más propia de periodos cálidos; la temporada local depende de las lluvias y del clima de ese año.'
           ]
@@ -1446,14 +1586,38 @@
   document.getElementById('map-retry').addEventListener('click', () => location.reload());
 
   // ================================================================
-  // COLORES (por valor)
+  // COLORES (gradiente continuo multiescala)
   // ================================================================
-  function colorScore(s) {
-    if (s <= 0)  return [51, 65, 85,   200];
-    if (s < 25)  return [249, 115, 22, 200];
-    if (s < 50)  return [234, 179, 8,  210];
-    if (s < 70)  return [34, 197, 94,  220];
-    return [16, 185, 129, 230];
+  const SCORE_STOPS = [
+    { s: 0,   c: [51, 65, 85, 195] },    // 0: Pizarra oscuro (#334155)
+    { s: 15,  c: [127, 29, 29, 200] },   // 15: Granate oscuro (#7f1d1d)
+    { s: 28,  c: [194, 65, 12, 205] },   // 28: Teja / caldera (#c2410c)
+    { s: 40,  c: [234, 88, 12, 210] },   // 40: Naranja vivo (#ea580c)
+    { s: 50,  c: [245, 158, 11, 215] },  // 50: Ámbar dorado (#f59e0b)
+    { s: 60,  c: [234, 179, 8, 220] },   // 60: Amarillo oro (#eab308)
+    { s: 70,  c: [132, 204, 22, 225] },  // 70: Verde lima (#84cc16)
+    { s: 80,  c: [34, 197, 94, 230] },   // 80: Verde vivo (#22c55e)
+    { s: 90,  c: [16, 185, 129, 235] },  // 90: Esmeralda (#10b981)
+    { s: 100, c: [6, 182, 212, 245] }    // 100: Turquesa brillante (#06b6d4)
+  ];
+
+  function colorScore(score) {
+    const s = Math.max(0, Math.min(100, Number(score) || 0));
+    if (s <= 0) return SCORE_STOPS[0].c;
+    for (let i = 0; i < SCORE_STOPS.length - 1; i++) {
+      const lower = SCORE_STOPS[i];
+      const upper = SCORE_STOPS[i + 1];
+      if (s <= upper.s) {
+        const factor = (s - lower.s) / (upper.s - lower.s);
+        return [
+          Math.round(lower.c[0] + factor * (upper.c[0] - lower.c[0])),
+          Math.round(lower.c[1] + factor * (upper.c[1] - lower.c[1])),
+          Math.round(lower.c[2] + factor * (upper.c[2] - lower.c[2])),
+          Math.round(lower.c[3] + factor * (upper.c[3] - lower.c[3]))
+        ];
+      }
+    }
+    return SCORE_STOPS[SCORE_STOPS.length - 1].c;
   }
   function colorPrecip(p) {
     if (!p || p <= 0)  return [15, 23, 42,  200];
@@ -1476,48 +1640,48 @@
     'Castanea sativa':  [146, 64, 14],
   };
   const FOREST_NAMES_ES = {
-    'quercus ilex': 'Encina (Quercus ilex)',
-    'pinus pinaster': 'Pino resinero o rodeno (Pinus pinaster)',
-    'pinus sylvestris': 'Pino silvestre o albar (Pinus sylvestris)',
-    'quercus pyrenaica': 'Rebollo o melojo (Quercus pyrenaica)',
-    'quercus faginea': 'Quejigo (Quercus faginea)',
-    'pinus halepensis': 'Pino carrasco (Pinus halepensis)',
-    'fagus sylvatica': 'Haya (Fagus sylvatica)',
-    'pinus uncinata': 'Pino negro de montaña (Pinus uncinata)',
-    'quercus suber': 'Alcornoque (Quercus suber)',
-    'sabinares albares': 'Bosque de sabina albar',
+    'quercus ilex': 'Encina',
+    'pinus pinaster': 'Pino resinero o rodeno',
+    'pinus sylvestris': 'Pino silvestre o albar',
+    'quercus pyrenaica': 'Rebollo o melojo',
+    'quercus faginea': 'Quejigo',
+    'pinus halepensis': 'Pino carrasco',
+    'fagus sylvatica': 'Haya',
+    'pinus uncinata': 'Pino negro de montaña',
+    'quercus suber': 'Alcornoque',
+    'sabinares albares': 'Sabina albar',
     'bosques ribereños': 'Bosque de ribera (chopos, sauces y fresnos)',
     'bosques mixtos de frondosas en region biogeográfica mediterranea':
-      'Mezcla de árboles de hoja ancha mediterráneos (sin especie única identificada)',
+      'Bosque mixto de robles y frondosas',
     'mezclas de coníferas y frondosas autóctonas en la región biogeográfica mediterránea':
-      'Mezcla de coníferas y árboles de hoja ancha autóctonos',
-    'pinares de pino salgareño': 'Pinar de pino salgareño o laricio',
+      'Mezcla de pinos y árboles de hoja ancha',
+    'pinares de pino salgareño': 'Pinar de pino salgareño',
     'choperas y plataneras de producción': 'Plantaciones de chopos y plátanos',
     'mezclas de coníferas autóctonas en la región biogeográfica mediterránea':
-      'Mezcla de coníferas autóctonas (sin especie única identificada)',
+      'Mezcla de pinos autóctonos',
     'pinares de pino piñonero': 'Pinar de pino piñonero',
-    'enebrales': 'Bosque o matorral de enebros',
-    'fresnedas': 'Bosque de fresnos',
-    'sabinares de juniperus phoenicia': 'Bosque de sabina negra (Juniperus phoenicea)',
-    'otras especies de producción en mezclas': 'Mezcla de otras especies forestales de producción',
-    'acebedas': 'Bosque de acebos',
-    'castañares': 'Bosque de castaños',
+    'enebrales': 'Enebral',
+    'fresnedas': 'Fresneda',
+    'sabinares de juniperus phoenicia': 'Sabina negra',
+    'otras especies de producción en mezclas': 'Mezcla de especies forestales',
+    'acebedas': 'Acebal',
+    'castañares': 'Castañar',
     'mezclas de coníferas autoctonas con alóctonas':
-      'Mezcla de coníferas autóctonas y especies introducidas',
-    'frondosas alóctonas invasoras': 'Árboles de hoja ancha introducidos e invasores',
+      'Mezcla de coníferas',
+    'frondosas alóctonas invasoras': 'Árboles de hoja ancha introducidos',
     'otras coníferas alóctonas de producción (larix spp., pseudotsuga spp., etc)':
-      'Otras coníferas introducidas (alerces y pseudotsugas, entre otras)',
+      'Otras coníferas (alerces, abetos de Douglas)',
     'arbolado disperso de frondosas': 'Árboles de hoja ancha dispersos',
     'coníferas alóctonas de gestión (cupressus sp, otros pinos, etc.)':
-      'Coníferas introducidas (cipreses y otros pinos)',
-    'acebuchares': 'Bosque de acebuches (olivo silvestre)',
+      'Coníferas (cipreses y otros pinos)',
+    'acebuchares': 'Acebuchal (olivo silvestre)',
     'frondosas alóctonas con  autóctonas':
-      'Mezcla de árboles de hoja ancha introducidos y autóctonos',
+      'Mezcla de árboles de hoja ancha',
     'robledal de quercus robur y quercus petrae':
-      'Robledal de roble común y roble albar',
+      'Robledal de roble común y albar',
     'mezclas de coníferas con frondosas, autoctónas con alóctonas':
-      'Mezcla de coníferas y árboles de hoja ancha, autóctonos e introducidos',
-    'abedulares': 'Bosque de abedules'
+      'Mezcla de coníferas y robles',
+    'abedulares': 'Abedular'
   };
   function forestNameEs(name) {
     if (!name) return 'Sin masa forestal identificada';
@@ -1746,6 +1910,10 @@
     ).length;
     document.getElementById('stat-total').textContent = cells.length.toLocaleString('es-ES');
     document.getElementById('stat-fav').textContent = fav.toLocaleString('es-ES');
+    const mapStatFav = document.getElementById('map-stat-fav');
+    if (mapStatFav) {
+      mapStatFav.textContent = `${fav.toLocaleString('es-ES')} ${currentLayer === 'precip' ? '≥25mm' : '≥50'}`;
+    }
     document.getElementById('stat-fav-label').firstChild.textContent =
       currentLayer === 'search' ? 'Índice combinado ≥50: '
         : currentLayer === 'weather' ? 'Tiempo ≥50: '
@@ -1916,7 +2084,7 @@
       ? dataset.soil_texture_metadata.scoring.max_points
       : null;
     const textureText = hasTexture
-      ? `SoilGrids (5–15 cm): arena ${formatNumber(cell.sand)}%, limo ${formatNumber(cell.silt)}%, arcilla ${formatNumber(cell.clay)}%. ${Number.isFinite(textureScore) ? `Aporta ${formatNumber(textureScore)}/${formatNumber(textureMaxPoints)} puntos edáficos con una regla general no calibrada por especie.` : 'No disponible para puntuar.'}`
+      ? `Textura: arena ${formatNumber(cell.sand)}%, limo ${formatNumber(cell.silt)}%, arcilla ${formatNumber(cell.clay)}%. ${Number.isFinite(textureScore) ? `Aporta ${formatNumber(textureScore)}/${formatNumber(textureMaxPoints)} puntos edáficos con una regla general no calibrada por especie.` : 'No disponible para puntuar.'}`
       : 'Textura no disponible; no se aplica penalización por falta de datos.';
 
     const sourceDistance = Number(cell.weather_distance_km);
@@ -2029,7 +2197,7 @@
       ? 'Combina el hábitat potencial del bosque y las condiciones meteorológicas recientes.'
       : 'Hábitat potencial y condiciones meteorológicas recientes evaluados por separado.';
     document.getElementById('c-ph').textContent    = p.ph !== undefined
-      ? `${formatNumber(p.ph)} (${formatNumber(p.ph05)}–${formatNumber(p.ph95)})` : '—';
+      ? `${formatNumber(p.ph)}` : '—';
     const hasTexture = ['sand', 'silt', 'clay'].every(key =>
       p[key] !== undefined && p[key] !== null && Number.isFinite(Number(p[key]))
     );
@@ -2074,13 +2242,19 @@
   // ================================================================
   // CAPAS Y LEYENDA
   // ================================================================
+  const SCORE_GRADIENT_BAR = [
+    '#334155', '#7f1d1d', '#c2410c', '#ea580c', '#f59e0b',
+    '#eab308', '#84cc16', '#22c55e', '#10b981', '#06b6d4'
+  ];
+  const SCORE_GRADIENT_LABELS = ['0', '25', '50', '75', '100'];
+
   const LEGEND_CFG = {
-    search:  { title:'Índice combinado (0–100)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','70','100'], note:'Media geométrica de hábitat forestal y tiempo reciente.' },
-    habitat: { title:'Hábitat potencial (0–100)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','70','100'], note:'Idoneidad de la masa forestal, suelo y relieve.' },
-    weather: { title:'Condiciones meteorológicas recientes (0–100)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','70','100'], note:'Señal reciente de lluvia, temperatura y humedad.' },
-    precip: { title:'Lluvia acumulada en 14 días', bar:['#0f172a','#0284c7','#06b6d4','#38bdf8','#7dd3fc'], labels:['0 mm','10 mm','25 mm','45 mm','≥45 mm'], note:'Precipitación estimada. El color oscuro indica 0 mm o dato ausente.' },
-    forest: { title:'Masa forestal (MFE50)', categorical:true, bar:['#059669','#d97706','#b45309','#4d7c0f','#475569'], labels:['Pinos','Hayas','Robles / melojos','Encinas','Otros / sin dato'], note:'Formación forestal predominante identificada en el mapa.' },
-    ph:     { title:'pH estimado del suelo', bar:['#ef4444','#f59e0b','#10b981','#3b82f6'], labels:['<4,5 ácido','4,5–5,5','5,5–6,5','≥6,5'], note:'Estimación de SoilGrids; gris indica dato ausente. No es una medición local.' }
+    search:  { title:'Índice combinado (0–100)', bar: SCORE_GRADIENT_BAR, labels: SCORE_GRADIENT_LABELS, note:'Media de hábitat forestal y tiempo reciente.' },
+    habitat: { title:'Hábitat potencial (0–100)', bar: SCORE_GRADIENT_BAR, labels: SCORE_GRADIENT_LABELS, note:'Idoneidad de árboles, suelo y relieve.' },
+    weather: { title:'Condiciones recientes (0–100)', bar: SCORE_GRADIENT_BAR, labels: SCORE_GRADIENT_LABELS, note:'Señal reciente de lluvia, temperatura y humedad.' },
+    precip: { title:'Lluvia acumulada en 14 días', bar:['#0f172a','#0284c7','#06b6d4','#38bdf8','#7dd3fc'], labels:['0 mm','10 mm','25 mm','45 mm','≥45 mm'], note:'Precipitación estimada en los últimos 14 días.' },
+    forest: { title:'Masa forestal (árboles)', categorical:true, bar:['#059669','#d97706','#b45309','#4d7c0f','#475569'], labels:['Pinos','Hayas','Robles / melojos','Encinas','Otros'], note:'Tipo de árbol o bosque predominante en la zona.' },
+    ph:     { title:'pH del suelo (acidez)', bar:['#ef4444','#f59e0b','#10b981','#3b82f6'], labels:['<4,5 ácido','4,5–5,5','5,5–6,5','≥6,5'], note:'Niveles de acidez. Valores menores a 6,5 favorecen a Boletus edulis y pinófilos.' }
   };
 
   function renderLegendBar(container, config) {
@@ -2135,18 +2309,40 @@
 
   function updateScoreFilterLabel() {
     const slider = document.getElementById('slider');
+    const mapScoreSlider = document.getElementById('map-score-slider');
+    const mapScoreVal = document.getElementById('map-score-val');
+    const mapScoreTitle = document.getElementById('map-score-title');
+
     slider.disabled = currentLayer === 'precip';
+    if (mapScoreSlider) {
+      mapScoreSlider.disabled = currentLayer === 'precip';
+      mapScoreSlider.value = currentMinScore;
+    }
+
+    if (mapScoreTitle) {
+      mapScoreTitle.textContent = currentLayer === 'search' ? 'Punt. mín:'
+        : currentLayer === 'weather' ? 'Tiempo mín:'
+        : currentLayer === 'precip' ? 'Filtro lluvia:'
+        : 'Hábitat mín:';
+    }
+
     document.getElementById('slider-title').textContent =
       currentLayer === 'search' ? 'Índice combinado mínimo'
         : currentLayer === 'weather' ? 'Condiciones recientes mínimas'
           : currentLayer === 'precip' ? 'Filtro de índice (no aplica a lluvia)'
-            : 'Hábitat mínimo (orientativo)';
+            : 'Hábitat mínimo';
+
     const label = currentMinScore === 0
       ? currentLayer === 'precip'
         ? 'Usa el filtro de lluvia inferior'
         : '0 — Todas las celdas candidatas'
       : `≥ ${currentMinScore} puntos`;
     document.getElementById('slider-label').textContent = label;
+
+    if (mapScoreVal) {
+      mapScoreVal.textContent = currentMinScore === 0 ? '0 (todas)' : `≥ ${currentMinScore}`;
+    }
+
     document.getElementById('rain-filter-label').textContent = currentRainFilter === 0
       ? 'Sin filtro'
       : `≥ ${currentRainFilter} mm`;
@@ -2287,6 +2483,18 @@
     selectAllSpeciesButton.textContent = count === SPECIES_IDS.length
       ? 'Dejar solo Boletus edulis'
       : 'Seleccionar todas';
+
+    const mapQuickSpecies = document.getElementById('map-quick-species');
+    if (mapQuickSpecies) {
+      if (checkedSpecies.length === SPECIES_IDS.length) {
+        mapQuickSpecies.value = 'all';
+      } else if (checkedSpecies.length === 1) {
+        mapQuickSpecies.value = checkedSpecies[0];
+      } else {
+        mapQuickSpecies.value = 'all';
+      }
+    }
+
     loadSpecies(selectedSpecies);
   }
 
@@ -2299,6 +2507,48 @@
     });
     updateSpeciesSelection();
   });
+
+  // Controles rápidos sobre el mapa
+  const mapQuickSpecies = document.getElementById('map-quick-species');
+  if (mapQuickSpecies) {
+    mapQuickSpecies.addEventListener('change', () => {
+      const val = mapQuickSpecies.value;
+      if (val === 'all') {
+        selectedSpecies = [...SPECIES_IDS];
+      } else {
+        selectedSpecies = [val];
+      }
+      speciesPicker.querySelectorAll('input').forEach(input => {
+        input.checked = selectedSpecies.includes(input.value);
+      });
+      const count = selectedSpecies.length;
+      speciesSelectionCount.textContent =
+        `${count} especie${count === 1 ? '' : 's'} seleccionada${count === 1 ? '' : 's'}`;
+      selectAllSpeciesButton.textContent = count === SPECIES_IDS.length
+        ? 'Dejar solo Boletus edulis'
+        : 'Seleccionar todas';
+      loadSpecies(selectedSpecies);
+    });
+  }
+
+  const mapScoreSlider = document.getElementById('map-score-slider');
+  if (mapScoreSlider) {
+    mapScoreSlider.addEventListener('input', e => {
+      currentMinScore = parseInt(e.target.value);
+      document.getElementById('slider').value = currentMinScore;
+      updateScoreFilterLabel();
+      render();
+    });
+  }
+
+  const mapLegendToggle = document.getElementById('map-legend-toggle');
+  if (mapLegendToggle) {
+    mapLegendToggle.addEventListener('click', () => {
+      const legend = document.getElementById('map-legend');
+      legend.classList.toggle('minimized');
+      mapLegendToggle.textContent = legend.classList.contains('minimized') ? '▸' : '▾';
+    });
+  }
 
   document.querySelectorAll('.guide-btn').forEach(button => {
     button.addEventListener('click', () => showSpeciesGuide(button.dataset.guide));
