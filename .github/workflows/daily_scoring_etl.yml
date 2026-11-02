@@ -1,0 +1,90 @@
+name: Actualizar y publicar Mapa setero
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Descargar el proyecto y la base ambiental
+        uses: actions/checkout@v4
+
+      - name: Comprobar la base de datos requerida
+        run: |
+          test -f backend/data/processed/mycologist_spatial.duckdb || {
+            echo "::error::Falta backend/data/processed/mycologist_spatial.duckdb. Incluye la base DuckDB del proyecto en el repositorio."
+            exit 1
+          }
+
+      - name: Configurar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias del actualizador
+        run: python -m pip install duckdb h3 pyyaml requests numpy scipy
+
+      - name: Actualizar meteorología y exportar índices experimentales
+        run: |
+          python -m backend.src.ingestion.dynamic.meteo_snapshots
+          python -m backend.src.export_relative_suitability
+
+      - name: Validar los cuatro conjuntos de datos
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          species = (
+              "boletus_edulis",
+              "boletus_aereus",
+              "boletus_pinophilus",
+              "boletus_reticulatus",
+          )
+          directory = Path("frontend/public/data/experimental")
+          today = datetime.now(ZoneInfo("Europe/Madrid")).date().isoformat()
+          for species_id in species:
+              path = directory / f"{species_id}.json"
+              with path.open(encoding="utf-8") as file:
+                  dataset = json.load(file)
+              if (
+                  dataset.get("species_id") != species_id
+                  or dataset.get("date") != today
+                  or dataset.get("data_quality") != "sourced_unvalidated"
+                  or dataset.get("score_type") != "experimental_separated_habitat_weather"
+                  or not dataset.get("cells")
+              ):
+                  raise SystemExit(f"Datos ausentes o inválidos: {path}")
+              print(f"{species_id}: {len(dataset['cells'])} celdas, {dataset['date']}")
+          PY
+
+      - name: Preparar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Subir el visor y los datos actualizados
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend
+
+      - name: Publicar el sitio
+        id: deployment
+        uses: actions/deploy-pages@v4

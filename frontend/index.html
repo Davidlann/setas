@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapa setero — Explora el bosque</title>
+  <meta name="theme-color" content="#79533a">
+  <meta name="description" content="Explora el hábitat micológico y las condiciones recientes en el centro peninsular.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <!-- h3-js para renderizar hexágonos en cliente sin enviar coordenadas por la red -->
+  <script src="https://unpkg.com/h3-js@4.1.0/dist/h3-js.umd.js"></script>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: rgba(13, 20, 38, 0.96);
+      --card2: rgba(22, 33, 58, 0.82);
+      --border: rgba(255,255,255,0.09);
+      --accent: #10b981;
+      --accent2: rgba(16,185,129,0.18);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --dim: #475569;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; }
+    .map-wrap { position: relative; flex: 1; height: 100%; min-width: 0; }
+    #map { width: 100%; height: 100%; }
+    .map-loading {
+      position: absolute; inset: 0; z-index: 3; display: grid; place-items: center;
+      background: rgba(9,13,22,.58); color: var(--text); pointer-events: none;
+    }
+    .map-loading[hidden] { display: none; }
+    .map-loading-card {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      max-width: min(320px, calc(100% - 32px)); padding: 18px 22px;
+      border: 1px solid var(--border); border-radius: 12px;
+      background: rgba(13,20,38,.96); text-align: center; font-size: 13px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.4);
+    }
+    .map-loading-spinner {
+      width: 24px; height: 24px; border: 3px solid rgba(255,255,255,.2);
+      border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .map-loading-error { pointer-events: auto; }
+    .map-retry {
+      border: 1px solid var(--accent); border-radius: 7px; padding: 7px 12px;
+      background: var(--accent2); color: var(--text); font-weight: 700; cursor: pointer;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: absolute; top: 16px; left: 16px; z-index: 10;
+      width: 400px; max-height: calc(100vh - 32px);
+      background: var(--card); backdrop-filter: blur(18px);
+      border: 1px solid var(--border); border-radius: 18px;
+      padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;
+      box-shadow: 0 25px 60px -10px rgba(0,0,0,0.65);
+      overflow-y: auto;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+
+    /* Brand */
+    .brand { display: flex; align-items: center; justify-content: space-between; }
+    .brand-left { display: flex; align-items: center; gap: 10px; }
+    .brand-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--accent2); border: 1px solid rgba(16,185,129,0.3);
+      display: flex; align-items: center; justify-content: center; color: var(--accent);
+    }
+    .brand h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+    .brand small { font-size: 11px; color: var(--dim); display: block; }
+    .badge { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--accent); background: var(--accent2); border: 1px solid rgba(16,185,129,0.25); padding: 3px 9px; border-radius: 999px; }
+    .data-status { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.45); border-radius: 9px; color: #fde68a; font-size: 12px; line-height: 1.45; padding: 10px 12px; }
+    .data-status.verified { background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.4); color: #a7f3d0; }
+    .guide-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .guide-btn {
+      padding: 8px; border: 1px solid var(--border); border-radius: 8px;
+      background: rgba(255,255,255,.04); color: var(--text); cursor: pointer;
+      font-size: 11px; font-weight: 600; text-align: left;
+    }
+    .guide-btn:hover, .guide-btn:focus-visible { border-color: var(--accent); background: var(--accent2); }
+    .species-dialog {
+      width: min(760px, calc(100vw - 32px)); max-width: 760px;
+      max-height: min(88vh, 900px); padding: 22px; overflow: auto;
+      color: var(--text); background: #0d1426; border: 1px solid var(--border);
+      border-radius: 16px; box-shadow: 0 25px 70px rgba(0,0,0,.65);
+    }
+    .species-dialog::backdrop { background: rgba(0,0,0,.72); backdrop-filter: blur(3px); }
+    .species-dialog-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
+    .species-dialog-head h2 { font-size: 20px; line-height: 1.3; }
+    .species-dialog-head p { margin-top: 4px; color: var(--muted); font-size: 13px; }
+    .species-dialog-close {
+      flex: 0 0 auto; width: 34px; height: 34px; border: 1px solid var(--border);
+      border-radius: 8px; background: rgba(255,255,255,.05); color: var(--text);
+      font-size: 21px; cursor: pointer;
+    }
+    .species-guide-photo { margin: 0 0 18px; }
+    .species-guide-photo img {
+      display: block; width: 100%; max-height: 340px; object-fit: contain;
+      border-radius: 10px; background: #080b12;
+    }
+    .species-guide-photo figcaption { margin-top: 6px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .species-dialog a { color: #6ee7b7; }
+    .species-guide-section { margin: 17px 0; }
+    .species-guide-section h3 { margin-bottom: 7px; color: #a7f3d0; font-size: 14px; }
+    .species-guide-section ul { padding-left: 20px; color: #dbe4ef; font-size: 13px; line-height: 1.55; }
+    .species-guide-section li + li { margin-top: 6px; }
+    .species-guide-warning {
+      margin-top: 18px; padding: 12px; border: 1px solid rgba(245,158,11,.4);
+      border-radius: 9px; background: rgba(245,158,11,.09);
+      color: #fde68a; font-size: 12px; line-height: 1.5;
+    }
+    @media (max-width: 520px) {
+      .species-dialog { width: 100vw; max-width: none; max-height: 100vh; height: 100vh; padding: 18px; border-radius: 0; }
+    }
+
+    /* Search */
+    .search-wrap { position: relative; }
+    .search-inner { position: relative; display: flex; align-items: center; }
+    .search-icon { position: absolute; left: 11px; color: var(--muted); pointer-events: none; }
+    .search-input {
+      width: 100%; background: rgba(10,15,30,0.9); color: #fff;
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 9.5px 34px 9.5px 36px; font-size: 13px; font-weight: 500; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(16,185,129,.2); }
+    .search-clear { position: absolute; right: 9px; background: none; border: none; color: var(--dim); cursor: pointer; display: none; padding: 3px; border-radius: 4px; }
+    .search-clear:hover { color: #fff; }
+    .suggestions {
+      position: absolute; top: calc(100% + 5px); left: 0; right: 0;
+      background: #1a2540; border: 1px solid var(--border); border-radius: 10px;
+      max-height: 200px; overflow-y: auto; z-index: 50; display: none;
+      box-shadow: 0 12px 30px rgba(0,0,0,.5);
+    }
+    .sug-item {
+      padding: 9px 13px; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; gap: 9px;
+      border-bottom: 1px solid rgba(255,255,255,.05); transition: background .15s;
+    }
+    .sug-item:last-child { border: none; }
+    .sug-item:hover { background: rgba(16,185,129,.15); }
+    .sug-item svg { color: var(--accent); flex-shrink: 0; }
+
+    /* Province pills */
+    .prov-row { display: flex; gap: 5px; }
+    .prov-btn {
+      flex: 1; padding: 6px 3px; border-radius: 7px; font-size: 11px; font-weight: 600; cursor: pointer; text-align: center;
+      background: rgba(255,255,255,.04); border: 1px solid var(--border); color: var(--muted); transition: all .2s;
+    }
+    .prov-btn.active, .prov-btn:hover { background: var(--accent2); border-color: var(--accent); color: #fff; }
+
+    /* Controls */
+    .ctrl { display: flex; flex-direction: column; gap: 6px; }
+    .ctrl-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+    select {
+      background: rgba(10,15,30,.9); color: #fff; border: 1px solid var(--border);
+      border-radius: 9px; padding: 9px 12px; font-size: 13px; font-weight: 600; cursor: pointer; outline: none; transition: border-color .2s;
+    }
+    select:focus { border-color: var(--accent); }
+
+    /* Layer buttons */
+    .layer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .layer-btn {
+      background: rgba(255,255,255,.04); border: 1px solid var(--border); color: var(--muted);
+      padding: 8px 9px; border-radius: 8px; font-size: 11.5px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; transition: all .2s;
+    }
+    .layer-btn.active { background: var(--accent2); border-color: var(--accent); color: #fff; }
+
+    /* Slider */
+    .slider-card { background: rgba(10,15,30,.5); border: 1px solid var(--border); border-radius: 10px; padding: 10px 13px; display: flex; flex-direction: column; gap: 6px; }
+    .slider-head { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); }
+    .slider-head strong { color: var(--accent); }
+    input[type=range] { width: 100%; height: 5px; accent-color: var(--accent); cursor: pointer; }
+
+    /* Stats */
+    .stats { display: flex; justify-content: space-between; background: rgba(10,15,30,.5); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 11.5px; }
+    .stats strong { color: var(--accent); }
+
+    /* Loading */
+    .loading-bar { display: none; height: 3px; background: rgba(255,255,255,.08); border-radius: 3px; overflow: hidden; }
+    .loading-bar.active { display: block; }
+    .loading-progress { height: 100%; background: var(--accent); border-radius: 3px; animation: load 1.5s ease-in-out infinite; }
+    @keyframes load { 0% { width: 0; margin-left: 0; } 50% { width: 60%; margin-left: 20%; } 100% { width: 0; margin-left: 100%; } }
+
+    /* Legend */
+    .legend { background: rgba(10,15,30,.5); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; }
+    .legend-title { font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+    .legend-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+    .step { flex: 1; }
+    .legend-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--dim); }
+
+    /* Cell card */
+    .cell-card { background: rgba(10,15,30,.7); border: 1px solid var(--border); border-radius: 12px; padding: 13px 15px; display: flex; flex-direction: column; gap: 9px; }
+    .cell-head { display: flex; justify-content: space-between; align-items: center; }
+    .cell-head h3 { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .species-comparison { border-top: 1px solid var(--border); padding-top: 9px; display: flex; flex-direction: column; gap: 8px; }
+    .species-comparison[hidden] { display: none; }
+    .species-comparison-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+    .species-comparison-list { display: flex; flex-direction: column; gap: 6px; }
+    .species-explanation { background: rgba(255,255,255,.035); border: 1px solid var(--border); border-radius: 8px; padding: 8px 9px; display: flex; flex-direction: column; gap: 6px; }
+    .species-explanation-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .species-explanation-name { font-size: 12px; font-weight: 700; }
+    .species-explanation-score { font-size: 11px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .species-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .species-check { min-width: 0; display: flex; align-items: flex-start; gap: 5px; font-size: 10.5px; line-height: 1.35; color: #cbd5e1; }
+    .species-check-mark { width: 15px; height: 15px; flex: 0 0 15px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 10px; font-weight: 800; }
+    .species-check.good .species-check-mark { color: #6ee7b7; background: rgba(16,185,129,.16); }
+    .species-check.bad .species-check-mark { color: #fca5a5; background: rgba(239,68,68,.16); }
+    .species-check.uncertain .species-check-mark { color: #fcd34d; background: rgba(245,158,11,.16); }
+    .species-check-label { color: var(--muted); font-weight: 700; }
+    .species-comparison-note { color: var(--dim); font-size: 10px; line-height: 1.4; }
+    @media (max-width: 460px) { .species-checks { grid-template-columns: 1fr; } }
+    .score-badge { font-size: 14px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
+    .b-ok  { background: rgba(34,197,94,.2);  color: #4ade80; border: 1px solid #22c55e; }
+    .b-mod { background: rgba(234,179,8,.2);  color: #facc15; border: 1px solid #eab308; }
+    .b-no  { background: rgba(71,85,105,.2);  color: #94a3b8; border: 1px solid #475569; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; font-size: 11.5px; }
+    .info-item { display: flex; flex-direction: column; gap: 1px; }
+    .info-wide { grid-column: 1 / -1; }
+    .info-item span:first-child { color: var(--dim); font-size: 10.5px; display: flex; align-items: center; gap: 3px; }
+    .info-item span:last-child { font-weight: 600; color: #e2e8f0; overflow-wrap: anywhere; }
+
+    /* Footer */
+    .footer { font-size: 10.5px; color: var(--dim); border-top: 1px solid var(--border); padding-top: 9px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+    .footer svg { color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+
+    /* Pulse marker */
+    .pulse { width: 22px; height: 22px; border-radius: 50%; background: #10b981; border: 3px solid #fff; box-shadow: 0 0 12px rgba(16,185,129,.8); animation: pulse 1.6s infinite; }
+    @keyframes pulse { 0%,100% { transform: scale(.9); box-shadow: 0 0 0 0 rgba(16,185,129,.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(16,185,129,0); } }
+
+    /* Warm field-guide palette and responsive layout */
+    :root {
+      --bg: #e9e2d5;
+      --card: rgba(251, 248, 241, .97);
+      --card2: #f2ecdf;
+      --border: #e2d8c8;
+      --accent: #79533a;
+      --accent2: rgba(121, 83, 58, .12);
+      --text: #352d26;
+      --muted: #71685b;
+      --dim: #948a7b;
+    }
+    body { background: var(--bg); color: var(--text); }
+    .map-wrap { background: #e9e2d5; }
+    .sidebar {
+      width: min(390px, calc(100vw - 32px));
+      max-height: calc(100vh - 32px);
+      padding: 19px;
+      gap: 12px;
+      border-color: rgba(121, 83, 58, .18);
+      border-radius: 22px;
+      box-shadow: 0 20px 55px rgba(61, 46, 31, .2);
+    }
+    .sidebar::-webkit-scrollbar-thumb { background: #d7c8b3; }
+    .brand { gap: 12px; }
+    .brand-left { gap: 12px; }
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      color: #fffaf0;
+      background: linear-gradient(145deg, #9b6845, #6e5038);
+      border: 0;
+      box-shadow: 0 5px 12px rgba(121, 83, 58, .2);
+    }
+    .brand h1 { font-family: Georgia, "Times New Roman", serif; font-size: 22px; letter-spacing: -.5px; }
+    .brand small { margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .badge {
+      flex: 0 0 auto;
+      color: #526444;
+      background: #e8eddf;
+      border-color: #d4dfc8;
+      letter-spacing: .2px;
+      text-transform: none;
+    }
+    .brand-actions { display: flex; align-items: center; gap: 7px; }
+    .install-button {
+      flex: 0 0 auto;
+      padding: 6px 9px;
+      color: #fffaf3;
+      background: #76563d;
+      border: 1px solid #76563d;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .install-button:hover { background: #63452f; }
+    .install-button[hidden] { display: none; }
+    .data-status {
+      color: #6a4b2d;
+      background: #f7edd9;
+      border-color: #ead9b7;
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .data-status.verified { color: #4e6744; background: #edf2e6; border-color: #d6e1ca; }
+    .search-input, select {
+      color: var(--text);
+      background: #fffdf8;
+      border-color: var(--border);
+      border-radius: 11px;
+    }
+    .search-input::placeholder { color: #9a9184; }
+    .search-input:focus, select:focus {
+      border-color: #9a7656;
+      box-shadow: 0 0 0 3px rgba(121, 83, 58, .13);
+    }
+    .search-clear:hover { color: var(--accent); }
+    .suggestions { color: var(--text); background: #fffdf8; border-color: var(--border); }
+    .sug-item { border-color: #eee7dc; }
+    .sug-item:hover { background: #f1ebdf; }
+    .sug-item svg, .search-icon { color: var(--accent); }
+    .prov-row { gap: 6px; }
+    .prov-btn {
+      padding: 7px 4px;
+      color: var(--muted);
+      background: #f7f3eb;
+      border-color: var(--border);
+      border-radius: 9px;
+    }
+    .prov-btn.active, .prov-btn:hover {
+      color: #fffaf3;
+      background: #76563d;
+      border-color: #76563d;
+    }
+    .ctrl { gap: 8px; }
+    .ctrl-label { color: #766b5e; letter-spacing: .65px; }
+    .ctrl-label svg { color: #8c6847; }
+    .guide-buttons { gap: 7px; }
+    .guide-btn {
+      padding: 9px 10px;
+      color: #514334;
+      background: #f4efe5;
+      border-color: #e4d9c8;
+      border-radius: 10px;
+      font-size: 11px;
+      transition: background .18s, border-color .18s, transform .18s;
+    }
+    .guide-btn:hover, .guide-btn:focus-visible {
+      color: #493524;
+      background: #eee4d3;
+      border-color: #b99a78;
+      outline: none;
+      transform: translateY(-1px);
+    }
+    .layer-grid { gap: 7px; }
+    .layer-btn {
+      min-height: 38px;
+      color: #6f665a;
+      background: #f7f3eb;
+      border-color: var(--border);
+      border-radius: 10px;
+      line-height: 1.3;
+    }
+    .layer-btn.active {
+      color: #fffaf3;
+      background: #76563d;
+      border-color: #76563d;
+    }
+    .layer-btn:not(.active):hover { color: #493524; background: #eee7da; }
+    .slider-card, .stats, .legend, .cell-card {
+      background: #f8f4ec;
+      border-color: var(--border);
+      border-radius: 13px;
+    }
+    .slider-card { padding: 12px 13px; }
+    .slider-head { color: var(--muted); }
+    .slider-head strong, .stats strong { color: #6e8053; }
+    input[type=range] { accent-color: #758653; }
+    .loading-bar { background: #e8dfd1; }
+    .loading-progress { background: #849261; }
+    .legend-title, .species-comparison-title { color: #776b5b; }
+    .legend-labels { color: #8f8577; }
+    .cell-card {
+      background: #fffdf8;
+      box-shadow: 0 5px 14px rgba(71, 52, 33, .05);
+    }
+    .cell-head h3 { color: #493b2d; }
+    .cell-head h3 svg { color: #8d6848; }
+    .species-comparison { border-color: var(--border); }
+    .species-explanation { background: #f8f4ec; border-color: #e9dfd0; }
+    .species-explanation-name { color: #483a2d; }
+    .species-explanation-score { color: #687b4d; }
+    .species-check { color: #5e574d; }
+    .species-check-label { color: #82786b; }
+    .species-comparison-note, .footer { color: #82796d; }
+    .footer { border-color: var(--border); padding-top: 11px; }
+    .footer svg { color: #758653; }
+    .score-badge { border-radius: 8px; }
+    .b-ok { color: #48613a; background: #e9f0e2; border-color: #cad9bb; }
+    .b-mod { color: #86602c; background: #f8edd6; border-color: #e9d4a9; }
+    .b-no { color: #756d62; background: #efede8; border-color: #ddd7ce; }
+    .info-item span:first-child { color: #857b6e; }
+    .info-item span:last-child { color: #443b32; }
+    .map-loading { background: rgba(238, 231, 218, .68); color: var(--text); }
+    .map-loading-card {
+      color: var(--text);
+      background: #fbf8f1;
+      border-color: var(--border);
+      box-shadow: 0 12px 30px rgba(61, 46, 31, .2);
+    }
+    .map-loading-spinner { border-color: #e1d6c6; border-top-color: #758653; }
+    .map-retry { color: #493524; background: #f0e6d8; border-color: #b99a78; }
+    .species-dialog {
+      color: var(--text);
+      background: #fbf8f1;
+      border-color: var(--border);
+      box-shadow: 0 25px 70px rgba(61, 46, 31, .3);
+    }
+    .species-dialog::backdrop { background: rgba(44, 37, 29, .48); }
+    .species-dialog-head p, .species-guide-photo figcaption { color: var(--muted); }
+    .species-dialog-close { color: var(--text); background: #f4efe5; border-color: var(--border); }
+    .species-guide-photo img { background: #eee7dc; }
+    .species-dialog a { color: #6d784c; }
+    .species-guide-section h3 { color: #6e8053; }
+    .species-guide-section ul { color: #51483d; }
+    .species-guide-warning {
+      color: #73532d;
+      background: #f7edd9;
+      border-color: #ead9b7;
+    }
+    .maplibregl-ctrl-group {
+      overflow: hidden;
+      border: 1px solid #e1d6c6 !important;
+      border-radius: 11px !important;
+      box-shadow: 0 4px 14px rgba(61, 46, 31, .14) !important;
+    }
+    .maplibregl-ctrl-group button { background-color: #fbf8f1; }
+    .maplibregl-ctrl-group button:hover { background-color: #f0e8dc; }
+    .maplibregl-ctrl-attrib {
+      color: #655b4e !important;
+      background: rgba(251, 248, 241, .86) !important;
+    }
+    @media (max-width: 700px) {
+      body { overflow: hidden; }
+      .sidebar {
+        top: 10px;
+        left: 10px;
+        width: calc(100vw - 20px);
+        max-height: min(68vh, 650px);
+        padding: 15px;
+        gap: 10px;
+        border-radius: 18px;
+      }
+      .brand h1 { font-size: 20px; }
+      .brand-icon { width: 38px; height: 38px; }
+      .prov-btn { font-size: 10px; }
+      .layer-btn { font-size: 10.5px; }
+      .maplibregl-ctrl-top-right { top: auto !important; bottom: 24px !important; }
+    }
+    @media (max-width: 380px) {
+      .sidebar { max-height: 72vh; }
+      .badge { display: none; }
+      .install-button { font-size: 10px; }
+      .prov-row { flex-wrap: wrap; }
+      .prov-btn { flex: 1 1 28%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-left">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a9 9 0 0 0-9 9c0 1.2.4 1.8 1.8 1.8h14.4c1.4 0 1.8-.6 1.8-1.8a9 9 0 0 0-9-9z"/>
+            <path d="M10 13.8v6.2a2 2 0 0 0 4 0v-6.2"/>
+          </svg>
+        </div>
+        <div><h1>Mapa setero</h1><small>Explora el bosque · centro peninsular</small></div>
+      </div>
+      <div class="brand-actions">
+        <span class="badge">Guía orientativa</span>
+        <button id="install-button" class="install-button" type="button" hidden>Instalar app</button>
+      </div>
+    </div>
+
+    <div id="data-status" class="data-status" role="status">
+      El mapa orienta sobre el hábitat y el tiempo reciente, pero no confirma que haya setas.
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <div class="search-inner">
+        <svg class="search-icon" viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.2" fill="none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="search" class="search-input" type="text" placeholder="Escribe un pueblo o zona (ej. Vinuesa, Rascafría...)" autocomplete="off"/>
+        <button id="search-clear" class="search-clear">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="suggestions" class="suggestions"></div>
+    </div>
+
+    <!-- Province pills -->
+    <div class="prov-row">
+      <button class="prov-btn active" data-prov="all">Todas</button>
+      <button class="prov-btn" data-prov="soria">Soria</button>
+      <button class="prov-btn" data-prov="madrid">Madrid</button>
+      <button class="prov-btn" data-prov="segovia">Segovia</button>
+      <button class="prov-btn" data-prov="guadalajara">Guadalajara</button>
+    </div>
+
+    <!-- Species -->
+    <div class="ctrl">
+      <label class="ctrl-label" for="species">
+        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Especies objetivo
+      </label>
+      <select id="species">
+        <option value="all">Todas las especies</option>
+        <option value="boletus_edulis" selected>Boletus edulis</option>
+        <option value="boletus_pinophilus">Boletus pinophilus</option>
+        <option value="boletus_aereus">Boletus aereus</option>
+        <option value="boletus_reticulatus">Boletus reticulatus</option>
+      </select>
+      <div class="ctrl-label">Guías de las especies</div>
+      <div class="guide-buttons">
+        <button class="guide-btn" type="button" data-guide="boletus_edulis">Boletus edulis</button>
+        <button class="guide-btn" type="button" data-guide="boletus_pinophilus">Boletus pinophilus</button>
+        <button class="guide-btn" type="button" data-guide="boletus_aereus">Boletus aereus</button>
+        <button class="guide-btn" type="button" data-guide="boletus_reticulatus">Boletus reticulatus</button>
+      </div>
+    </div>
+
+    <!-- Layer selector -->
+    <div class="ctrl">
+      <label class="ctrl-label">
+        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        Capa del mapa
+      </label>
+      <div class="layer-grid">
+        <button class="layer-btn active" id="lbtn-habitat" onclick="setLayer('habitat')">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="9"/></svg>
+          Hábitat potencial
+        </button>
+        <button class="layer-btn" id="lbtn-weather" onclick="setLayer('weather')">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 15a4 4 0 0 1 4-4h1a5 5 0 0 1 10-1 4 4 0 1 1 1 8H7a4 4 0 0 1-4-3z"/><path d="m9 20 1 2m5-2 1 2"/></svg>
+          Tiempo reciente
+        </button>
+        <button class="layer-btn" id="lbtn-precip" onclick="setLayer('precip')">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          Lluvia 14d (mm)
+        </button>
+        <button class="layer-btn" id="lbtn-forest" onclick="setLayer('forest')">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 19 12 15 12 20 19 4 19 9 12 5 12 12 2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+          Masa Forestal MFE50
+        </button>
+        <button class="layer-btn" id="lbtn-ph" onclick="setLayer('ph')">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M10 2v7.31L4.66 17.5A2 2 0 0 0 6.32 20.5h11.36a2 2 0 0 0 1.66-3L14 9.31V2"/></svg>
+          pH estimado (SoilGrids)
+        </button>
+      </div>
+    </div>
+
+    <!-- Slider -->
+    <div class="slider-card">
+      <div class="slider-head">
+        <span id="slider-title">Hábitat mínimo (orientativo)</span>
+        <strong id="slider-label">0 — Solo celdas candidatas</strong>
+      </div>
+      <input type="range" id="slider" min="0" max="80" step="5" value="0"/>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-bar" id="loading"><div class="loading-progress"></div></div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <span>Celdas visibles: <strong id="stat-total">—</strong></span>
+      <span id="stat-fav-label">Hábitat ≥50: <strong id="stat-fav">—</strong></span>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-title" id="leg-title">Hábitat potencial (0 – 100)</div>
+      <div class="legend-bar" id="leg-bar">
+        <div class="step" style="background:#334155"></div>
+        <div class="step" style="background:#f97316"></div>
+        <div class="step" style="background:#eab308"></div>
+        <div class="step" style="background:#22c55e"></div>
+        <div class="step" style="background:#10b981"></div>
+      </div>
+      <div class="legend-labels" id="leg-labels">
+        <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+      </div>
+    </div>
+
+    <!-- Cell card -->
+    <div class="cell-card">
+      <div class="cell-head">
+        <h3>
+          <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
+          Celda H3 seleccionada
+        </h3>
+        <span class="score-badge b-ok" id="score-pill">—</span>
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 19 12 15 12 20 19 4 19 9 12 5 12 12 2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Masa forestal:</span>
+          <span id="c-tree">Haz clic en un hexágono</span>
+        </div>
+        <div class="info-item info-wide">
+          <span>Lectura del índice:</span>
+          <span id="c-reason">—</span>
+        </div>
+        <div class="info-item">
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M10 2v7.31L4.66 17.5A2 2 0 0 0 6.32 20.5h11.36a2 2 0 0 0 1.66-3L14 9.31V2"/></svg> pH SoilGrids (Q05–Q95):</span>
+          <span id="c-ph">—</span>
+        </div>
+        <div class="info-item">
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Lluvia últimos 14 días:</span>
+          <span id="c-rain">—</span>
+        </div>
+        <div class="info-item">
+          <span>Condiciones recientes:</span>
+          <span id="c-weather-score">—</span>
+        </div>
+        <div class="info-item">
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Temperatura media:</span>
+          <span id="c-temp">—</span>
+        </div>
+        <div class="info-item">
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> Altitud / orientación:</span>
+          <span id="c-topo">—</span>
+        </div>
+        <div class="info-item">
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> Humedad estimada del suelo:</span>
+          <span id="c-moist">—</span>
+        </div>
+        <div class="info-item">
+          <span>Fuente meteorológica más cercana:</span>
+          <span id="c-weather-distance">—</span>
+        </div>
+      </div>
+      <div id="species-comparison" class="species-comparison" hidden>
+        <div class="species-comparison-title">Hábitat y condiciones por especie</div>
+        <div id="species-comparison-list" class="species-comparison-list"></div>
+        <p class="species-comparison-note">El pH y las condiciones son estimaciones orientativas; no confirman que haya setas.</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+      <span>El mapa orienta sobre el hábitat y el tiempo reciente, pero no confirma que haya setas. La lluvia, la temperatura y el pH son estimaciones, no mediciones exactas de cada lugar.</span>
+    </div>
+  </div>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div id="map-loading" class="map-loading" role="status" aria-live="polite">
+      <div class="map-loading-card">
+        <span class="map-loading-spinner" aria-hidden="true"></span>
+        <span id="map-loading-message">Cargando el mapa base…</span>
+        <button id="map-retry" class="map-retry" type="button" hidden>Volver a cargar</button>
+      </div>
+    </div>
+  </div>
+
+  <dialog id="species-dialog" class="species-dialog" aria-labelledby="species-dialog-title">
+    <div class="species-dialog-head">
+      <div>
+        <h2 id="species-dialog-title"></h2>
+        <p id="species-dialog-subtitle"></p>
+      </div>
+      <button id="species-dialog-close" class="species-dialog-close" type="button" aria-label="Cerrar guía">×</button>
+    </div>
+    <div id="species-guide-content"></div>
+    <p class="species-guide-warning">No recolectes ni consumas una seta basándote en esta guía, una foto o el mapa. Hay especies tóxicas parecidas y la identificación requiere revisar todos los rasgos con una persona experta. Respeta también las normas locales de recolección.</p>
+  </dialog>
+
+  <script>
+  // ================================================================
+  // CATÁLOGO DE ZONAS MICOLÓGICAS CONOCIDAS
+  // ================================================================
+  const KNOWN_SPOTS = [
+    {n:"Vinuesa (Pinares de Urbión, Soria)", lat:41.9118, lon:-2.7631},
+    {n:"Covaleda (Soria)", lat:41.9344, lon:-2.8833},
+    {n:"Navaleno (Soria)", lat:41.8378, lon:-3.0042},
+    {n:"San Leonardo de Yagüe (Soria)", lat:41.8311, lon:-3.0683},
+    {n:"Salduero (Soria)", lat:41.9602, lon:-2.8148},
+    {n:"Duruelo de la Sierra (Soria)", lat:41.9817, lon:-2.8281},
+    {n:"Quintanar de la Sierra (Burgos)", lat:41.9756, lon:-3.0255},
+    {n:"Rascafría — Valle del Lozoya (Madrid)", lat:40.9064, lon:-3.8797},
+    {n:"Cercedilla (Guadarrama, Madrid)", lat:40.7417, lon:-4.0558},
+    {n:"Navacerrada (Madrid)", lat:40.7289, lon:-4.0161},
+    {n:"El Paular (Madrid)", lat:40.9014, lon:-3.8977},
+    {n:"Valsaín (Montes de Valsaín, Segovia)", lat:40.8794, lon:-4.0336},
+    {n:"La Granja de San Ildefonso (Segovia)", lat:40.8933, lon:-4.0097},
+    {n:"Riaza (Segovia)", lat:41.2797, lon:-3.4808},
+    {n:"El Espinar (Segovia)", lat:40.7189, lon:-4.2464},
+    {n:"Cantalojas (Hayedo Tejera Negra, Guadalajara)", lat:41.2344, lon:-3.2458},
+    {n:"Majaelrayo (Sierra Norte, Guadalajara)", lat:41.1133, lon:-3.3039},
+    {n:"Sigüenza (Guadalajara)", lat:41.0694, lon:-2.6419},
+    {n:"Atienza (Guadalajara)", lat:41.2047, lon:-2.8708},
+  ];
+
+  const PROV_BOUNDS = {
+    soria:       {center:[-2.78, 41.92], zoom: 9.2},
+    madrid:      {center:[-3.95, 40.75], zoom: 9.3},
+    segovia:     {center:[-4.05, 41.05], zoom: 9.1},
+    guadalajara: {center:[-2.90, 41.10], zoom: 8.9},
+    all:         {center:[-3.42, 41.25], zoom: 7.8}
+  };
+
+  // Filtros de coordenadas por provincia (bounding box)
+  const PROV_BBOX = {
+    soria:       { minLon:-3.5, maxLon:-1.8, minLat:41.1, maxLat:42.1 },
+    madrid:      { minLon:-4.6, maxLon:-3.1, minLat:40.0, maxLat:41.2 },
+    segovia:     { minLon:-4.7, maxLon:-3.3, minLat:40.6, maxLat:41.6 },
+    guadalajara: { minLon:-3.6, maxLon:-1.5, minLat:40.4, maxLat:41.5 },
+  };
+  const SPECIES_IDS = [
+    'boletus_edulis',
+    'boletus_pinophilus',
+    'boletus_aereus',
+    'boletus_reticulatus'
+  ];
+  const SPECIES_GUIDES = {
+    boletus_edulis: {
+      scientificName: 'Boletus edulis',
+      image: {
+        src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/Boletus_edulis_IT.jpg/960px-Boletus_edulis_IT.jpg',
+        alt: 'Boletus edulis creciendo en un bosque montano mixto',
+        artist: 'ReddishClover',
+        fileUrl: 'https://commons.wikimedia.org/wiki/File:Boletus_edulis_IT.jpg',
+        license: 'CC BY-SA 4.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/'
+      },
+      sections: [
+        {
+          title: 'Dónde buscarla',
+          items: [
+            'Busca bajo árboles adultos con los que puede asociarse: pinos, hayas, robles y abetos, según el bosque y la zona. Mira alrededor, no solo pegado al tronco.',
+            'Revisa suelos con hojarasca o acículas, musgo y claros o bordes de bosque que conserven humedad, especialmente después de lluvias y cuando la temperatura acompañe.',
+            'La época cambia con la altitud y el año; suele buscarse desde finales del verano hasta el otoño en muchas zonas.'
+          ]
+        },
+        {
+          title: 'Suelo, plantas y pH',
+          items: [
+            'No hay una hierba que confirme que el suelo tenga el pH adecuado. Arándanos y brezos suelen asociarse a suelos ácidos; tomillos y romeros aparecen a menudo en lugares más secos y básicos, pero hay excepciones.',
+            'Los helechos suelen señalar rincones sombríos y húmedos, no la presencia de esta especie. El musgo puede ayudar a localizar zonas que retienen humedad.',
+            'La capa de pH del mapa es una estimación amplia: úsala como pista secundaria, no como una medición del suelo bajo cada árbol.'
+          ]
+        },
+        {
+          title: 'Sombra y orientación',
+          items: [
+            'Prueba en bosque con sombra ligera o intermedia, claros y bordes; el suelo debe guardar humedad sin estar encharcado.',
+            'En periodos secos, las laderas norte y este suelen conservar mejor la humedad. La orientación no es una regla fija: importan también la altitud, el arbolado y las lluvias.'
+          ]
+        },
+        {
+          title: 'Cómo reconocerla',
+          items: [
+            'Sombrero marrón, a menudo más claro en el borde; poros blancos cuando es joven, que pasan a amarillos y luego oliváceos.',
+            'Pie robusto, normalmente claro y con una fina retícula blanca sobre todo en la parte alta; carne blanca y firme, que normalmente no cambia a azul al cortarla.',
+            'Estos rasgos varían con la edad y el tiempo. Comprueba sombrero, poros, pie y carne en conjunto.'
+          ]
+        },
+        {
+          title: 'Cómo distinguirla de las otras especies de la app',
+          items: [
+            'Boletus pinophilus suele aparecer asociado a pinos y puede tener tonos rojizos más marcados.',
+            'Boletus aereus suele tener el sombrero mucho más oscuro, color bronce, y se asocia a bosques cálidos de frondosas.',
+            'Boletus reticulatus suele aparecer antes, en bosques cálidos de frondosas, y puede mostrar una retícula muy marcada por el pie.',
+            'Los colores se solapan: no identifiques una seta por un solo rasgo ni solo por la foto.'
+          ]
+        }
+      ]
+    },
+    boletus_pinophilus: {
+      scientificName: 'Boletus pinophilus',
+      image: {
+        src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/Boletus_pinophilus3.JPG/960px-Boletus_pinophilus3.JPG',
+        alt: 'Boletus pinophilus fotografiado en un bosque',
+        artist: 'Paffka',
+        fileUrl: 'https://commons.wikimedia.org/wiki/File:Boletus_pinophilus3.JPG',
+        license: 'CC BY-SA 3.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by-sa/3.0/'
+      },
+      sections: [
+        {
+          title: 'Dónde buscarla',
+          items: [
+            'Empieza por pinares: forma asociaciones con pinos y suele aparecer en el suelo dentro del bosque, entre acículas, musgo y hojarasca.',
+            'Busca zonas con humedad retenida, claros y bordes del pinar después de lluvias. La temporada depende de la región y puede alargarse desde primavera hasta otoño.',
+            'Los pinares maduros son una pista más útil que encontrar una planta concreta.'
+          ]
+        },
+        {
+          title: 'Suelo, plantas y pH',
+          items: [
+            'Se encuentra a menudo en pinares sobre suelos ácidos, pero el pino y el contexto del bosque son pistas mejores que inferir el pH por una hierba.',
+            'Brezos y arándanos pueden acompañar suelos ácidos; no demuestran que allí crezca el hongo. Tomillo y romero tampoco descartan una seta.',
+            'Los helechos pueden señalar sombra o humedad local, no una relación directa con el pinícola. El pH del mapa es aproximado.'
+          ]
+        },
+        {
+          title: 'Sombra y orientación',
+          items: [
+            'Busca sombra ligera o intermedia bajo los pinos, pero revisa también claros donde el suelo no se seque demasiado.',
+            'En verano seco, las laderas norte y este pueden guardar más humedad; no descartes otras orientaciones si el pinar conserva humedad.'
+          ]
+        },
+        {
+          title: 'Cómo reconocerla',
+          items: [
+            'Sombrero carnoso, de tonos castaños a rojizos; poros claros al principio que se vuelven amarillentos con la edad.',
+            'Pie muy robusto, a menudo con tonos rojizos o pardos y retícula; carne clara, normalmente sin azuleamiento intenso.',
+            'La edad y la lluvia cambian mucho el aspecto. Examina también los poros y el pie, no solo el color del sombrero.'
+          ]
+        },
+        {
+          title: 'Cómo distinguirla de las otras especies de la app',
+          items: [
+            'Su asociación con pinos orienta frente a Boletus aereus y Boletus reticulatus, más ligados a frondosas cálidas.',
+            'Boletus edulis puede compartir pinares; la separación por color y retícula no siempre es segura y puede requerir experiencia.',
+            'Si la identificación depende de un matiz de color o de una foto, déjala sin recolectar.'
+          ]
+        }
+      ]
+    },
+    boletus_aereus: {
+      scientificName: 'Boletus aereus',
+      image: {
+        src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Boletus_aereus_%2829105181796%29.jpg/960px-Boletus_aereus_%2829105181796%29.jpg',
+        alt: 'Boletus aereus, conocido como boleto bronceado',
+        artist: 'Björn Sothmann',
+        fileUrl: 'https://commons.wikimedia.org/wiki/File:Boletus_aereus_(29105181796).jpg',
+        license: 'CC BY-SA 2.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/'
+      },
+      sections: [
+        {
+          title: 'Dónde buscarla',
+          items: [
+            'Prioriza bosques cálidos de frondosas, sobre todo encinas, robles y otros Quercus; también puede asociarse a castaños en algunas zonas.',
+            'Busca bajo la copa y en bordes o claros del bosque, en lugares templados que hayan recibido lluvia. No es una especie que se deba esperar por el mero hecho de estar cerca de una ciudad o de una encina aislada.',
+            'Es más propia de periodos cálidos; la temporada local depende de las lluvias y del clima de ese año.'
+          ]
+        },
+        {
+          title: 'Suelo, plantas y pH',
+          items: [
+            'La presencia de un bosque adecuado es una pista más útil que una planta indicadora. Encinas o robles adultos importan porque el hongo vive asociado a sus raíces.',
+            'Tomillo y romero pueden aparecer en ambientes mediterráneos secos o básicos, pero no indican que haya Boletus aereus ni permiten conocer el pH exacto.',
+            'Los helechos suelen señalar sombra o humedad; pueden aparecer en microhábitats frescos, pero no son un indicador específico de esta seta.'
+          ]
+        },
+        {
+          title: 'Sombra y orientación',
+          items: [
+            'Aunque prefiere ambientes cálidos, suele encontrarse protegido bajo las copas. Busca sombra moteada y bordes cálidos, no suelo totalmente expuesto y reseco.',
+            'En zonas frescas, una orientación más soleada puede calentar el lugar; en verano seco, una ladera sur muy expuesta puede perder demasiada humedad. La orientación por sí sola no predice la fructificación.'
+          ]
+        },
+        {
+          title: 'Cómo reconocerla',
+          items: [
+            'Sombrero generalmente oscuro, pardo negruzco o bronceado; poros blancos de joven que pasan a amarillos y después oliváceos.',
+            'Pie grueso, de tonos pardos, con retícula; carne blanca y firme que normalmente no vira intensamente a azul.',
+            'El color oscuro ayuda a orientarse, pero cambia con la edad, la lluvia y la luz. Hay que revisar también pie, poros y carne.'
+          ]
+        },
+        {
+          title: 'Cómo distinguirla de las otras especies de la app',
+          items: [
+            'El sombrero bronceado y el bosque cálido de encinas o robles la orientan frente a Boletus pinophilus, más asociado a pinos.',
+            'Boletus reticulatus también aparece en frondosas cálidas y puede parecerse mucho; la retícula del pie y el aspecto del sombrero se solapan.',
+            'Boletus edulis suele mostrar tonos más claros y una franja clara en el borde del sombrero, pero estos rasgos no bastan por separado.'
+          ]
+        }
+      ]
+    },
+    boletus_reticulatus: {
+      scientificName: 'Boletus reticulatus',
+      image: {
+        src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Boletus.JPG/960px-Boletus.JPG',
+        alt: 'Boletus reticulatus fotografiado en un bosque de frondosas',
+        artist: 'Rude',
+        fileUrl: 'https://commons.wikimedia.org/wiki/File:Boletus.JPG',
+        license: 'CC BY-SA 3.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by-sa/3.0/'
+      },
+      sections: [
+        {
+          title: 'Dónde buscarla',
+          items: [
+            'Busca principalmente bajo robles y otros árboles de hoja ancha; el roble es una pista especialmente útil.',
+            'Suele asociarse a bosques cálidos y puede aparecer desde finales de primavera o en verano, a menudo tras lluvias y tormentas.',
+            'Revisa el suelo bajo las copas, los claros y los bordes de bosque que mantengan algo de humedad.'
+          ]
+        },
+        {
+          title: 'Suelo, plantas y pH',
+          items: [
+            'No uses tomillo, helechos ni otra planta como prueba de pH o de presencia. La relación con robles y el tipo de bosque son indicios más útiles.',
+            'Los tomillares suelen aparecer en lugares abiertos y secos; un helechal suele señalar humedad o sombra local. Ninguno confirma esta especie.',
+            'El valor de pH del visor es una estimación del entorno, no una medida del suelo bajo el árbol.'
+          ]
+        },
+        {
+          title: 'Sombra y orientación',
+          items: [
+            'Prefiere ambientes cálidos, pero busca ejemplares bajo la copa o en claros parcialmente sombreados, donde el suelo no esté completamente seco.',
+            'Las laderas soleadas pueden calentarse antes en primavera; si el verano es seco, los rincones frescos y húmedos pueden ser mejores. No hay una orientación universal.'
+          ]
+        },
+        {
+          title: 'Cómo reconocerla',
+          items: [
+            'Sombrero marrón claro a avellana, a menudo seco y aterciopelado; con calor o sequía puede agrietarse.',
+            'Pie robusto con una retícula clara que puede extenderse bastante por él; poros blancos al principio, luego amarillos y oliváceos.',
+            'La retícula marcada y la época cálida ayudan a orientarse, pero se solapan con otros boletos.'
+          ]
+        },
+        {
+          title: 'Cómo distinguirla de las otras especies de la app',
+          items: [
+            'Frente a Boletus edulis, suele tener aspecto más seco y agrietado y retícula más extendida por el pie; ambos rasgos pueden variar.',
+            'Puede confundirse con Boletus aereus, que suele tener el sombrero más oscuro y bronceado.',
+            'Boletus pinophilus aparece sobre todo en pinares. El árbol acompañante orienta, pero no confirma la especie.'
+          ]
+        }
+      ]
+    }
+  };
+
+  // ================================================================
+  // ESTADO GLOBAL
+  // ================================================================
+  let currentSpecies = 'boletus_edulis';
+  let currentLayer   = 'habitat';
+  let currentMinScore = 0;
+  let currentProv    = 'all';
+  let rawData        = null;   // índice experimental cargado de .json
+  const speciesDatasets = new Map();
+  const speciesCellMaps = new Map();
+  const pendingSpeciesLoads = new Map();
+  let speciesLoadRequest = 0;
+  let marker         = null;
+  let debounce       = null;
+
+  // ================================================================
+  // MAPA
+  // ================================================================
+  const BASEMAP_STYLE_URL = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+  let baseMapLoaded = false;
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: BASEMAP_STYLE_URL,
+    center: [-3.42, 41.25],
+    zoom: 7.8,
+    maxZoom: 16,
+    minZoom: 5
+  });
+  map.addControl(new maplibregl.NavigationControl({showCompass:true}), 'top-right');
+  map.on('load', () => {
+    baseMapLoaded = true;
+    document.getElementById('map-loading').hidden = true;
+  });
+  map.on('error', event => {
+    if (baseMapLoaded) return;
+    const overlay = document.getElementById('map-loading');
+    overlay.classList.add('map-loading-error');
+    document.getElementById('map-loading-message').textContent =
+      'No se pudo cargar el mapa base. Comprueba la conexión e inténtalo de nuevo.';
+    document.getElementById('map-retry').hidden = false;
+    console.error('No se pudo cargar el mapa base.', event.error);
+  });
+  document.getElementById('map-retry').addEventListener('click', () => location.reload());
+
+  // ================================================================
+  // COLORES (por valor)
+  // ================================================================
+  function colorScore(s) {
+    if (s <= 0)  return [51, 65, 85,   200];
+    if (s < 25)  return [249, 115, 22, 200];
+    if (s < 50)  return [234, 179, 8,  210];
+    if (s < 70)  return [34, 197, 94,  220];
+    return [16, 185, 129, 230];
+  }
+  function colorPrecip(p) {
+    if (!p || p <= 0)  return [15, 23, 42,  200];
+    if (p < 10)  return [2, 132, 199,   180];
+    if (p < 25)  return [6, 182, 212,   200];
+    if (p < 45)  return [56, 189, 248,  215];
+    return [125, 211, 252, 230];
+  }
+  const TREE_COLORS = {
+    'Pinus sylvestris': [5, 150, 105],
+    'Pinus pinaster':   [16, 185, 129],
+    'Pinus uncinata':   [4, 120, 87],
+    'Pinus nigra':      [2, 101, 70],
+    'Pinus halepensis': [21, 128, 61],
+    'Fagus sylvatica':  [217, 119, 6],
+    'Quercus pyrenaica':[180, 83, 9],
+    'Quercus ilex':     [77, 124, 15],
+    'Quercus suber':    [120, 113, 10],
+    'Quercus faginea':  [161, 98, 7],
+    'Castanea sativa':  [146, 64, 14],
+  };
+  const FOREST_NAMES_ES = {
+    'quercus ilex': 'Encina (Quercus ilex)',
+    'pinus pinaster': 'Pino resinero o rodeno (Pinus pinaster)',
+    'pinus sylvestris': 'Pino silvestre o albar (Pinus sylvestris)',
+    'quercus pyrenaica': 'Rebollo o melojo (Quercus pyrenaica)',
+    'quercus faginea': 'Quejigo (Quercus faginea)',
+    'pinus halepensis': 'Pino carrasco (Pinus halepensis)',
+    'fagus sylvatica': 'Haya (Fagus sylvatica)',
+    'pinus uncinata': 'Pino negro de montaña (Pinus uncinata)',
+    'quercus suber': 'Alcornoque (Quercus suber)',
+    'sabinares albares': 'Bosque de sabina albar',
+    'bosques ribereños': 'Bosque de ribera (chopos, sauces y fresnos)',
+    'bosques mixtos de frondosas en region biogeográfica mediterranea':
+      'Mezcla de árboles de hoja ancha mediterráneos (sin especie única identificada)',
+    'mezclas de coníferas y frondosas autóctonas en la región biogeográfica mediterránea':
+      'Mezcla de coníferas y árboles de hoja ancha autóctonos',
+    'pinares de pino salgareño': 'Pinar de pino salgareño o laricio',
+    'choperas y plataneras de producción': 'Plantaciones de chopos y plátanos',
+    'mezclas de coníferas autóctonas en la región biogeográfica mediterránea':
+      'Mezcla de coníferas autóctonas (sin especie única identificada)',
+    'pinares de pino piñonero': 'Pinar de pino piñonero',
+    'enebrales': 'Bosque o matorral de enebros',
+    'fresnedas': 'Bosque de fresnos',
+    'sabinares de juniperus phoenicia': 'Bosque de sabina negra (Juniperus phoenicea)',
+    'otras especies de producción en mezclas': 'Mezcla de otras especies forestales de producción',
+    'acebedas': 'Bosque de acebos',
+    'castañares': 'Bosque de castaños',
+    'mezclas de coníferas autoctonas con alóctonas':
+      'Mezcla de coníferas autóctonas y especies introducidas',
+    'frondosas alóctonas invasoras': 'Árboles de hoja ancha introducidos e invasores',
+    'otras coníferas alóctonas de producción (larix spp., pseudotsuga spp., etc)':
+      'Otras coníferas introducidas (alerces y pseudotsugas, entre otras)',
+    'arbolado disperso de frondosas': 'Árboles de hoja ancha dispersos',
+    'coníferas alóctonas de gestión (cupressus sp, otros pinos, etc.)':
+      'Coníferas introducidas (cipreses y otros pinos)',
+    'acebuchares': 'Bosque de acebuches (olivo silvestre)',
+    'frondosas alóctonas con  autóctonas':
+      'Mezcla de árboles de hoja ancha introducidos y autóctonos',
+    'robledal de quercus robur y quercus petrae':
+      'Robledal de roble común y roble albar',
+    'mezclas de coníferas con frondosas, autoctónas con alóctonas':
+      'Mezcla de coníferas y árboles de hoja ancha, autóctonos e introducidos',
+    'abedulares': 'Bosque de abedules'
+  };
+  function forestNameEs(name) {
+    if (!name) return 'Sin masa forestal identificada';
+    const key = name.trim().toLocaleLowerCase('es');
+    return FOREST_NAMES_ES[key] || name;
+  }
+  function colorForest(tree) {
+    const c = TREE_COLORS[tree];
+    return c ? [...c, 210] : [71, 85, 105, 180];
+  }
+  function colorPh(ph) {
+    if (!ph) return [71, 85, 105, 180];
+    if (ph < 4.5) return [239, 68, 68,  220];
+    if (ph < 5.5) return [245, 158, 11, 215];
+    if (ph < 6.5) return [16, 185, 129, 220];
+    return [59, 130, 246, 215];
+  }
+
+  // ================================================================
+  // CARGAR Y RENDERIZAR DATOS
+  // ================================================================
+  async function fetchSpeciesDataset(speciesId) {
+    if (speciesDatasets.has(speciesId)) return speciesDatasets.get(speciesId);
+    if (pendingSpeciesLoads.has(speciesId)) return pendingSpeciesLoads.get(speciesId);
+
+    const request = (async () => {
+      const path = `./public/data/experimental/${speciesId}.json`;
+      const response = await fetch(path, { cache: 'no-cache' });
+      if (!response.ok) {
+        throw new Error(response.status === 404
+          ? `Falta el fichero ${speciesId}.json (HTTP 404). Regenera los índices experimentales.`
+          : `El fichero ${speciesId}.json respondió HTTP ${response.status}.`);
+      }
+
+      const dataset = await response.json();
+      if (
+        !dataset ||
+        typeof dataset !== 'object' ||
+        dataset.data_quality !== 'sourced_unvalidated' ||
+        dataset.score_type !== 'experimental_separated_habitat_weather' ||
+        dataset.is_probability !== false ||
+        dataset.species_id !== speciesId ||
+        !Array.isArray(dataset.cells) ||
+        !dataset.species_profile
+      ) {
+        throw new Error(`El fichero ${speciesId}.json no tiene el formato experimental esperado.`);
+      }
+
+      speciesDatasets.set(speciesId, dataset);
+      speciesCellMaps.set(speciesId, new Map(dataset.cells.map(cell => [cell.h, cell])));
+      return dataset;
+    })();
+
+    pendingSpeciesLoads.set(speciesId, request);
+    try {
+      return await request;
+    } finally {
+      pendingSpeciesLoads.delete(speciesId);
+    }
+  }
+
+  async function loadSpecies(sp) {
+    const requestId = ++speciesLoadRequest;
+    const loading = document.getElementById('loading');
+    const status = document.getElementById('data-status');
+    loading.classList.add('active');
+    rawData = null;
+
+    try {
+      if (sp === 'all') {
+        const results = await Promise.allSettled(SPECIES_IDS.map(fetchSpeciesDataset));
+        const failures = results
+          .map((result, index) => result.status === 'rejected'
+            ? `${SPECIES_IDS[index]}: ${result.reason.message}`
+            : null)
+          .filter(Boolean);
+        if (failures.length) {
+          throw new Error(`No se pudieron cargar todas las especies. ${failures.join(' ')}`);
+        }
+        rawData = speciesDatasets.get('boletus_edulis');
+      } else {
+        rawData = await fetchSpeciesDataset(sp);
+      }
+
+      if (requestId !== speciesLoadRequest) return;
+      status.textContent = `Datos del ${rawData.date}. El mapa orienta sobre el hábitat y el tiempo reciente, pero no confirma que haya setas.`;
+      status.classList.remove('verified');
+      render();
+    } catch (error) {
+      if (requestId !== speciesLoadRequest) return;
+      console.error(`No se pudieron cargar datos para ${sp}.`, error);
+      const message = error instanceof Error ? error.message : String(error);
+      const protocolHint = location.protocol === 'file:'
+        ? ' Sirve el visor mediante HTTP; no lo abras como fichero local.'
+        : '';
+      status.textContent = `No se pudieron cargar los datos (${message}).${protocolHint}`;
+      status.classList.remove('verified');
+      clearDisplayedData();
+    } finally {
+      if (requestId === speciesLoadRequest) loading.classList.remove('active');
+    }
+  }
+
+  function clearDisplayedData() {
+    const source = map.getSource('h3');
+    if (source) source.setData({ type: 'FeatureCollection', features: [] });
+    document.getElementById('stat-total').textContent = '0';
+    document.getElementById('stat-fav').textContent = '0';
+    document.getElementById('score-pill').textContent = '—';
+    document.getElementById('score-pill').className = 'score-badge b-no';
+    document.getElementById('c-tree').textContent = 'Datos no disponibles';
+    document.getElementById('c-reason').textContent = '—';
+    document.getElementById('c-ph').textContent = '—';
+    document.getElementById('c-rain').textContent = '—';
+    document.getElementById('c-weather-score').textContent = '—';
+    document.getElementById('c-temp').textContent = '—';
+    document.getElementById('c-topo').textContent = '—';
+    document.getElementById('c-moist').textContent = '—';
+    document.getElementById('c-weather-distance').textContent = '—';
+    document.getElementById('species-comparison').hidden = true;
+    document.getElementById('species-comparison-list').replaceChildren();
+  }
+
+  function inProvBounds(cell) {
+    if (currentProv === 'all') return true;
+    const b = PROV_BBOX[currentProv];
+    return cell.lon >= b.minLon && cell.lon <= b.maxLon &&
+           cell.lat >= b.minLat && cell.lat <= b.maxLat;
+  }
+
+  function render() {
+    if (!rawData) return;
+    document.getElementById('loading').classList.add('active');
+
+    const mapCells = currentSpecies === 'all'
+      ? rawData.cells.map(cell => {
+          const habitatScore = Math.max(...SPECIES_IDS.map(speciesId =>
+            speciesCellMaps.get(speciesId).get(cell.h)?.hs ?? 0
+          ));
+          return {
+            ...cell,
+            s: habitatScore,
+            hs: habitatScore,
+            ws: Math.max(...SPECIES_IDS.map(speciesId =>
+            speciesCellMaps.get(speciesId).get(cell.h)?.ws ?? 0
+            )),
+          };
+        })
+      : rawData.cells;
+    const activeScore = currentLayer === 'weather' ? 'ws' : 'hs';
+    const cells = mapCells.filter(c =>
+      (currentLayer !== 'habitat' || c.hs > 0) &&
+      c[activeScore] >= currentMinScore &&
+      inProvBounds(c)
+    );
+
+    // Construir GeoJSON de polígonos H3 usando h3-js en cliente
+    const features = cells.map(c => {
+      const boundary = h3.cellToBoundary(c.h);  // [[lat,lon], ...]
+      const coords = boundary.map(([la, lo]) => [lo, la]);
+      coords.push(coords[0]); // cerrar polígono
+
+      // Elegir color según capa
+      let color;
+      if (currentLayer === 'precip') color = colorPrecip(c.p14);
+      else if (currentLayer === 'forest') color = colorForest(c.tree);
+      else if (currentLayer === 'ph') color = colorPh(c.ph);
+      else if (currentLayer === 'weather') color = colorScore(c.ws);
+      else color = colorScore(c.hs);
+
+      return {
+        type: 'Feature',
+        properties: { ...c, _r: color[0], _g: color[1], _b: color[2], _a: color[3] },
+        geometry: { type: 'Polygon', coordinates: [coords] }
+      };
+    });
+
+    const geojson = { type: 'FeatureCollection', features };
+
+    // Estadísticas
+    const fav = cells.filter(c => c[activeScore] >= 50).length;
+    document.getElementById('stat-total').textContent = cells.length.toLocaleString('es-ES');
+    document.getElementById('stat-fav').textContent = fav.toLocaleString('es-ES');
+    document.getElementById('stat-fav-label').firstChild.textContent =
+      currentLayer === 'weather' ? 'Tiempo ≥50: ' : 'Hábitat ≥50: ';
+
+    // Actualizar fuente o crearla
+    if (map.getSource('h3')) {
+      map.getSource('h3').setData(geojson);
+    } else {
+      map.addSource('h3', { type:'geojson', data: geojson });
+
+      map.addLayer({
+        id: 'h3-fill',
+        type: 'fill',
+        source: 'h3',
+        paint: {
+          'fill-color': ['rgb', ['get','_r'], ['get','_g'], ['get','_b']],
+          'fill-opacity': ['/', ['get','_a'], 255]
+        }
+      });
+
+      map.addLayer({
+        id: 'h3-line',
+        type: 'line',
+        source: 'h3',
+        paint: { 'line-color':'#fff', 'line-width':0.8, 'line-opacity':0.28 }
+      });
+
+      // Click para inspección
+      map.on('click', 'h3-fill', e => {
+        if (e.features && e.features[0]) selectCell(e.features[0].properties);
+      });
+      map.on('mouseenter','h3-fill', () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave','h3-fill', () => { map.getCanvas().style.cursor = ''; });
+    }
+
+    // Auto-mostrar celda destacada
+    const best = cells.find(c => c.s >= 50) || cells[0];
+    if (best) selectCell(best);
+
+    document.getElementById('loading').classList.remove('active');
+  }
+
+  function selectCell(cell) {
+    if (currentSpecies === 'all') {
+      showAllSpeciesAtCell(cell);
+    } else {
+      showCell(cell);
+    }
+  }
+
+  function formatNumber(value) {
+    if (value === null || value === undefined || value === '') return 'sin dato';
+    const number = Number(value);
+    return Number.isFinite(number)
+      ? number.toLocaleString('es-ES', { maximumFractionDigits: 1 })
+      : 'sin dato';
+  }
+
+  function showSpeciesGuide(speciesId) {
+    const guide = SPECIES_GUIDES[speciesId];
+    if (!guide) return;
+
+    document.getElementById('species-dialog-title').textContent = guide.scientificName;
+    document.getElementById('species-dialog-subtitle').textContent =
+      'Pistas de búsqueda e identificación; no sustituyen una revisión experta.';
+
+    const content = document.getElementById('species-guide-content');
+    content.replaceChildren();
+
+    const figure = document.createElement('figure');
+    figure.className = 'species-guide-photo';
+    const image = document.createElement('img');
+    image.src = guide.image.src;
+    image.alt = guide.image.alt;
+    image.loading = 'lazy';
+    image.referrerPolicy = 'no-referrer';
+    const caption = document.createElement('figcaption');
+    caption.append(document.createTextNode(`Fotografía: ${guide.image.artist} · `));
+    const fileLink = document.createElement('a');
+    fileLink.href = guide.image.fileUrl;
+    fileLink.target = '_blank';
+    fileLink.rel = 'noopener noreferrer';
+    fileLink.textContent = 'Wikimedia Commons';
+    caption.append(fileLink, document.createTextNode(' · '));
+    const licenseLink = document.createElement('a');
+    licenseLink.href = guide.image.licenseUrl;
+    licenseLink.target = '_blank';
+    licenseLink.rel = 'noopener noreferrer';
+    licenseLink.textContent = guide.image.license;
+    caption.append(licenseLink);
+    figure.append(image, caption);
+    content.append(figure);
+
+    const note = document.createElement('p');
+    note.className = 'species-comparison-note';
+    note.textContent = 'Las plantas y el relieve dan pistas generales; no miden el pH ni garantizan que fructifique aquí.';
+    content.append(note);
+
+    for (const sectionData of guide.sections) {
+      const section = document.createElement('section');
+      section.className = 'species-guide-section';
+      const heading = document.createElement('h3');
+      heading.textContent = sectionData.title;
+      const list = document.createElement('ul');
+      for (const itemText of sectionData.items) {
+        const item = document.createElement('li');
+        item.textContent = itemText;
+        list.append(item);
+      }
+      section.append(heading, list);
+      content.append(section);
+    }
+
+    document.getElementById('species-dialog').showModal();
+  }
+
+  function getSpeciesChecks(cell, dataset) {
+    const profile = dataset.species_profile;
+    const tree = forestNameEs(cell.tree);
+    const phRange = profile.ph_tolerated;
+    const altitudeRange = profile.altitude_range_meters;
+    const canopyOk = cell.cc >= profile.minimum_canopy_cover_percent;
+    const altitudeOk = cell.elev >= altitudeRange[0] - 150 &&
+      cell.elev <= altitudeRange[1] + 150;
+
+    const habitatStatus = cell.host === 'incompatible' || !canopyOk
+      ? 'bad'
+      : cell.host === 'unknown'
+        ? 'uncertain'
+        : 'good';
+    const habitatText = cell.host === 'compatible'
+      ? `${tree}; hospedador adecuado. Copa ${cell.cc}% (mín. ${profile.minimum_canopy_cover_percent}%).`
+      : cell.host === 'incompatible'
+        ? `${tree}; no coincide con hospedadores conocidos.`
+        : `${tree}; no se puede identificar el hospedador.`;
+    const canopyText = !canopyOk
+      ? ` Copa insuficiente: ${cell.cc}% (mín. ${profile.minimum_canopy_cover_percent}%).`
+      : '';
+
+    const ph05 = Number(cell.ph05);
+    const ph95 = Number(cell.ph95);
+    const phHasInterval = Number.isFinite(ph05) && Number.isFinite(ph95);
+    const phWhollyInside = phHasInterval
+      ? ph05 >= phRange[0] && ph95 <= phRange[1]
+      : cell.ph >= phRange[0] && cell.ph <= phRange[1];
+    const phWhollyOutside = phHasInterval
+      ? ph95 < phRange[0] || ph05 > phRange[1]
+      : cell.ph < phRange[0] || cell.ph > phRange[1];
+    const phStatus = phWhollyInside ? 'good' : phWhollyOutside ? 'bad' : 'uncertain';
+    const phText = `Estimado ${cell.ph}${phHasInterval ? ` (rango ${ph05}–${ph95})` : ''}; referencia ${phRange[0]}–${phRange[1]}.`;
+
+    const weatherStatus = 'uncertain';
+    const sourceDistance = Number(cell.weather_distance_km);
+    const distanceNote = cell.weather_distance_km != null && Number.isFinite(sourceDistance)
+      ? ` Fuente meteorológica más cercana: ${formatNumber(sourceDistance)} km.`
+      : '';
+    const weatherText = `Puntuación orientativa: ${formatNumber(cell.ws)}/100. Lluvia en 14 días: ${formatNumber(cell.p14)} mm; humedad estimada: ${formatNumber(cell.moist)}%; temperatura media: ${formatNumber(cell.t)} °C.${distanceNote}`;
+
+    return [
+      { label: 'Árbol y cubierta', status: habitatStatus, text: `${habitatText}${canopyText}` },
+      {
+        label: 'Altitud',
+        status: altitudeOk ? 'good' : 'bad',
+        text: `${cell.elev} m; referencia ${altitudeRange[0]}–${altitudeRange[1]} m.`
+      },
+      { label: 'pH estimado', status: phStatus, text: phText },
+      { label: 'Tiempo reciente', status: weatherStatus, text: weatherText }
+    ];
+  }
+
+  function createSpeciesCard(cell, dataset) {
+    const profile = dataset.species_profile;
+    const card = document.createElement('article');
+    card.className = 'species-explanation';
+
+    const heading = document.createElement('div');
+    heading.className = 'species-explanation-head';
+    const name = document.createElement('span');
+    name.className = 'species-explanation-name';
+    name.textContent = profile.scientific_name;
+    const score = document.createElement('span');
+    score.className = 'species-explanation-score';
+    score.textContent = `${formatNumber(cell.hs)}/100 hábitat · ${formatNumber(cell.ws)}/100 tiempo`;
+    heading.append(name, score);
+
+    const checks = document.createElement('div');
+    checks.className = 'species-checks';
+    for (const check of getSpeciesChecks(cell, dataset)) {
+      const row = document.createElement('div');
+      row.className = `species-check ${check.status}`;
+      const mark = document.createElement('span');
+      mark.className = 'species-check-mark';
+      mark.setAttribute('aria-hidden', 'true');
+      mark.textContent = check.status === 'good' ? '✓' : check.status === 'bad' ? '×' : '?';
+      const description = document.createElement('span');
+      const label = document.createElement('span');
+      label.className = 'species-check-label';
+      label.textContent = `${check.label}: `;
+      description.append(label, document.createTextNode(check.text));
+      row.append(mark, description);
+      checks.append(row);
+    }
+
+    card.append(heading, checks);
+    return card;
+  }
+
+  function showAllSpeciesAtCell(cell) {
+    showCell(cell);
+    const comparison = document.getElementById('species-comparison');
+    const list = document.getElementById('species-comparison-list');
+    list.replaceChildren();
+
+    for (const speciesId of SPECIES_IDS) {
+      const dataset = speciesDatasets.get(speciesId);
+      const speciesCell = speciesCellMaps.get(speciesId).get(cell.h);
+      if (speciesCell) list.append(createSpeciesCard(speciesCell, dataset));
+    }
+    comparison.hidden = false;
+  }
+
+  function showCell(p) {
+    const s = parseFloat(p.hs ?? p.s) || 0;
+    const pill = document.getElementById('score-pill');
+    pill.textContent = currentSpecies === 'all'
+      ? `Hábitat ${formatNumber(s)}/100 · tiempo ${formatNumber(p.ws)}/100`
+      : `Hábitat ${formatNumber(s)}/100`;
+    pill.className = 'score-badge ' + (s >= 50 ? 'b-ok' : s > 0 ? 'b-mod' : 'b-no');
+
+    const hostNote = p.host === 'unknown' ? ' (hospedador incierto)' : '';
+    document.getElementById('c-tree').textContent  = forestNameEs(p.tree) + hostNote;
+    const dataset = speciesDatasets.get(currentSpecies);
+    document.getElementById('c-reason').textContent = currentSpecies === 'all'
+      ? 'El hábitat y las condiciones recientes se muestran por separado; debajo se comparan las especies.'
+      : 'El hábitat y las condiciones recientes se muestran por separado.';
+    document.getElementById('c-ph').textContent    = p.ph !== undefined
+      ? `${formatNumber(p.ph)} (${formatNumber(p.ph05)}–${formatNumber(p.ph95)})` : '—';
+    document.getElementById('c-rain').textContent  = p.p14 !== undefined && p.p14 !== null
+      ? `${formatNumber(p.p14)} mm`
+      : '—';
+    document.getElementById('c-weather-score').textContent =
+      p.ws !== undefined ? `${formatNumber(p.ws)}/100 (orientativo)` : '—';
+    document.getElementById('c-temp').textContent  = p.t !== undefined && p.t !== null
+      ? `${formatNumber(p.t)} °C` : '—';
+    document.getElementById('c-topo').textContent  = `${p.elev || 0} m · Exp. ${p.asp || 'N'}`;
+    document.getElementById('c-moist').textContent = p.moist !== undefined && p.moist !== null
+      ? `${formatNumber(p.moist)}%` : '—';
+    document.getElementById('c-weather-distance').textContent =
+      Number.isFinite(parseFloat(p.weather_distance_km))
+        ? `${formatNumber(p.weather_distance_km)} km`
+        : 'Sin dato';
+    const comparison = document.getElementById('species-comparison');
+    const list = document.getElementById('species-comparison-list');
+    list.replaceChildren();
+    if (dataset) {
+      list.append(createSpeciesCard(p, dataset));
+      comparison.hidden = false;
+    } else {
+      comparison.hidden = true;
+    }
+  }
+
+  // ================================================================
+  // CAPAS Y LEYENDA
+  // ================================================================
+  const LEGEND_CFG = {
+    habitat: { title:'Hábitat potencial (0–100; no indica presencia)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','75','100'] },
+    weather: { title:'Condiciones recientes (0–100; orientación, no confirma presencia)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','75','100'] },
+    precip: { title:'Precipitación acumulada 14 días (mm)', bar:['#0f172a','#0284c7','#06b6d4','#38bdf8','#7dd3fc'], labels:['0mm','10mm','25mm','45mm','>70mm'] },
+    forest: { title:'Especie forestal (MFE50 oficial)', bar:['#059669','#d97706','#b45309','#4d7c0f','#475569'], labels:['Pino albar','Hayedo','Roble/Melojo','Encinar','Otros'] },
+    ph:     { title:'pH del suelo (Acidez edáfica)', bar:['#ef4444','#f59e0b','#10b981','#3b82f6'], labels:['<4.5 Ácido','5.0','6.2','≥7 Calizo'] }
+  };
+
+  function setLayer(mode) {
+    currentLayer = mode;
+    document.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`lbtn-${mode}`).classList.add('active');
+    const cfg = LEGEND_CFG[mode];
+    document.getElementById('leg-title').textContent = cfg.title;
+    document.getElementById('leg-bar').innerHTML = cfg.bar.map(c => `<div class="step" style="background:${c}"></div>`).join('');
+    document.getElementById('leg-labels').innerHTML = cfg.labels.map(l => `<span>${l}</span>`).join('');
+    updateScoreFilterLabel();
+    render();
+  }
+
+  function updateScoreFilterLabel() {
+    document.getElementById('slider-title').textContent =
+      currentLayer === 'weather' ? 'Condiciones recientes mínimas' : 'Hábitat mínimo (orientativo)';
+    const label = currentMinScore === 0
+      ? currentLayer === 'weather'
+        ? '0 — Todas las celdas candidatas'
+        : '0 — Solo celdas candidatas'
+      : `≥ ${currentMinScore} puntos`;
+    document.getElementById('slider-label').textContent = label;
+  }
+
+  // ================================================================
+  // BÚSQUEDA DE PUEBLOS
+  // ================================================================
+  const searchEl    = document.getElementById('search');
+  const clearEl     = document.getElementById('search-clear');
+  const suggestEl   = document.getElementById('suggestions');
+
+  searchEl.addEventListener('input', e => {
+    const q = e.target.value.trim();
+    clearEl.style.display = q ? 'block' : 'none';
+    if (q.length < 2) { suggestEl.style.display = 'none'; return; }
+    clearTimeout(debounce);
+    debounce = setTimeout(() => doSearch(q), 220);
+  });
+
+  clearEl.addEventListener('click', () => {
+    searchEl.value = '';
+    clearEl.style.display = 'none';
+    suggestEl.style.display = 'none';
+    if (marker) { marker.remove(); marker = null; }
+  });
+
+  async function doSearch(q) {
+    const qlo = q.toLowerCase();
+    let items = KNOWN_SPOTS.filter(s => s.n.toLowerCase().includes(qlo)).map(s => ({label: s.n, lat: s.lat, lon: s.lon}));
+
+    if (items.length < 4) {
+      try {
+        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=es&limit=5`, {headers:{'User-Agent':'MapaSetero/1.0'}});
+        if (r.ok) {
+          const d = await r.json();
+          d.forEach(x => items.push({ label: x.display_name.split(',').slice(0,3).join(', '), lat: parseFloat(x.lat), lon: parseFloat(x.lon) }));
+        }
+      } catch {}
+    }
+
+    if (!items.length) {
+      suggestEl.innerHTML = `<div class="sug-item" style="color:var(--dim)">Sin resultados para "${q}"</div>`;
+    } else {
+      suggestEl.innerHTML = items.slice(0,7).map(it =>
+        `<div class="sug-item" onclick="selectSpot(${it.lat},${it.lon},'${it.label.replace(/'/g,"\\'").replace(/"/g,'\\"')}')">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>${it.label}</span>
+        </div>`
+      ).join('');
+    }
+    suggestEl.style.display = 'block';
+  }
+
+  function selectSpot(lat, lon, label) {
+    searchEl.value = label.split('(')[0].split(',')[0].trim();
+    suggestEl.style.display = 'none';
+    if (marker) marker.remove();
+    const el = document.createElement('div');
+    el.className = 'pulse';
+    marker = new maplibregl.Marker(el).setLngLat([lon, lat]).addTo(map);
+    map.flyTo({ center:[lon, lat], zoom: 12, speed: 1.4, essential: true });
+  }
+
+  document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) suggestEl.style.display = 'none'; });
+
+  // ================================================================
+  // PROVINCE FILTER
+  // ================================================================
+  document.querySelectorAll('.prov-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.prov-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentProv = btn.dataset.prov;
+      const b = PROV_BOUNDS[currentProv];
+      map.flyTo({ center: b.center, zoom: b.zoom, speed: 1.2 });
+      render();
+    });
+  });
+
+  // ================================================================
+  // SLIDER
+  // ================================================================
+  document.getElementById('slider').addEventListener('input', e => {
+    currentMinScore = parseInt(e.target.value);
+    updateScoreFilterLabel();
+    render();
+  });
+
+  // ================================================================
+  // SPECIES SELECTOR
+  // ================================================================
+  document.getElementById('species').addEventListener('change', e => {
+    currentSpecies = e.target.value;
+    loadSpecies(currentSpecies);
+  });
+
+  document.querySelectorAll('.guide-btn').forEach(button => {
+    button.addEventListener('click', () => showSpeciesGuide(button.dataset.guide));
+  });
+  document.getElementById('species-dialog-close').addEventListener('click', () => {
+    document.getElementById('species-dialog').close();
+  });
+  const speciesDialog = document.getElementById('species-dialog');
+  speciesDialog.addEventListener('click', event => {
+    if (event.target === event.currentTarget) event.currentTarget.close();
+  });
+  speciesDialog.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      speciesDialog.close();
+    }
+  });
+
+  // ================================================================
+  // ARRANQUE
+  // ================================================================
+  map.on('load', () => loadSpecies(currentSpecies));
+
+  let deferredInstallPrompt = null;
+  const installButton = document.getElementById('install-button');
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    installButton.hidden = false;
+  });
+  installButton.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) return;
+    await deferredInstallPrompt.prompt();
+    const choice = await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    if (choice.outcome === 'accepted') installButton.hidden = true;
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    installButton.hidden = true;
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(error => {
+        console.error('No se pudo registrar el modo instalable de Mapa setero.', error);
+      });
+    });
+  }
+  </script>
+</body>
+</html>

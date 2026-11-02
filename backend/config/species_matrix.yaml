@@ -1,0 +1,120 @@
+# Parámetros heurísticos experimentales; pendientes de contraste con fuentes y
+# observaciones de fructificación para las especies y regiones objetivo.
+
+version: "1.0"
+target_genus: "Boletus"
+
+species:
+  boletus_edulis:
+    common_name_es: "Calabaza / Hongo Blanco / Porcino"
+    scientific_name: "Boletus edulis"
+    trophic_type: "mycorrhizal"
+    edaphic:
+      ph_optimal: [4.5, 6.0]
+      ph_tolerated: [4.0, 6.5]
+      substrate_preference: "siliceous"
+    habitat:
+      preferred_forest_types:
+        - "Pinus sylvestris"
+        - "Pinus nigra"
+        - "Fagus sylvatica"
+        - "Quercus pyrenaica"
+        - "Quercus petraea"
+        - "Betula alba"
+        - "Castanea sativa"
+      minimum_canopy_cover_percent: 40
+      altitude_range_meters: [700, 1900]
+    topography:
+      slope_max_deg: 40
+      aspect_preference_early_season: ["N", "NE", "NW"] # umbrías
+      aspect_preference_late_season: ["S", "SE", "SW"]  # solanas
+    meteorology:
+      accumulated_precip_14d_threshold_mm: 35.0
+      accumulated_precip_14d_optimal_mm: 60.0
+      mean_temp_optimal_celsius: [12.0, 18.0]
+      min_temp_limit_celsius: 1.0 # Sensible a heladas directas
+      soil_moisture_min_percent: 25.0
+
+  boletus_aereus:
+    common_name_es: "Hongo Negro / Boleto Bronceado"
+    scientific_name: "Boletus aereus"
+    trophic_type: "mycorrhizal"
+    edaphic:
+      ph_optimal: [5.2, 6.8]
+      ph_tolerated: [4.8, 7.2]
+      substrate_preference: "siliceous_to_neutral"
+    habitat:
+      preferred_forest_types:
+        - "Quercus ilex"
+        - "Quercus suber"
+        - "Quercus faginea"
+        - "Castanea sativa"
+        - "Quercus pyrenaica"
+      minimum_canopy_cover_percent: 30
+      altitude_range_meters: [100, 1100]
+    topography:
+      slope_max_deg: 45
+      aspect_preference_early_season: ["E", "SE", "S"]
+      aspect_preference_late_season: ["S", "SW"]
+    meteorology:
+      accumulated_precip_14d_threshold_mm: 30.0
+      accumulated_precip_14d_optimal_mm: 50.0
+      mean_temp_optimal_celsius: [16.0, 24.0]
+      min_temp_limit_celsius: 4.0 # Más termófilo, no tolera frío prematuro
+      soil_moisture_min_percent: 20.0
+
+  boletus_pinophilus:
+    common_name_es: "Hongo Pinícola / Boleto del Pino"
+    scientific_name: "Boletus pinophilus"
+    trophic_type: "mycorrhizal"
+    edaphic:
+      ph_optimal: [4.0, 5.5]
+      ph_tolerated: [3.8, 6.0]
+      substrate_preference: "strictly_siliceous"
+    habitat:
+      preferred_forest_types:
+        - "Pinus sylvestris"
+        - "Pinus uncinata"
+        - "Pinus nigra"
+        - "Pinus pinaster"
+        - "Fagus sylvatica"
+      minimum_canopy_cover_percent: 35
+      altitude_range_meters: [900, 2100]
+    topography:
+      slope_max_deg: 40
+      aspect_preference_early_season: ["N", "NE"]
+      aspect_preference_late_season: ["E", "SE", "S"]
+    meteorology:
+      accumulated_precip_14d_threshold_mm: 40.0
+      accumulated_precip_14d_optimal_mm: 70.0
+      mean_temp_optimal_celsius: [10.0, 16.0]
+      min_temp_limit_celsius: -2.0 # Gran resistencia al frío de montaña
+      soil_moisture_min_percent: 25.0
+
+  boletus_reticulatus:
+    common_name_es: "Boleto Reticulado / Boleto de Verano"
+    scientific_name: "Boletus reticulatus"
+    trophic_type: "mycorrhizal"
+    edaphic:
+      ph_optimal: [5.0, 6.5]
+      ph_tolerated: [4.5, 7.0]
+      substrate_preference: "siliceous_to_decalcified"
+    habitat:
+      preferred_forest_types:
+        - "Quercus robur"
+        - "Quercus petraea"
+        - "Quercus pyrenaica"
+        - "Castanea sativa"
+        - "Fagus sylvatica"
+      minimum_canopy_cover_percent: 35
+      altitude_range_meters: [300, 1400]
+    topography:
+      slope_max_deg: 35
+      aspect_preference_early_season: ["E", "SE", "S"]
+      aspect_preference_late_season: ["S", "SW"]
+    meteorology:
+      accumulated_precip_14d_threshold_mm: 30.0
+      accumulated_precip_14d_optimal_mm: 50.0
+      mean_temp_optimal_celsius: [17.0, 25.0]
+      min_temp_limit_celsius: 6.0 # Estival puro, requiere calor para romper dormancia
+      soil_moisture_min_percent: 20.0

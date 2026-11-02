@@ -1,0 +1,9 @@
+backend/venv/
+backend/data/raw/
+backend/src/ingestion/data/raw/
+**/__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+scratch_*.py

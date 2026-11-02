@@ -1,0 +1,14 @@
+duckdb>=1.1.0
+h3>=4.0.0b1
+pyyaml>=6.0.2
+requests>=2.32.0
+pydantic>=2.10.0
+numpy>=2.0.0
+scipy>=1.14.0
+shapely>=2.0.6
+rasterio>=1.4.3
+fastapi>=0.115.0
+uvicorn>=0.32.0
+python-dotenv>=1.0.1
+rich>=13.9.0
+tzdata>=2024.1
