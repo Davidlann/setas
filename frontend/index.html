@@ -240,15 +240,23 @@
     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; font-size: 11.5px; }
     .info-item { display: flex; flex-direction: column; gap: 1px; }
     .info-wide { grid-column: 1 / -1; }
-    .info-item span:first-child { color: var(--dim); font-size: 10.5px; display: flex; align-items: center; gap: 3px; }
-    .info-item span:last-child { font-weight: 600; color: #e2e8f0; overflow-wrap: anywhere; }
+    .info-item span:first-child {
+      color: var(--dim);
+      font-size: 10.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 4px;
+    }
+    .info-item span:last-child { font-weight: 600; color: #443b32; overflow-wrap: anywhere; }
     .info-help-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       width: 14px;
       height: 14px;
-      margin-left: 3px;
+      margin-left: auto;
       padding: 0;
       font-size: 9.5px;
       font-family: serif;
@@ -784,7 +792,7 @@
     }
     .map-quick-select {
       width: 100%;
-      height: 32px;
+      height: 34px;
       padding: 0 8px;
       font-size: 12px;
       font-weight: 700;
@@ -798,6 +806,280 @@
     .map-quick-select:focus {
       border-color: #9a7656;
       box-shadow: 0 0 0 2px rgba(121, 83, 58, .15);
+    }
+    /* Custom autumn dropdown */
+    .custom-select-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+    }
+    .custom-select-btn {
+      width: 100%;
+      min-height: 34px;
+      padding: 4px 8px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #44372a;
+      background: #fffdf8;
+      border: 1px solid #dcd1c2;
+      border-radius: 9px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-align: left;
+      transition: all .18s;
+      outline: none;
+    }
+    .custom-select-btn:hover {
+      border-color: #b99a78;
+      background: #fdfaf3;
+    }
+    .custom-select-btn:focus-visible {
+      border-color: #9a7656;
+      box-shadow: 0 0 0 2px rgba(121, 83, 58, .18);
+    }
+    .custom-select-icon {
+      flex: 0 0 22px;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .custom-select-text {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #44372a;
+    }
+    .custom-select-arrow {
+      flex: 0 0 auto;
+      font-size: 10px;
+      color: #846b4d;
+      transition: transform .2s ease;
+    }
+    .custom-select-wrap.open .custom-select-arrow {
+      transform: rotate(180deg);
+    }
+    .custom-select-list {
+      position: absolute;
+      top: calc(100% + 5px);
+      left: 0;
+      right: 0;
+      z-index: 60;
+      background: #fffdf8;
+      border: 1px solid #dcd1c2;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(61, 46, 31, .2);
+      padding: 5px;
+      display: none;
+      flex-direction: column;
+      gap: 3px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .custom-select-wrap.open .custom-select-list {
+      display: flex;
+    }
+    .custom-select-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .15s;
+      user-select: none;
+    }
+    .custom-select-option:hover, .custom-select-option:focus {
+      background: #f4efe5;
+    }
+    .custom-select-option.active {
+      background: #ede3d1;
+      border-left: 3px solid #79533a;
+    }
+    .custom-select-option .option-icon {
+      flex: 0 0 22px;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .custom-select-option .option-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+      min-width: 0;
+    }
+    .custom-select-option .option-text strong {
+      font-size: 11.5px;
+      color: #44372a;
+      font-weight: 700;
+    }
+    .custom-select-option .option-text small {
+      font-size: 9.5px;
+      color: #766858;
+    }
+    .mush-icon {
+      width: 22px;
+      height: 22px;
+      display: block;
+      flex-shrink: 0;
+    }
+    .species-option .option-icon-wrap {
+      flex: 0 0 22px;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Satellite toggle button */
+    .satellite-toggle {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 0 13px;
+      color: #514334;
+      background: rgba(251, 248, 241, .96);
+      border: 1px solid #e2d8c8;
+      border-radius: 12px;
+      box-shadow: 0 5px 18px rgba(61, 46, 31, .12);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .satellite-toggle:hover {
+      background: #f4ede0;
+      border-color: #b99a78;
+    }
+    .satellite-toggle.active {
+      color: #fffaf3;
+      background: #3a4f2e;
+      border-color: #3a4f2e;
+      box-shadow: 0 5px 18px rgba(58, 79, 46, .28);
+    }
+    .satellite-toggle svg {
+      flex-shrink: 0;
+    }
+    /* Cell zone badge and routing box */
+    .cell-head-title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .cell-zone-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #493b2d;
+      line-height: 1.3;
+    }
+    .cell-zone-badge svg {
+      color: #8d6848;
+      flex-shrink: 0;
+    }
+    .cell-zone-sub {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.35;
+    }
+    .cell-nav-box {
+      margin-top: 4px;
+      padding: 10px 12px;
+      background: #f4eee2;
+      border: 1px solid #e2d6c3;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .nav-box-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .nav-box-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 750;
+      color: #514334;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+    }
+    .nav-box-title svg {
+      color: #8c6847;
+    }
+    .road-distance-badge {
+      font-size: 11px;
+      font-weight: 750;
+      color: #50663a;
+      background: #e6eddd;
+      border: 1px solid #ccd8be;
+      border-radius: 6px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+    .nav-box-actions {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .google-maps-link {
+      flex: 1;
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 11px;
+      color: #fffaf3;
+      background: #76563d;
+      border: 1px solid #76563d;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background .18s;
+    }
+    .google-maps-link:hover {
+      background: #5f422d;
+      color: #fff;
+    }
+    .calc-route-btn {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 6px 10px;
+      color: #514334;
+      background: #fffdf8;
+      border: 1px solid #d8ccb8;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .18s;
+    }
+    .calc-route-btn:hover {
+      background: #ede3d2;
+      border-color: #bfa588;
     }
     .map-legend-toggle {
       flex: 0 0 28px;
@@ -1000,6 +1282,10 @@
       <div id="suggestions" class="suggestions"></div>
     </div>
     <div class="toolbar-actions">
+      <button id="satellite-toggle" class="satellite-toggle" type="button" aria-pressed="false" title="Alternar vista satélite / mapa">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        <span id="satellite-toggle-text">Satélite</span>
+      </button>
       <button id="install-button" class="install-button" type="button" hidden>Instalar app</button>
       <button id="menu-toggle" class="menu-toggle" type="button" aria-controls="sidebar" aria-expanded="false">
         <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -1014,14 +1300,67 @@
   </div>
   <section id="map-legend" class="map-legend" aria-label="Controles del mapa y leyenda">
     <div class="map-ctrl-header">
-      <div class="map-ctrl-species-wrap">
-        <label for="map-quick-species" class="visually-hidden">Seta</label>
-        <select id="map-quick-species" class="map-quick-select" aria-label="Elegir seta">
-          <option value="boletus_edulis">🍄 Boletus edulis (hongo blanco)</option>
-          <option value="boletus_pinophilus">🍄 B. pinophilus (pinícola)</option>
-          <option value="boletus_aereus">🍄 B. aereus (negro / bronce)</option>
-          <option value="boletus_reticulatus">🍄 B. reticulatus (verano)</option>
-          <option value="all">🍄 Todas las especies</option>
+      <div class="map-ctrl-species-wrap custom-select-wrap" id="species-custom-dropdown">
+        <button id="map-custom-species-btn" class="custom-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Elegir seta">
+          <span class="custom-select-icon" id="quick-selected-icon">
+            <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.8 14.5c-.8 2.8-2.2 6.5-1.5 9.2.5 1.8 2.4 2.3 4.7 2.3 2.5 0 4.2-.6 4.7-2.3.7-2.7-.7-6.4-1.5-9.2h-6.4z" fill="#f7f1e4"/><path d="M12.5 15.5c-.2 2.5-.8 5-.4 7.5m3.4-7.5c.2 2.5.8 5 .4 7.5" stroke="#d8c5aa" stroke-width="0.75" stroke-dasharray="1.2 1"/><ellipse cx="14" cy="14.8" rx="8" ry="1.6" fill="#dedaa8"/><path d="M5.5 14.5C5 9.5 8.5 5 14 5s9 4.5 8.5 9.5c-1.3.8-4 1-8.5 1s-7.2-.2-8.5-1z" fill="url(#grad-edulis)"/><path d="M5.8 14.5c1.8.7 4.8.8 8.2.8s6.4-.1 8.2-.8" stroke="#fbe4cb" stroke-width="0.9" stroke-linecap="round"/><path d="M18.8 23.5c1.8-1 3.5-.8 4.2.8-.8 1.4-2.5 1.5-4.2-.8z" fill="#d97706" opacity="0.9"/><defs><linearGradient id="grad-edulis" x1="14" y1="5" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#af6932"/><stop offset="1" stop-color="#733b16"/></linearGradient></defs></svg>
+          </span>
+          <span class="custom-select-text" id="quick-selected-text">Boletus edulis</span>
+          <span class="custom-select-arrow" aria-hidden="true">▾</span>
+        </button>
+        <div id="map-custom-species-list" class="custom-select-list" role="listbox" tabindex="-1">
+          <div class="custom-select-option active" role="option" data-value="boletus_edulis" aria-selected="true">
+            <span class="option-icon" aria-hidden="true">
+              <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.8 14.5c-.8 2.8-2.2 6.5-1.5 9.2.5 1.8 2.4 2.3 4.7 2.3 2.5 0 4.2-.6 4.7-2.3.7-2.7-.7-6.4-1.5-9.2h-6.4z" fill="#f7f1e4"/><path d="M12.5 15.5c-.2 2.5-.8 5-.4 7.5m3.4-7.5c.2 2.5.8 5 .4 7.5" stroke="#d8c5aa" stroke-width="0.75" stroke-dasharray="1.2 1"/><ellipse cx="14" cy="14.8" rx="8" ry="1.6" fill="#dedaa8"/><path d="M5.5 14.5C5 9.5 8.5 5 14 5s9 4.5 8.5 9.5c-1.3.8-4 1-8.5 1s-7.2-.2-8.5-1z" fill="url(#grad-edulis)"/><path d="M5.8 14.5c1.8.7 4.8.8 8.2.8s6.4-.1 8.2-.8" stroke="#fbe4cb" stroke-width="0.9" stroke-linecap="round"/><path d="M18.8 23.5c1.8-1 3.5-.8 4.2.8-.8 1.4-2.5 1.5-4.2-.8z" fill="#d97706" opacity="0.9"/><defs><linearGradient id="grad-edulis" x1="14" y1="5" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#af6932"/><stop offset="1" stop-color="#733b16"/></linearGradient></defs></svg>
+            </span>
+            <div class="option-text">
+              <strong>Boletus edulis</strong>
+              <small>Hongo blanco / Porcino</small>
+            </div>
+          </div>
+          <div class="custom-select-option" role="option" data-value="boletus_pinophilus" aria-selected="false">
+            <span class="option-icon" aria-hidden="true">
+              <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7.5" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.5 14.5c-.7 2.8-2 6.5-1.3 9.2.6 1.8 2.6 2.3 4.8 2.3 2.4 0 4.2-.6 4.8-2.3.7-2.7-.6-6.4-1.3-9.2h-7z" fill="#edd6c4"/><path d="M11.5 17c.5 3 2.5 5 5 4" stroke="#ab5945" stroke-width="0.9" stroke-linecap="round" opacity="0.6"/><ellipse cx="14" cy="14.8" rx="8.2" ry="1.6" fill="#dad2a3"/><path d="M5.2 14.5C4.8 9.5 8.2 4.8 14 4.8s9.2 4.7 8.8 9.7c-1.3.8-4 1-8.8 1s-7.5-.2-8.8-1z" fill="url(#grad-pinophilus)"/><path d="M7 23l4 3m-4.5-1l4.5 2" stroke="#4a633a" stroke-width="0.9" stroke-linecap="round"/><defs><linearGradient id="grad-pinophilus" x1="14" y1="4.8" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#8e3629"/><stop offset="1" stop-color="#541b14"/></linearGradient></defs></svg>
+            </span>
+            <div class="option-text">
+              <strong>B. pinophilus</strong>
+              <small>Hongo pinícola / Pino</small>
+            </div>
+          </div>
+          <div class="custom-select-option" role="option" data-value="boletus_aereus" aria-selected="false">
+            <span class="option-icon" aria-hidden="true">
+              <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7.5" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.8 14.5c-.8 2.8-2 6.5-1.4 9.2.5 1.8 2.5 2.3 4.6 2.3 2.3 0 4.1-.6 4.6-2.3.6-2.7-.6-6.4-1.4-9.2h-6.4z" fill="#ebd6bf"/><path d="M12.5 16c-.2 2.5-.5 5-.3 7m3.3-7c.2 2.5.5 5 .3 7" stroke="#b08660" stroke-width="0.75" stroke-dasharray="1.2 1"/><ellipse cx="14" cy="14.8" rx="8" ry="1.6" fill="#f0ebd9"/><path d="M5.5 14.5C5 9.5 8.5 5 14 5s9 4.5 8.5 9.5c-1.3.8-4 1-8.5 1s-7.2-.2-8.5-1z" fill="url(#grad-aereus)"/><ellipse cx="20.5" cy="24" rx="1.8" ry="2.2" fill="#7a5430"/><path d="M19.5 22c.8-.8 2-.6 2.4 0" stroke="#50331b" stroke-width="1.2" stroke-linecap="round"/><defs><linearGradient id="grad-aereus" x1="14" y1="5" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#4a3525"/><stop offset="0.6" stop-color="#2d1e14"/><stop offset="1" stop-color="#1e130c"/></linearGradient></defs></svg>
+            </span>
+            <div class="option-text">
+              <strong>B. aereus</strong>
+              <small>Hongo negro / Bronceado</small>
+            </div>
+          </div>
+          <div class="custom-select-option" role="option" data-value="boletus_reticulatus" aria-selected="false">
+            <span class="option-icon" aria-hidden="true">
+              <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.8 14.5c-.8 2.8-2.2 6.5-1.5 9.2.5 1.8 2.4 2.3 4.7 2.3 2.5 0 4.2-.6 4.7-2.3.7-2.7-.7-6.4-1.5-9.2h-6.4z" fill="#f2e4d0"/><path d="M11 16.5l6 5m-6 0l6-5m-5 2.5l4 3.5m-4 0l4-3.5" stroke="#bc946e" stroke-width="0.75" opacity="0.7"/><ellipse cx="14" cy="14.8" rx="8" ry="1.6" fill="#dedaaa"/><path d="M5.5 14.5C5 9.5 8.5 5 14 5s9 4.5 8.5 9.5c-1.3.8-4 1-8.5 1s-7.2-.2-8.5-1z" fill="url(#grad-reticulatus)"/><path d="M11 8c1 1.5 2 2 3 1.5m-5 3c2-.5 3 0 4 .5" stroke="#9e6e44" stroke-width="0.7" stroke-linecap="round" opacity="0.6"/><defs><linearGradient id="grad-reticulatus" x1="14" y1="5" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#ba8251"/><stop offset="1" stop-color="#8a5327"/></linearGradient></defs></svg>
+            </span>
+            <div class="option-text">
+              <strong>B. reticulatus</strong>
+              <small>Boleto de verano</small>
+            </div>
+          </div>
+          <div class="custom-select-option" role="option" data-value="all" aria-selected="false">
+            <span class="option-icon" aria-hidden="true">
+              <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="9" ry="2" fill="#71685b" opacity="0.2"/><path d="M8 18c-.4 2-1 4-.6 5.5.4 1 1.5 1.3 2.8 1.3 1.4 0 2.4-.3 2.8-1.3.4-1.5-.2-3.5-.6-5.5H8z" fill="#f4ebd9"/><path d="M5 18c-.3-3 1.8-5.5 5-5.5s5.3 2.5 5 5.5c-.8.5-2.2.6-5 .6s-4.2-.1-5-.6z" fill="#9e5e2e"/><path d="M15.5 16c-.5 2.5-1.5 5.5-.9 7.5.4 1.3 1.8 1.6 3.4 1.6 1.8 0 3-.3 3.4-1.6.6-2-.4-5-.9-7.5h-5z" fill="#ebd6bf"/><path d="M12 16c-.4-4 2.5-7 7-7s7.4 3 7 7c-1 .6-3 .8-7 .8s-6-.2-7-.8z" fill="#692b1b"/><path d="M8 22c2.5-.5 5 1 5.5 2.5-2 1.5-4.5 1-5.5-2.5z" fill="#d97706"/><path d="M18 23c2 0 3.5 1.5 4 2.5-1.5 1-3.5.5-4-2.5z" fill="#6e8053"/></svg>
+            </span>
+            <div class="option-text">
+              <strong>Todas las especies</strong>
+              <small>Comparar en conjunto</small>
+            </div>
+          </div>
+        </div>
+        <select id="map-quick-species" class="visually-hidden" aria-label="Elegir seta">
+          <option value="boletus_edulis">Boletus edulis (hongo blanco)</option>
+          <option value="boletus_pinophilus">B. pinophilus (pinícola)</option>
+          <option value="boletus_aereus">B. aereus (negro / bronce)</option>
+          <option value="boletus_reticulatus">B. reticulatus (verano)</option>
+          <option value="all">Todas las especies</option>
         </select>
       </div>
       <button id="map-legend-toggle" class="map-legend-toggle" type="button" aria-label="Minimizar o expandir controles" title="Minimizar / expandir">▾</button>
@@ -1079,10 +1418,34 @@
         <button id="select-all-species" class="species-selection-all" type="button">Seleccionar todas</button>
       </div>
       <div id="species-picker" class="species-picker">
-        <label class="species-option"><input type="checkbox" value="boletus_edulis" checked/>Boletus edulis</label>
-        <label class="species-option"><input type="checkbox" value="boletus_pinophilus"/>Boletus pinophilus</label>
-        <label class="species-option"><input type="checkbox" value="boletus_aereus"/>Boletus aereus</label>
-        <label class="species-option"><input type="checkbox" value="boletus_reticulatus"/>Boletus reticulatus</label>
+        <label class="species-option">
+          <input type="checkbox" value="boletus_edulis" checked/>
+          <span class="option-icon-wrap" aria-hidden="true">
+            <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.8 14.5c-.8 2.8-2.2 6.5-1.5 9.2.5 1.8 2.4 2.3 4.7 2.3 2.5 0 4.2-.6 4.7-2.3.7-2.7-.7-6.4-1.5-9.2h-6.4z" fill="#f7f1e4"/><path d="M12.5 15.5c-.2 2.5-.8 5-.4 7.5m3.4-7.5c.2 2.5.8 5 .4 7.5" stroke="#d8c5aa" stroke-width="0.75" stroke-dasharray="1.2 1"/><ellipse cx="14" cy="14.8" rx="8" ry="1.6" fill="#dedaa8"/><path d="M5.5 14.5C5 9.5 8.5 5 14 5s9 4.5 8.5 9.5c-1.3.8-4 1-8.5 1s-7.2-.2-8.5-1z" fill="url(#grad-edulis-side)"/><path d="M5.8 14.5c1.8.7 4.8.8 8.2.8s6.4-.1 8.2-.8" stroke="#fbe4cb" stroke-width="0.9" stroke-linecap="round"/><path d="M18.8 23.5c1.8-1 3.5-.8 4.2.8-.8 1.4-2.5 1.5-4.2-.8z" fill="#d97706" opacity="0.9"/><defs><linearGradient id="grad-edulis-side" x1="14" y1="5" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#af6932"/><stop offset="1" stop-color="#733b16"/></linearGradient></defs></svg>
+          </span>
+          <span>Boletus edulis</span>
+        </label>
+        <label class="species-option">
+          <input type="checkbox" value="boletus_pinophilus"/>
+          <span class="option-icon-wrap" aria-hidden="true">
+            <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7.5" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.5 14.5c-.7 2.8-2 6.5-1.3 9.2.6 1.8 2.6 2.3 4.8 2.3 2.4 0 4.2-.6 4.8-2.3.7-2.7-.6-6.4-1.3-9.2h-7z" fill="#edd6c4"/><path d="M11.5 17c.5 3 2.5 5 5 4" stroke="#ab5945" stroke-width="0.9" stroke-linecap="round" opacity="0.6"/><ellipse cx="14" cy="14.8" rx="8.2" ry="1.6" fill="#dad2a3"/><path d="M5.2 14.5C4.8 9.5 8.2 4.8 14 4.8s9.2 4.7 8.8 9.7c-1.3.8-4 1-8.8 1s-7.5-.2-8.8-1z" fill="url(#grad-pinophilus-side)"/><path d="M7 23l4 3m-4.5-1l4.5 2" stroke="#4a633a" stroke-width="0.9" stroke-linecap="round"/><defs><linearGradient id="grad-pinophilus-side" x1="14" y1="4.8" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#8e3629"/><stop offset="1" stop-color="#541b14"/></linearGradient></defs></svg>
+          </span>
+          <span>Boletus pinophilus</span>
+        </label>
+        <label class="species-option">
+          <input type="checkbox" value="boletus_aereus"/>
+          <span class="option-icon-wrap" aria-hidden="true">
+            <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7.5" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.8 14.5c-.8 2.8-2 6.5-1.4 9.2.5 1.8 2.5 2.3 4.6 2.3 2.3 0 4.1-.6 4.6-2.3.6-2.7-.6-6.4-1.4-9.2h-6.4z" fill="#ebd6bf"/><path d="M12.5 16c-.2 2.5-.5 5-.3 7m3.3-7c.2 2.5.5 5 .3 7" stroke="#b08660" stroke-width="0.75" stroke-dasharray="1.2 1"/><ellipse cx="14" cy="14.8" rx="8" ry="1.6" fill="#f0ebd9"/><path d="M5.5 14.5C5 9.5 8.5 5 14 5s9 4.5 8.5 9.5c-1.3.8-4 1-8.5 1s-7.2-.2-8.5-1z" fill="url(#grad-aereus-side)"/><ellipse cx="20.5" cy="24" rx="1.8" ry="2.2" fill="#7a5430"/><path d="M19.5 22c.8-.8 2-.6 2.4 0" stroke="#50331b" stroke-width="1.2" stroke-linecap="round"/><defs><linearGradient id="grad-aereus-side" x1="14" y1="5" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#4a3525"/><stop offset="0.6" stop-color="#2d1e14"/><stop offset="1" stop-color="#1e130c"/></linearGradient></defs></svg>
+          </span>
+          <span>Boletus aereus</span>
+        </label>
+        <label class="species-option">
+          <input type="checkbox" value="boletus_reticulatus"/>
+          <span class="option-icon-wrap" aria-hidden="true">
+            <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.8 14.5c-.8 2.8-2.2 6.5-1.5 9.2.5 1.8 2.4 2.3 4.7 2.3 2.5 0 4.2-.6 4.7-2.3.7-2.7-.7-6.4-1.5-9.2h-6.4z" fill="#f2e4d0"/><path d="M11 16.5l6 5m-6 0l6-5m-5 2.5l4 3.5m-4 0l4-3.5" stroke="#bc946e" stroke-width="0.75" opacity="0.7"/><ellipse cx="14" cy="14.8" rx="8" ry="1.6" fill="#dedaaa"/><path d="M5.5 14.5C5 9.5 8.5 5 14 5s9 4.5 8.5 9.5c-1.3.8-4 1-8.5 1s-7.2-.2-8.5-1z" fill="url(#grad-reticulatus-side)"/><path d="M11 8c1 1.5 2 2 3 1.5m-5 3c2-.5 3 0 4 .5" stroke="#9e6e44" stroke-width="0.7" stroke-linecap="round" opacity="0.6"/><defs><linearGradient id="grad-reticulatus-side" x1="14" y1="5" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#ba8251"/><stop offset="1" stop-color="#8a5327"/></linearGradient></defs></svg>
+          </span>
+          <span>Boletus reticulatus</span>
+        </label>
       </div>
       <p class="species-comparison-note">La época cambia según la zona y la altitud; consulta las guías. Las mínimas recientes sí reducen el índice meteorológico, pero el mes aún no se usa como factor numérico.</p>
       <details class="menu-section">
@@ -1173,13 +1536,39 @@
     <!-- Cell card -->
     <div id="cell-card" class="cell-card" hidden>
       <div class="cell-head">
-        <h3>
-          <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
-          Celda H3 seleccionada
-        </h3>
+        <div class="cell-head-title">
+          <div class="cell-zone-badge">
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="c-zone-title">Celda seleccionada</span>
+          </div>
+          <small id="c-zone-subtitle" class="cell-zone-sub">Identificando zona y municipio…</small>
+        </div>
         <span class="score-badge b-ok" id="score-pill">—</span>
       </div>
+      <div class="cell-nav-box">
+        <div class="nav-box-header">
+          <span class="nav-box-title">
+            <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1 .4-1 1v7c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+            Acceso y ruta por carretera
+          </span>
+          <span id="c-road-distance" class="road-distance-badge">Calculando distancia…</span>
+        </div>
+        <div class="nav-box-actions">
+          <a id="btn-google-maps" class="google-maps-link" href="#" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            <span>Cómo llegar en Google Maps</span>
+          </a>
+          <button id="btn-calc-route" class="calc-route-btn" type="button" title="Calcular distancia exacta desde tu ubicación">
+            <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+            <span>Mi ubicación</span>
+          </button>
+        </div>
+      </div>
       <div class="info-grid">
+        <div class="info-item info-wide">
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Zona y municipio: <button class="info-help-btn" type="button" aria-label="Información sobre la zona" data-title="Zona y municipio" data-info="Localidad de referencia y término municipal más cercano a las coordenadas de la celda.">i</button></span>
+          <span id="c-location">—</span>
+        </div>
         <div class="info-item">
           <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 19 12 15 12 20 19 4 19 9 12 5 12 12 2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Masa forestal: <button class="info-help-btn" type="button" aria-label="Información sobre masa forestal" data-title="Masa forestal" data-info="Los Boletus forman micorrizas obligadas asociándose a las raíces de árboles específicos (pinos, robles, hayas, encinas o castaños). Sin la especie arbórea compatible, el hongo no puede asociarse ni fructificar.">i</button></span>
           <span id="c-tree">Haz clic en un hexágono</span>
@@ -1189,7 +1578,7 @@
           <span id="c-weather-score">—</span>
         </div>
       </div>
-      <details class="menu-section cell-extra">
+      <details class="menu-section cell-extra" open>
         <summary>Más datos del lugar</summary>
         <div class="info-grid">
         <div class="info-item">
@@ -1285,26 +1674,214 @@
   // CATÁLOGO DE ZONAS MICOLÓGICAS CONOCIDAS
   // ================================================================
   const KNOWN_SPOTS = [
+    // Soria - Pinares de Urbión, Sierra de Cabrejas y Valle del Razón
     {n:"Vinuesa (Pinares de Urbión, Soria)", lat:41.9118, lon:-2.7631},
-    {n:"Covaleda (Soria)", lat:41.9344, lon:-2.8833},
-    {n:"Navaleno (Soria)", lat:41.8378, lon:-3.0042},
+    {n:"Covaleda (Pinares de Urbión, Soria)", lat:41.9344, lon:-2.8833},
+    {n:"Navaleno (Pinares de Soria)", lat:41.8378, lon:-3.0042},
     {n:"San Leonardo de Yagüe (Soria)", lat:41.8311, lon:-3.0683},
-    {n:"Salduero (Soria)", lat:41.9602, lon:-2.8148},
-    {n:"Duruelo de la Sierra (Soria)", lat:41.9817, lon:-2.8281},
-    {n:"Quintanar de la Sierra (Burgos)", lat:41.9756, lon:-3.0255},
+    {n:"Salduero (Pinares de Urbión, Soria)", lat:41.9602, lon:-2.8148},
+    {n:"Duruelo de la Sierra (Pinares, Soria)", lat:41.9817, lon:-2.8281},
+    {n:"Molinos de Duero (Soria)", lat:41.8842, lon:-2.7881},
+    {n:"Abejar (Puerta de Pinares, Soria)", lat:41.8083, lon:-2.7831},
+    {n:"Cabrejas del Pinar (Soria)", lat:41.7994, lon:-2.8514},
+    {n:"Talveila (Soria)", lat:41.7833, lon:-2.9667},
+    {n:"Muriel Viejo (Soria)", lat:41.7847, lon:-2.9153},
+    {n:"Valonsadero (Monte Valonsadero, Soria)", lat:41.7950, lon:-2.5310},
+    {n:"Almarza (Sierra de Cebollera, Soria)", lat:41.9481, lon:-2.4703},
+    {n:"El Royo (Valle del Razón, Soria)", lat:41.9083, lon:-2.6481},
+    {n:"Sotillo del Rincón (Valle del Razón, Soria)", lat:41.9333, lon:-2.6281},
+    {n:"Valdeavellano de Tera (Soria)", lat:41.9411, lon:-2.5761},
+    {n:"Montenegro de Cameros (Paso de Santa Inés, Soria)", lat:42.0889, lon:-2.7528},
+    {n:"Almazán (Pinares del Duero, Soria)", lat:41.4861, lon:-2.5322},
+    {n:"El Burgo de Osma (Soria)", lat:41.5861, lon:-3.0722},
+    {n:"San Esteban de Gormaz (Soria)", lat:41.5731, lon:-3.2044},
+    {n:"Berlanga de Duero (Soria)", lat:41.4653, lon:-2.8550},
+    {n:"Tardelcuende (Pinares de Tardelcuende, Soria)", lat:41.5931, lon:-2.5931},
+    {n:"Quintana Redonda (Soria)", lat:41.6372, lon:-2.6142},
+    {n:"Ólvega (Faldas del Moncayo, Soria)", lat:41.7781, lon:-1.9850},
+    {n:"Ágreda (Sierra del Moncayo, Soria)", lat:41.8542, lon:-1.9192},
+    {n:"Santa María de Huerta (Valle del Jalón, Soria)", lat:41.2611, lon:-2.1761},
+    {n:"Arcos de Jalón (Soria)", lat:41.2161, lon:-2.2742},
+    {n:"Medinaceli (Soria)", lat:41.1711, lon:-2.4344},
+
+    // Madrid - Sierra de Guadarrama, Valle del Lozoya y Sierra del Rincón
     {n:"Rascafría — Valle del Lozoya (Madrid)", lat:40.9064, lon:-3.8797},
-    {n:"Cercedilla (Guadarrama, Madrid)", lat:40.7417, lon:-4.0558},
-    {n:"Navacerrada (Madrid)", lat:40.7289, lon:-4.0161},
-    {n:"El Paular (Madrid)", lat:40.9014, lon:-3.8977},
+    {n:"El Paular (Valle del Lozoya, Madrid)", lat:40.9014, lon:-3.8977},
+    {n:"Alameda del Valle (Valle del Lozoya, Madrid)", lat:40.9231, lon:-3.8431},
+    {n:"Pinilla del Valle (Valle del Lozoya, Madrid)", lat:40.9292, lon:-3.8183},
+    {n:"Lozoya (Sierra de Guadarrama, Madrid)", lat:40.9542, lon:-3.7958},
+    {n:"Canencia (Puerto de Canencia, Madrid)", lat:40.9122, lon:-3.7622},
+    {n:"Garganta de los Montes (Madrid)", lat:40.9853, lon:-3.7381},
+    {n:"Buitrago del Lozoya (Madrid)", lat:40.9931, lon:-3.6372},
+    {n:"Somosierra (Puerto de Somosierra, Madrid)", lat:41.1333, lon:-3.5822},
+    {n:"Montejo de la Sierra (Hayedo de Montejo, Madrid)", lat:41.0592, lon:-3.5303},
+    {n:"La Hiruela (Sierra del Rincón, Madrid)", lat:41.0781, lon:-3.5250},
+    {n:"Puebla de la Sierra (Sierra del Rincón, Madrid)", lat:40.9903, lon:-3.4431},
+    {n:"Cercedilla (Sierra de Guadarrama, Madrid)", lat:40.7417, lon:-4.0558},
+    {n:"Navacerrada (Sierra de Guadarrama, Madrid)", lat:40.7289, lon:-4.0161},
+    {n:"Puerto de Navacerrada (Madrid/Segovia)", lat:40.7889, lon:-4.0042},
+    {n:"Puerto de Cotos (Sierra de Guadarrama, Madrid)", lat:40.8250, lon:-3.9622},
+    {n:"Los Molinos (Guadarrama, Madrid)", lat:40.7142, lon:-4.0744},
+    {n:"Guadarrama (Madrid)", lat:40.6722, lon:-4.0889},
+    {n:"San Lorenzo de El Escorial (Monte Abantos, Madrid)", lat:40.5922, lon:-4.1481},
+    {n:"Santa María de la Alameda (Pinar de Peguerinos, Madrid)", lat:40.5981, lon:-4.2611},
+    {n:"Robledo de Chavela (Madrid)", lat:40.5011, lon:-4.2381},
+    {n:"Manzanares el Real (La Pedriza, Madrid)", lat:40.7272, lon:-3.8644},
+    {n:"Miraflores de la Sierra (Puerto de la Morcuera, Madrid)", lat:40.8122, lon:-3.7672},
+    {n:"Bustarviejo (Madrid)", lat:40.8581, lon:-3.7081},
+    {n:"Soto del Real (Madrid)", lat:40.7531, lon:-3.7842},
+
+    // Segovia - Montes de Valsaín, Riaza, Ayllón y Pinares
     {n:"Valsaín (Montes de Valsaín, Segovia)", lat:40.8794, lon:-4.0336},
     {n:"La Granja de San Ildefonso (Segovia)", lat:40.8933, lon:-4.0097},
-    {n:"Riaza (Segovia)", lat:41.2797, lon:-3.4808},
-    {n:"El Espinar (Segovia)", lat:40.7189, lon:-4.2464},
-    {n:"Cantalojas (Hayedo Tejera Negra, Guadalajara)", lat:41.2344, lon:-3.2458},
-    {n:"Majaelrayo (Sierra Norte, Guadalajara)", lat:41.1133, lon:-3.3039},
-    {n:"Sigüenza (Guadalajara)", lat:41.0694, lon:-2.6419},
-    {n:"Atienza (Guadalajara)", lat:41.2047, lon:-2.8708},
+    {n:"El Espinar (Montes de San Rafael, Segovia)", lat:40.7189, lon:-4.2464},
+    {n:"San Rafael (Pinares de Guadarrama, Segovia)", lat:40.7131, lon:-4.1911},
+    {n:"Navas de Riofrío (Bosque de Riofrío, Segovia)", lat:40.8711, lon:-4.1372},
+    {n:"Palazuelos de Eresma (Segovia)", lat:40.9292, lon:-4.0583},
+    {n:"Collado Hermoso (Segovia)", lat:41.0392, lon:-3.9181},
+    {n:"Sotosalbos (Segovia)", lat:41.0342, lon:-3.9431},
+    {n:"Navafría (Pinar y Chorro de Navafría, Segovia)", lat:41.0522, lon:-3.8222},
+    {n:"Pedraza (Sierra de Guadarrama, Segovia)", lat:41.1311, lon:-3.8111},
+    {n:"Prádena (Acebal de Prádena, Segovia)", lat:41.1392, lon:-3.6892},
+    {n:"Casla (Segovia)", lat:41.1642, lon:-3.6572},
+    {n:"Arcones (Segovia)", lat:41.1181, lon:-3.7222},
+    {n:"Santo Tomé del Puerto (Segovia)", lat:41.1942, lon:-3.6153},
+    {n:"Cerezo de Arriba (La Pinilla, Segovia)", lat:41.2403, lon:-3.5550},
+    {n:"Riaza (Hayedo de la Pedrosa, Segovia)", lat:41.2797, lon:-3.4808},
+    {n:"Riofrío de Riaza (Hayedo de la Pedrosa, Segovia)", lat:41.2481, lon:-3.4511},
+    {n:"Ayllón (Sierra de Ayllón, Segovia)", lat:41.4194, lon:-3.3761},
+    {n:"Sepúlveda (Hoces del Río Duratón, Segovia)", lat:41.2972, lon:-3.7492},
+    {n:"Cantalejo (Tierra de Pinares, Segovia)", lat:41.2583, lon:-3.9272},
+
+    // Guadalajara - Sierra Norte, Tejera Negra y Alto Tajo
+    {n:"Cantalojas (Hayedo de Tejera Negra, Guadalajara)", lat:41.2344, lon:-3.2458},
+    {n:"Majaelrayo (Sierra de Ayllón, Guadalajara)", lat:41.1133, lon:-3.3039},
+    {n:"Campillo de Ranas (Pueblos Negros, Guadalajara)", lat:41.0853, lon:-3.3150},
+    {n:"Valverde de los Arroyos (Pico Ocejón, Guadalajara)", lat:41.1292, lon:-3.2403},
+    {n:"Galve de Sorbe (Sierra Pela, Guadalajara)", lat:41.2231, lon:-3.1811},
+    {n:"Condemios de Arriba (Pinar de Condemios, Guadalajara)", lat:41.2022, lon:-3.1250},
+    {n:"Campisábalos (Sierra de Pela, Guadalajara)", lat:41.2672, lon:-3.1461},
+    {n:"Tamajón (Sierra Norte, Guadalajara)", lat:41.0022, lon:-3.2492},
+    {n:"Cogolludo (Guadalajara)", lat:40.9481, lon:-3.0881},
+    {n:"Hiendelaencina (Alto Rey, Guadalajara)", lat:41.0842, lon:-3.0031},
+    {n:"Atienza (Serranía de Guadalajara)", lat:41.2047, lon:-2.8708},
+    {n:"Sigüenza (Pinar de Sigüenza, Guadalajara)", lat:41.0694, lon:-2.6419},
+    {n:"Pelegrina (Barranco del Río Dulce, Guadalajara)", lat:41.0131, lon:-2.6392},
+    {n:"Molina de Aragón (Guadalajara)", lat:40.8431, lon:-1.8842},
+    {n:"Checa (Montes Universales, Guadalajara)", lat:40.5853, lon:-1.7911},
+    {n:"Orea (Montes Universales, Guadalajara)", lat:40.5581, lon:-1.7281},
+    {n:"Zaorejas (Parque Natural Alto Tajo, Guadalajara)", lat:40.7603, lon:-2.2031},
+    {n:"Poveda de la Sierra (Alto Tajo, Guadalajara)", lat:40.6431, lon:-2.0622},
+
+    // Burgos - Comarca de Pinares y Lagunas de Neila
+    {n:"Quintanar de la Sierra (Pinares de Burgos)", lat:41.9756, lon:-3.0255},
+    {n:"Neila (Parque Natural Lagunas de Neila, Burgos)", lat:42.0592, lon:-2.9961},
+    {n:"Regumiel de la Sierra (Burgos)", lat:41.9542, lon:-2.9881},
+    {n:"Canicosa de la Sierra (Burgos)", lat:41.9322, lon:-3.0422},
+    {n:"Palacios de la Sierra (Burgos)", lat:41.9661, lon:-3.1272}
   ];
+
+  function getDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  function findNearestZone(lat, lon) {
+    const numLat = Number(lat);
+    const numLon = Number(lon);
+    if (!Number.isFinite(numLat) || !Number.isFinite(numLon)) return null;
+    let best = null;
+    let minD = Infinity;
+    for (const spot of KNOWN_SPOTS) {
+      const d = getDistanceKm(numLat, numLon, spot.lat, spot.lon);
+      if (d < minD) {
+        minD = d;
+        best = spot;
+      }
+    }
+    return best ? { spot: best, distanceKm: minD } : null;
+  }
+
+  const geoCache = new Map();
+  async function reverseGeocodeCell(lat, lon, callback) {
+    const numLat = Number(lat);
+    const numLon = Number(lon);
+    if (!Number.isFinite(numLat) || !Number.isFinite(numLon)) return;
+    const cacheKey = `${numLat.toFixed(3)},${numLon.toFixed(3)}`;
+    if (geoCache.has(cacheKey)) {
+      callback(geoCache.get(cacheKey));
+      return;
+    }
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${numLat}&lon=${numLon}&format=json&zoom=14`, {
+        headers: { 'User-Agent': 'MapaSetero/1.0' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const addr = data.address || {};
+        const place = addr.village || addr.town || addr.municipality || addr.city || addr.hamlet || addr.county;
+        const prov = addr.province || addr.state;
+        const label = place ? (prov ? `${place} (${prov})` : place) : null;
+        if (label) {
+          geoCache.set(cacheKey, label);
+          callback(label);
+        }
+      }
+    } catch {}
+  }
+
+  let userCoords = null;
+  function getUserLocation(callback) {
+    if (userCoords) { callback(userCoords); return; }
+    if (!navigator.geolocation) { callback(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        userCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        callback(userCoords);
+      },
+      () => callback(null),
+      { timeout: 7000, enableHighAccuracy: false }
+    );
+  }
+
+  async function updateRouteDistanceForCell(destLat, destLon) {
+    const badge = document.getElementById('c-road-distance');
+    if (!badge) return;
+
+    if (!userCoords) {
+      // Intento no bloqueante de leer ubicación si ya fue concedida
+      badge.textContent = 'Pulsa "Mi ubicación" para ruta';
+      return;
+    }
+
+    badge.textContent = 'Calculando por carretera…';
+    try {
+      const url = `https://router.project-osrm.org/route/v1/driving/${userCoords.lon},${userCoords.lat};${destLon},${destLat}?overview=false`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.routes && data.routes[0]) {
+          const distKm = (data.routes[0].distance / 1000).toFixed(1);
+          const durMin = Math.round(data.routes[0].duration / 60);
+          const hours = Math.floor(durMin / 60);
+          const mins = durMin % 60;
+          const timeStr = hours > 0 ? `${hours} h ${mins} min` : `${mins} min`;
+          badge.textContent = `🚗 ${distKm} km · ${timeStr} en coche`;
+          return;
+        }
+      }
+    } catch {}
+
+    // Fallback en línea recta
+    const crowDist = getDistanceKm(userCoords.lat, userCoords.lon, destLat, destLon).toFixed(1);
+    badge.textContent = `~${crowDist} km en línea recta`;
+  }
 
   const PROV_BOUNDS = {
     soria:       {center:[-2.78, 41.92], zoom: 9.2},
@@ -1570,10 +2147,70 @@
     minZoom: 5
   });
   map.addControl(new maplibregl.NavigationControl({showCompass:true}), 'top-right');
+  let isSatelliteMode = false;
   map.on('load', () => {
     baseMapLoaded = true;
     document.getElementById('map-loading').hidden = true;
+
+    // Capa de ortofoto aérea / satélite ESRI World Imagery
+    map.addSource('satellite-tiles', {
+      type: 'raster',
+      tiles: [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+      ],
+      tileSize: 256,
+      attribution: 'Tiles &copy; Esri World Imagery'
+    });
+
+    map.addLayer({
+      id: 'satellite-layer',
+      type: 'raster',
+      source: 'satellite-tiles',
+      layout: { visibility: 'none' }
+    });
   });
+
+  function setSatelliteMode(enable) {
+    isSatelliteMode = enable;
+    if (map.getLayer('satellite-layer')) {
+      map.setLayoutProperty('satellite-layer', 'visibility', enable ? 'visible' : 'none');
+    }
+    const btn = document.getElementById('satellite-toggle');
+    if (btn) {
+      btn.classList.toggle('active', enable);
+      btn.setAttribute('aria-pressed', enable ? 'true' : 'false');
+      const label = document.getElementById('satellite-toggle-text');
+      if (label) label.textContent = enable ? 'Modo mapa' : 'Satélite';
+    }
+    if (map.getLayer('h3-fill')) {
+      map.setPaintProperty('h3-fill', 'fill-opacity', enable ? 0.65 : ['/', ['get','_a'], 255]);
+    }
+  }
+
+  const satBtn = document.getElementById('satellite-toggle');
+  if (satBtn) {
+    satBtn.addEventListener('click', () => setSatelliteMode(!isSatelliteMode));
+  }
+
+  // Botón "Mi ubicación" para calcular ruta
+  const btnCalcRoute = document.getElementById('btn-calc-route');
+  if (btnCalcRoute) {
+    btnCalcRoute.addEventListener('click', () => {
+      btnCalcRoute.disabled = true;
+      btnCalcRoute.querySelector('span').textContent = 'Buscando GPS…';
+      getUserLocation(coords => {
+        btnCalcRoute.disabled = false;
+        btnCalcRoute.querySelector('span').textContent = 'Mi ubicación';
+        if (coords && selectedCellH && rawData) {
+          const cell = rawData.cells.find(c => c.h === selectedCellH);
+          if (cell) updateRouteDistanceForCell(cell.lat, cell.lon);
+        } else if (!coords) {
+          alert('No se pudo acceder a tu ubicación. Comprueba los permisos de geolocalización en tu navegador.');
+        }
+      });
+    });
+  }
+
   map.on('error', event => {
     if (baseMapLoaded) return;
     const overlay = document.getElementById('map-loading');
@@ -1954,6 +2591,7 @@
     document.getElementById('loading').classList.remove('active');
   }
 
+  let cellPopup = null;
   function selectCell(cell) {
     selectedCellH = cell.h;
     showSelectedSpeciesAtCell(cell);
@@ -1962,6 +2600,24 @@
     requestAnimationFrame(() => {
       document.getElementById('cell-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
+
+    if (cell.lat && cell.lon) {
+      if (cellPopup) cellPopup.remove();
+      const zone = findNearestZone(Number(cell.lat), Number(cell.lon));
+      const zoneTitle = zone ? zone.spot.n.split('(')[0].trim() : 'Zona forestal';
+      const zoneDist = zone ? `a ${formatNumber(zone.distanceKm)} km` : '';
+      const displayScore = currentLayer === 'search'
+        ? Number(cell.cs)
+        : currentLayer === 'weather' ? Number(cell.ws)
+          : currentLayer === 'precip' ? Number(cell.p14)
+            : Number(cell.hs);
+      const scoreLabel = currentLayer === 'precip' ? `${formatNumber(displayScore)} mm` : `${formatNumber(displayScore)}/100`;
+
+      cellPopup = new maplibregl.Popup({ offset: 12, closeButton: false, className: 'map-cell-popup' })
+        .setLngLat([Number(cell.lon), Number(cell.lat)])
+        .setHTML(`<div style="font-size:12px; font-weight:700; color:#493b2d; line-height:1.35; padding:2px;">📍 ${zoneTitle}<div style="font-size:10px; font-weight:500; color:#71685b;">${zoneDist} · Índice: <strong>${scoreLabel}</strong></div></div>`)
+        .addTo(map);
+    }
   }
 
   function formatNumber(value) {
@@ -2074,10 +2730,14 @@
       ? ph95 < phRange[0] || ph05 > phRange[1]
       : cell.ph < phRange[0] || cell.ph > phRange[1];
     const phStatus = phWhollyInside ? 'good' : phWhollyOutside ? 'bad' : 'uncertain';
-    const phText = `Estimado ${cell.ph}${phHasInterval ? ` (rango ${ph05}–${ph95})` : ''}; referencia ${phRange[0]}–${phRange[1]}.`;
     const hasTexture = ['sand', 'silt', 'clay'].every(key =>
       cell[key] !== undefined && cell[key] !== null && Number.isFinite(Number(cell[key]))
     );
+    const phMaxPts = hasTexture ? 28 : 35;
+    const phScoreText = Number.isFinite(cell.soil_ph_score)
+      ? ` Aporta ${formatNumber(cell.soil_ph_score)}/${phMaxPts} puntos edáficos.`
+      : '';
+    const phText = `Estimado ${cell.ph}${phHasInterval ? ` (rango ${ph05}–${ph95})` : ''}; referencia ${phRange[0]}–${phRange[1]}.${phScoreText}`;
     const textureScore = cell.soil_texture_score;
     const textureMaxPoints = dataset.soil_texture_metadata &&
       dataset.soil_texture_metadata.scoring
@@ -2104,7 +2764,10 @@
           : ` Mínima ${formatNumber(minTemp)} °C; el umbral de esta especie es ${formatNumber(minTempLimit)} °C.`
         : ` Mínima ${formatNumber(minTemp)} °C; el índice meteorológico ya aplica un umbral térmico para esta especie.`
       : '';
-    const weatherText = `Índice orientativo: ${formatNumber(cell.ws)}/100. Lluvia en 14 días: ${formatNumber(cell.p14)} mm; humedad estimada: ${formatNumber(cell.moist)}%; temperatura media: ${formatNumber(cell.t)} °C.${frostText}${distanceNote}`;
+    const metScoreText = Number.isFinite(cell.met)
+      ? ` (${formatNumber(cell.met)}/45 puntos meteorológicos)`
+      : '';
+    const weatherText = `Índice orientativo: ${formatNumber(cell.ws)}/100${metScoreText}. Lluvia en 14 días: ${formatNumber(cell.p14)} mm; humedad estimada: ${formatNumber(cell.moist)}%; temperatura media: ${formatNumber(cell.t)} °C.${frostText}${distanceNote}`;
 
     return [
       { label: 'Índice de hábitat', status: habitatIndexStatus, text: habitatIndexText },
@@ -2112,7 +2775,7 @@
       {
         label: 'Altitud',
         status: altitudeOk ? 'good' : 'bad',
-        text: `${cell.elev} m; referencia ${altitudeRange[0]}–${altitudeRange[1]} m.`
+        text: `${cell.elev} m; referencia ${altitudeRange[0]}–${altitudeRange[1]} m.${Number.isFinite(cell.topo) ? ` Aporta ${formatNumber(cell.topo)}/20 puntos topográficos.` : ''}`
       },
       { label: 'pH estimado', status: phStatus, text: phText },
       { label: 'Textura del suelo', status: 'uncertain', text: textureText },
@@ -2191,27 +2854,76 @@
         : `${currentLayer === 'weather' ? 'Tiempo' : 'Hábitat'} ${formatNumber(displayScore)}/100`;
     pill.className = 'score-badge ' + (displayScore >= 50 ? 'b-ok' : displayScore > 0 ? 'b-mod' : 'b-no');
 
+    // Ubicación y zona de la celda
+    const nearestZone = findNearestZone(p.lat, p.lon);
+    const zoneName = nearestZone ? nearestZone.spot.n : 'Zona forestal';
+    const zoneDist = nearestZone ? nearestZone.distanceKm : null;
+    const distText = zoneDist !== null ? `a ${formatNumber(zoneDist)} km` : '';
+    
+    const zoneTitleEl = document.getElementById('c-zone-title');
+    if (zoneTitleEl) zoneTitleEl.textContent = zoneName.split('(')[0].trim();
+    const zoneSubEl = document.getElementById('c-zone-subtitle');
+    if (zoneSubEl) {
+      zoneSubEl.textContent = zoneDist !== null
+        ? `A ${formatNumber(zoneDist)} km de ${zoneName}`
+        : zoneName;
+    }
+    const locEl = document.getElementById('c-location');
+    if (locEl) {
+      locEl.textContent = `${zoneName}${zoneDist !== null ? ` · a ${formatNumber(zoneDist)} km` : ''} · Coord: ${formatNumber(p.lat)}, ${formatNumber(p.lon)}`;
+    }
+
+    reverseGeocodeCell(p.lat, p.lon, geoLabel => {
+      if (selectedCellH === p.h) {
+        if (zoneSubEl) zoneSubEl.textContent = `${geoLabel} · ${distText} de ${zoneName.split('(')[0].trim()}`;
+        if (locEl) locEl.textContent = `${geoLabel} · ${zoneName} (${distText}) · Coord: ${formatNumber(p.lat)}, ${formatNumber(p.lon)}`;
+      }
+    });
+
+    // Enlace a Google Maps y cálculo de distancia
+    const btnGmaps = document.getElementById('btn-google-maps');
+    if (btnGmaps) {
+      btnGmaps.href = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}`;
+    }
+    updateRouteDistanceForCell(p.lat, p.lon);
+
     const hostNote = p.host === 'unknown' ? ' (hospedador incierto)' : '';
     document.getElementById('c-tree').textContent  = forestNameEs(p.tree) + hostNote;
     document.getElementById('c-reason').textContent = currentLayer === 'search'
       ? 'Combina el hábitat potencial del bosque y las condiciones meteorológicas recientes.'
       : 'Hábitat potencial y condiciones meteorológicas recientes evaluados por separado.';
-    document.getElementById('c-ph').textContent    = p.ph !== undefined
-      ? `${formatNumber(p.ph)}` : '—';
+
     const hasTexture = ['sand', 'silt', 'clay'].every(key =>
       p[key] !== undefined && p[key] !== null && Number.isFinite(Number(p[key]))
     );
+    const phMaxPts = hasTexture ? 28 : 35;
+    const phPtsText = Number.isFinite(p.soil_ph_score)
+      ? ` · ${formatNumber(p.soil_ph_score)}/${phMaxPts} puntos`
+      : '';
+    document.getElementById('c-ph').textContent = p.ph !== undefined
+      ? `${formatNumber(p.ph)}${phPtsText}` : '—';
+
     document.getElementById('c-texture').textContent = hasTexture
-      ? `Arena ${formatNumber(p.sand)}% · limo ${formatNumber(p.silt)}% · arcilla ${formatNumber(p.clay)}%${Number.isFinite(p.soil_texture_score) ? ` · ${formatNumber(p.soil_texture_score)}/${formatNumber(p.soil_texture_score_max)} puntos` : ''}`
+      ? `Arena ${formatNumber(p.sand)}% · limo ${formatNumber(p.silt)}% · arcilla ${formatNumber(p.clay)}%${Number.isFinite(p.soil_texture_score) ? ` · ${formatNumber(p.soil_texture_score)}/${formatNumber(p.soil_texture_score_max || 7)} puntos` : ''}`
       : 'Sin dato';
     document.getElementById('c-rain').textContent  = p.p14 !== undefined && p.p14 !== null
       ? `${formatNumber(p.p14)} mm`
       : '—';
+
+    const metPtsText = Number.isFinite(p.met)
+      ? ` · ${formatNumber(p.met)}/45 puntos`
+      : '';
     document.getElementById('c-weather-score').textContent =
-      p.ws !== undefined ? `${formatNumber(p.ws)}/100 (orientativo)` : '—';
+      p.ws !== undefined ? `${formatNumber(p.ws)}/100${metPtsText}` : '—';
+
     document.getElementById('c-temp').textContent  = p.t !== undefined && p.t !== null
       ? `${formatNumber(p.t)} °C` : '—';
-    document.getElementById('c-topo').textContent  = `${p.elev || 0} m · Exp. ${p.asp || 'N'}`;
+
+    const topoPtsText = Number.isFinite(p.topo)
+      ? ` · ${formatNumber(p.topo)}/20 puntos`
+      : '';
+    document.getElementById('c-topo').textContent  = `${p.elev || 0} m · Exp. ${p.asp || 'N'}${topoPtsText}`;
+
     document.getElementById('c-moist').textContent = p.moist !== undefined && p.moist !== null
       ? `${formatNumber(p.moist)}%` : '—';
     document.getElementById('c-water-balance').textContent = p.wb !== undefined && p.wb !== null
@@ -2459,8 +3171,42 @@
   });
 
   // ================================================================
-  // SPECIES SELECTOR
+  // SPECIES SELECTOR Y DESPLEGABLE PERSONALIZADO
   // ================================================================
+  const MUSH_SVGS = {
+    boletus_edulis: `<svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.8 14.5c-.8 2.8-2.2 6.5-1.5 9.2.5 1.8 2.4 2.3 4.7 2.3 2.5 0 4.2-.6 4.7-2.3.7-2.7-.7-6.4-1.5-9.2h-6.4z" fill="#f7f1e4"/><path d="M12.5 15.5c-.2 2.5-.8 5-.4 7.5m3.4-7.5c.2 2.5.8 5 .4 7.5" stroke="#d8c5aa" stroke-width="0.75" stroke-dasharray="1.2 1"/><ellipse cx="14" cy="14.8" rx="8" ry="1.6" fill="#dedaa8"/><path d="M5.5 14.5C5 9.5 8.5 5 14 5s9 4.5 8.5 9.5c-1.3.8-4 1-8.5 1s-7.2-.2-8.5-1z" fill="url(#grad-edulis-d)"/><path d="M5.8 14.5c1.8.7 4.8.8 8.2.8s6.4-.1 8.2-.8" stroke="#fbe4cb" stroke-width="0.9" stroke-linecap="round"/><path d="M18.8 23.5c1.8-1 3.5-.8 4.2.8-.8 1.4-2.5 1.5-4.2-.8z" fill="#d97706" opacity="0.9"/><defs><linearGradient id="grad-edulis-d" x1="14" y1="5" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#af6932"/><stop offset="1" stop-color="#733b16"/></linearGradient></defs></svg>`,
+    boletus_pinophilus: `<svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7.5" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.5 14.5c-.7 2.8-2 6.5-1.3 9.2.6 1.8 2.6 2.3 4.8 2.3 2.4 0 4.2-.6 4.8-2.3.7-2.7-.6-6.4-1.3-9.2h-7z" fill="#edd6c4"/><path d="M11.5 17c.5 3 2.5 5 5 4" stroke="#ab5945" stroke-width="0.9" stroke-linecap="round" opacity="0.6"/><ellipse cx="14" cy="14.8" rx="8.2" ry="1.6" fill="#dad2a3"/><path d="M5.2 14.5C4.8 9.5 8.2 4.8 14 4.8s9.2 4.7 8.8 9.7c-1.3.8-4 1-8.8 1s-7.5-.2-8.8-1z" fill="url(#grad-pinophilus-d)"/><path d="M7 23l4 3m-4.5-1l4.5 2" stroke="#4a633a" stroke-width="0.9" stroke-linecap="round"/><defs><linearGradient id="grad-pinophilus-d" x1="14" y1="4.8" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#8e3629"/><stop offset="1" stop-color="#541b14"/></linearGradient></defs></svg>`,
+    boletus_aereus: `<svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7.5" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.8 14.5c-.8 2.8-2 6.5-1.4 9.2.5 1.8 2.5 2.3 4.6 2.3 2.3 0 4.1-.6 4.6-2.3.6-2.7-.6-6.4-1.4-9.2h-6.4z" fill="#ebd6bf"/><path d="M12.5 16c-.2 2.5-.5 5-.3 7m3.3-7c.2 2.5.5 5 .3 7" stroke="#b08660" stroke-width="0.75" stroke-dasharray="1.2 1"/><ellipse cx="14" cy="14.8" rx="8" ry="1.6" fill="#f0ebd9"/><path d="M5.5 14.5C5 9.5 8.5 5 14 5s9 4.5 8.5 9.5c-1.3.8-4 1-8.5 1s-7.2-.2-8.5-1z" fill="url(#grad-aereus-d)"/><ellipse cx="20.5" cy="24" rx="1.8" ry="2.2" fill="#7a5430"/><path d="M19.5 22c.8-.8 2-.6 2.4 0" stroke="#50331b" stroke-width="1.2" stroke-linecap="round"/><defs><linearGradient id="grad-aereus-d" x1="14" y1="5" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#4a3525"/><stop offset="0.6" stop-color="#2d1e14"/><stop offset="1" stop-color="#1e130c"/></linearGradient></defs></svg>`,
+    boletus_reticulatus: `<svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.8 14.5c-.8 2.8-2.2 6.5-1.5 9.2.5 1.8 2.4 2.3 4.7 2.3 2.5 0 4.2-.6 4.7-2.3.7-2.7-.7-6.4-1.5-9.2h-6.4z" fill="#f2e4d0"/><path d="M11 16.5l6 5m-6 0l6-5m-5 2.5l4 3.5m-4 0l4-3.5" stroke="#bc946e" stroke-width="0.75" opacity="0.7"/><ellipse cx="14" cy="14.8" rx="8" ry="1.6" fill="#dedaaa"/><path d="M5.5 14.5C5 9.5 8.5 5 14 5s9 4.5 8.5 9.5c-1.3.8-4 1-8.5 1s-7.2-.2-8.5-1z" fill="url(#grad-reticulatus-d)"/><path d="M11 8c1 1.5 2 2 3 1.5m-5 3c2-.5 3 0 4 .5" stroke="#9e6e44" stroke-width="0.7" stroke-linecap="round" opacity="0.6"/><defs><linearGradient id="grad-reticulatus-d" x1="14" y1="5" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#ba8251"/><stop offset="1" stop-color="#8a5327"/></linearGradient></defs></svg>`,
+    all: `<svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="9" ry="2" fill="#71685b" opacity="0.2"/><path d="M8 18c-.4 2-1 4-.6 5.5.4 1 1.5 1.3 2.8 1.3 1.4 0 2.4-.3 2.8-1.3.4-1.5-.2-3.5-.6-5.5H8z" fill="#f4ebd9"/><path d="M5 18c-.3-3 1.8-5.5 5-5.5s5.3 2.5 5 5.5c-.8.5-2.2.6-5 .6s-4.2-.1-5-.6z" fill="#9e5e2e"/><path d="M15.5 16c-.5 2.5-1.5 5.5-.9 7.5.4 1.3 1.8 1.6 3.4 1.6 1.8 0 3-.3 3.4-1.6.6-2-.4-5-.9-7.5h-5z" fill="#ebd6bf"/><path d="M12 16c-.4-4 2.5-7 7-7s7.4 3 7 7c-1 .6-3 .8-7 .8s-6-.2-7-.8z" fill="#692b1b"/><path d="M8 22c2.5-.5 5 1 5.5 2.5-2 1.5-4.5 1-5.5-2.5z" fill="#d97706"/><path d="M18 23c2 0 3.5 1.5 4 2.5-1.5 1-3.5.5-4-2.5z" fill="#6e8053"/></svg>`
+  };
+
+  const MUSH_LABELS = {
+    boletus_edulis: 'Boletus edulis',
+    boletus_pinophilus: 'B. pinophilus',
+    boletus_aereus: 'B. aereus',
+    boletus_reticulatus: 'B. reticulatus',
+    all: 'Todas las especies'
+  };
+
+  function setCustomQuickSpecies(value) {
+    const iconContainer = document.getElementById('quick-selected-icon');
+    const textContainer = document.getElementById('quick-selected-text');
+    if (iconContainer && MUSH_SVGS[value]) iconContainer.innerHTML = MUSH_SVGS[value];
+    if (textContainer && MUSH_LABELS[value]) textContainer.textContent = MUSH_LABELS[value];
+
+    document.querySelectorAll('.custom-select-option').forEach(opt => {
+      const isSelected = opt.dataset.value === value;
+      opt.classList.toggle('active', isSelected);
+      opt.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+    });
+
+    const hiddenSelect = document.getElementById('map-quick-species');
+    if (hiddenSelect && hiddenSelect.value !== value) {
+      hiddenSelect.value = value;
+    }
+  }
+
   const speciesPicker = document.getElementById('species-picker');
   const speciesSelectionCount = document.getElementById('species-selection-count');
   const selectAllSpeciesButton = document.getElementById('select-all-species');
@@ -2484,16 +3230,12 @@
       ? 'Dejar solo Boletus edulis'
       : 'Seleccionar todas';
 
-    const mapQuickSpecies = document.getElementById('map-quick-species');
-    if (mapQuickSpecies) {
-      if (checkedSpecies.length === SPECIES_IDS.length) {
-        mapQuickSpecies.value = 'all';
-      } else if (checkedSpecies.length === 1) {
-        mapQuickSpecies.value = checkedSpecies[0];
-      } else {
-        mapQuickSpecies.value = 'all';
-      }
-    }
+    const nextVal = checkedSpecies.length === SPECIES_IDS.length
+      ? 'all'
+      : checkedSpecies.length === 1
+        ? checkedSpecies[0]
+        : 'all';
+    setCustomQuickSpecies(nextVal);
 
     loadSpecies(selectedSpecies);
   }
@@ -2508,26 +3250,56 @@
     updateSpeciesSelection();
   });
 
-  // Controles rápidos sobre el mapa
-  const mapQuickSpecies = document.getElementById('map-quick-species');
-  if (mapQuickSpecies) {
-    mapQuickSpecies.addEventListener('change', () => {
-      const val = mapQuickSpecies.value;
-      if (val === 'all') {
-        selectedSpecies = [...SPECIES_IDS];
-      } else {
-        selectedSpecies = [val];
-      }
-      speciesPicker.querySelectorAll('input').forEach(input => {
-        input.checked = selectedSpecies.includes(input.value);
+  // Eventos del desplegable personalizado con iconos SVG
+  const customDropdown = document.getElementById('species-custom-dropdown');
+  const customBtn = document.getElementById('map-custom-species-btn');
+  if (customBtn && customDropdown) {
+    customBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = customDropdown.classList.contains('open');
+      customDropdown.classList.toggle('open', !isOpen);
+      customBtn.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
+    });
+
+    document.querySelectorAll('.custom-select-option').forEach(opt => {
+      opt.addEventListener('click', e => {
+        e.stopPropagation();
+        const val = opt.dataset.value;
+        setCustomQuickSpecies(val);
+        customDropdown.classList.remove('open');
+        customBtn.setAttribute('aria-expanded', 'false');
+
+        if (val === 'all') {
+          selectedSpecies = [...SPECIES_IDS];
+        } else {
+          selectedSpecies = [val];
+        }
+        speciesPicker.querySelectorAll('input').forEach(input => {
+          input.checked = selectedSpecies.includes(input.value);
+        });
+        const count = selectedSpecies.length;
+        speciesSelectionCount.textContent =
+          `${count} especie${count === 1 ? '' : 's'} seleccionada${count === 1 ? '' : 's'}`;
+        selectAllSpeciesButton.textContent = count === SPECIES_IDS.length
+          ? 'Dejar solo Boletus edulis'
+          : 'Seleccionar todas';
+        loadSpecies(selectedSpecies);
       });
-      const count = selectedSpecies.length;
-      speciesSelectionCount.textContent =
-        `${count} especie${count === 1 ? '' : 's'} seleccionada${count === 1 ? '' : 's'}`;
-      selectAllSpeciesButton.textContent = count === SPECIES_IDS.length
-        ? 'Dejar solo Boletus edulis'
-        : 'Seleccionar todas';
-      loadSpecies(selectedSpecies);
+    });
+
+    document.addEventListener('click', e => {
+      if (!customDropdown.contains(e.target)) {
+        customDropdown.classList.remove('open');
+        customBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    customDropdown.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        customDropdown.classList.remove('open');
+        customBtn.setAttribute('aria-expanded', 'false');
+        customBtn.focus();
+      }
     });
   }
 
