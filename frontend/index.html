@@ -623,6 +623,7 @@
       pointer-events: none;
     }
     .map-overlay-controls > * { pointer-events: auto; }
+    body.cell-selected .map-overlay-controls { display: none; }
     .filters-panel {
       position: absolute;
       z-index: 60;
@@ -851,12 +852,6 @@
     .species-comparison > summary::-webkit-details-marker { display: none; }
     .species-comparison > summary::after { content: " +"; color: #846b4d; }
     .species-comparison[open] > summary::after { content: " −"; }
-    .about-section p {
-      padding: 11px 13px;
-      color: #71685b;
-      font-size: 12px;
-      line-height: 1.5;
-    }
     .cell-card[hidden] { display: none; }
     .cell-card { scroll-margin-top: 12px; }
     .map-hint {
@@ -1490,17 +1485,12 @@
     <div class="sidebar-head">
       <div>
         <h1>Explora el mapa</h1>
-        <p>Guías de especies e información del lugar.</p>
+        <p>Guías de especies y datos del lugar.</p>
       </div>
       <button id="menu-close" class="menu-close" type="button" aria-label="Cerrar menú">×</button>
     </div>
 
     <div id="data-status" class="data-status" role="status"></div>
-    <details class="menu-section about-section" open>
-      <summary>Información</summary>
-      <p>El mapa combina el hábitat forestal con las condiciones meteorológicas recientes. Sus índices orientan la exploración y no representan una probabilidad de encontrar setas.</p>
-    </details>
-
     <!-- Province pills -->
     <div id="prov-row" class="prov-row">
       <button class="prov-btn active" data-prov="all">Todas</button>
@@ -1765,7 +1755,7 @@
     .forEach(id => filtersPanelContent.appendChild(document.getElementById(id)));
   const sidebar = document.querySelector('.sidebar');
   const guidesSection = document.getElementById('species-guides-section');
-  sidebar.insertBefore(guidesSection, document.querySelector('.about-section'));
+  sidebar.insertBefore(guidesSection, document.getElementById('cell-card'));
   const speciesControl = document.getElementById('species-control');
   speciesControl.insertBefore(
     document.getElementById('species-custom-dropdown'),
@@ -2588,6 +2578,7 @@
     const previousSelectedH = selectedCellH;
     if (!previousSelectedH) {
       document.getElementById('cell-card').hidden = true;
+      document.body.classList.remove('cell-selected');
     }
     rawData = null;
 
@@ -2638,6 +2629,7 @@
         } else {
           document.getElementById('cell-card').hidden = true;
           selectedCellH = null;
+          document.body.classList.remove('cell-selected');
         }
       }
     } catch (error) {
@@ -2658,6 +2650,7 @@
   function clearDisplayedData() {
     selectedCellH = null;
     document.getElementById('cell-card').hidden = true;
+    document.body.classList.remove('cell-selected');
     const source = map.getSource('h3');
     if (source) source.setData({ type: 'FeatureCollection', features: [] });
     document.getElementById('stat-total').textContent = '0';
@@ -3041,6 +3034,7 @@
 
   function showCell(p) {
     document.getElementById('cell-card').hidden = false;
+    document.body.classList.add('cell-selected');
     const displayScore = currentLayer === 'search'
       ? Number(p.cs)
       : currentLayer === 'weather' ? Number(p.ws)
@@ -3796,12 +3790,14 @@
   function openMenu() {
     closeFilters();
     document.body.classList.add('menu-open');
+    document.body.classList.toggle('cell-selected', !document.getElementById('cell-card').hidden);
     menuToggle.setAttribute('aria-expanded', 'true');
     menuToggle.setAttribute('aria-label', 'Cerrar menú');
     menuToggle.title = 'Cerrar menú';
   }
   function closeMenu() {
     document.body.classList.remove('menu-open');
+    document.body.classList.remove('cell-selected');
     menuToggle.setAttribute('aria-expanded', 'false');
     menuToggle.setAttribute('aria-label', 'Abrir menú');
     menuToggle.title = 'Menú';
