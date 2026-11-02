@@ -704,7 +704,7 @@
       box-shadow: 0 5px 18px rgba(61, 46, 31, .12);
     }
     .map-toolbar .search-input:focus { background: #fffdf8; }
-    .toolbar-actions { flex: 0 0 auto; gap: 8px; }
+    .toolbar-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; }
     .menu-toggle {
       color: #fffaf3;
       background: #76563d;
@@ -1256,12 +1256,6 @@
     .map-legend-category { display: flex; align-items: center; gap: 5px; font-size: 9px; line-height: 1.2; }
     .map-legend-swatch { width: 10px; height: 10px; flex: 0 0 10px; border-radius: 3px; }
     .map-legend.categorical .map-legend-labels { display: none; }
-    .map-basemap-toggle {
-      position: absolute;
-      z-index: 31;
-      top: 74px;
-      right: 16px;
-    }
     .maplibregl-ctrl-top-right { top: 128px !important; }
     @media (max-width: 700px) {
       .map-toolbar {
@@ -1286,11 +1280,10 @@
       .filters-panel { max-height: min(64dvh, calc(100dvh - 125px)); padding: 13px; }
       .toolbar-actions { grid-column: 2; grid-row: 1; }
       .map-overlay-controls {
-        top: 102px;
+        top: 116px;
         left: 10px;
         gap: 6px;
       }
-      .map-basemap-toggle { top: 102px; right: 10px; }
       .map-overlay-actions { gap: 6px; }
       .sidebar {
         top: auto;
@@ -1327,7 +1320,7 @@
       .map-legend-title { font-size: 10px; }
       .map-legend-labels { font-size: 8px; }
       .map-legend-note { font-size: 8px; margin-top: 3px; }
-      .maplibregl-ctrl-top-right { top: 156px !important; right: 10px !important; bottom: auto !important; }
+      .maplibregl-ctrl-top-right { top: 170px !important; right: 10px !important; bottom: auto !important; }
       .maplibregl-ctrl-bottom-right { bottom: 62px !important; }
       body.menu-open .map-hint { display: none; }
     }
@@ -1335,6 +1328,10 @@
       .sidebar { max-height: 72dvh; }
       .prov-btn { flex-basis: 28%; }
       .toolbar-brand { padding-right: 9px; }
+      .toolbar-actions { gap: 4px; }
+      .satellite-toggle { width: 40px; min-height: 40px; padding: 0; }
+      .satellite-toggle span { display: none; }
+      .install-button:not([hidden]) { padding-right: 7px; padding-left: 7px; font-size: 10px; }
     }
     @media (prefers-reduced-motion: reduce) {
       .sidebar, .menu-backdrop { transition: none; }
@@ -1363,6 +1360,10 @@
       <div id="suggestions" class="suggestions"></div>
     </div>
     <div class="toolbar-actions">
+      <button id="satellite-toggle" class="satellite-toggle" type="button" aria-pressed="false" aria-label="Cambiar a vista satélite" title="Cambiar a vista satélite">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        <span id="satellite-toggle-text">Satélite</span>
+      </button>
       <button id="install-button" class="install-button" type="button" hidden>Instalar app</button>
     </div>
   </div>
@@ -1370,12 +1371,6 @@
   <div id="map-hint" class="map-hint">
     <span>Desplázate por el mapa y toca una celda para explorarla</span>
     <button id="map-hint-close" type="button" aria-label="Ocultar ayuda">×</button>
-  </div>
-  <div class="map-basemap-toggle">
-    <button id="satellite-toggle" class="satellite-toggle" type="button" aria-pressed="false" aria-label="Cambiar a vista satélite" title="Cambiar a vista satélite">
-      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-      <span id="satellite-toggle-text">Satélite</span>
-    </button>
   </div>
   <div class="map-overlay-controls">
     <section id="map-legend" class="map-legend" aria-label="Leyenda del mapa">
