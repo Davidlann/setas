@@ -119,7 +119,8 @@ El filtro de lluvia limita las celdas según la precipitación estimada acumulad
 en los últimos 14 días. La meteorología es regional y no representa diferencias
 fiables entre hexágonos vecinos; la humedad y el pH tampoco son mediciones
 locales. Las mínimas recientes bajo el umbral térmico experimental de cada
-especie reducen el índice meteorológico. Las guías ofrecen temporadas generales,
+especie reducen el índice meteorológico; ese umbral se incluye en el perfil
+exportado de cada especie. Las guías ofrecen temporadas generales,
 pero el mes aún no se usa como factor numérico: la época cambia según región,
 altitud, bosque y año. Una puntuación baja o cero no demuestra que no haya setas.
 Las guías incluyen consejos prácticos de hábitat y búsqueda e imágenes
