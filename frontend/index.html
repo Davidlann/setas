@@ -685,20 +685,6 @@
     .filters-panel .ctrl-label { color: #766b5e; }
     #filters-panel #species-custom-dropdown { display: block; }
     .filters-panel .layer-btn { font-size: 11px; }
-    .basemap-control {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 9px;
-      padding: 8px 10px;
-      color: #766b5e;
-      background: #f8f4ec;
-      border: 1px solid #e2d8c8;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 700;
-    }
     .filters-panel .menu-section { margin: 0; }
     .filters-panel .menu-section[open] > summary { border-bottom-color: #e2d8c8; }
     .filters-panel .slider-card, .filters-panel .stats {
@@ -916,7 +902,6 @@
       border-radius: 14px;
       box-shadow: 0 5px 20px rgba(61, 46, 31, .15);
       pointer-events: auto;
-      transition: max-height .2s ease;
     }
     .map-ctrl-header {
       display: flex;
@@ -1219,34 +1204,6 @@
       background: #ede3d2;
       border-color: #bfa588;
     }
-    .map-legend-toggle {
-      flex: 0 0 28px;
-      width: 28px;
-      height: 32px;
-      margin-left: auto;
-      padding: 0;
-      font-size: 13px;
-      font-weight: 700;
-      color: #71685b;
-      background: #f4efe5;
-      border: 1px solid #dcd1c2;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .map-legend-toggle:hover {
-      background: #ede5d7;
-      color: #493524;
-    }
-    .map-legend.minimized .map-legend-content {
-      display: none;
-    }
-    .map-legend.minimized .map-ctrl-header {
-      margin-bottom: 0;
-    }
-    .map-legend.minimized { width: fit-content; }
     .map-legend-content {
       display: flex;
       flex-direction: column;
@@ -1299,7 +1256,13 @@
     .map-legend-category { display: flex; align-items: center; gap: 5px; font-size: 9px; line-height: 1.2; }
     .map-legend-swatch { width: 10px; height: 10px; flex: 0 0 10px; border-radius: 3px; }
     .map-legend.categorical .map-legend-labels { display: none; }
-    .maplibregl-ctrl-top-right { top: 74px !important; }
+    .map-basemap-toggle {
+      position: absolute;
+      z-index: 31;
+      top: 74px;
+      right: 16px;
+    }
+    .maplibregl-ctrl-top-right { top: 128px !important; }
     @media (max-width: 700px) {
       .map-toolbar {
         top: 10px;
@@ -1327,6 +1290,7 @@
         left: 10px;
         gap: 6px;
       }
+      .map-basemap-toggle { top: 102px; right: 10px; }
       .map-overlay-actions { gap: 6px; }
       .sidebar {
         top: auto;
@@ -1360,11 +1324,10 @@
         width: min(260px, calc(100vw - 120px));
         padding: 8px 10px;
       }
-      .map-overlay-controls .map-legend.minimized { width: fit-content; }
       .map-legend-title { font-size: 10px; }
       .map-legend-labels { font-size: 8px; }
       .map-legend-note { font-size: 8px; margin-top: 3px; }
-      .maplibregl-ctrl-top-right { top: 102px !important; right: 10px !important; }
+      .maplibregl-ctrl-top-right { top: 156px !important; right: 10px !important; bottom: auto !important; }
       .maplibregl-ctrl-bottom-right { bottom: 62px !important; }
       body.menu-open .map-hint { display: none; }
     }
@@ -1407,6 +1370,12 @@
   <div id="map-hint" class="map-hint">
     <span>Desplázate por el mapa y toca una celda para explorarla</span>
     <button id="map-hint-close" type="button" aria-label="Ocultar ayuda">×</button>
+  </div>
+  <div class="map-basemap-toggle">
+    <button id="satellite-toggle" class="satellite-toggle" type="button" aria-pressed="false" aria-label="Cambiar a vista satélite" title="Cambiar a vista satélite">
+      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+      <span id="satellite-toggle-text">Satélite</span>
+    </button>
   </div>
   <div class="map-overlay-controls">
     <section id="map-legend" class="map-legend" aria-label="Leyenda del mapa">
@@ -1474,7 +1443,6 @@
           <option value="all">Todas las especies</option>
         </select>
       </div>
-      <button id="map-legend-toggle" class="map-legend-toggle" type="button" aria-label="Minimizar o expandir leyenda" title="Minimizar / expandir">▾</button>
     </div>
 
     <div id="map-legend-content" class="map-legend-content">
@@ -1490,13 +1458,13 @@
     </div>
     </section>
     <div class="map-overlay-actions">
-      <button id="menu-toggle" class="menu-toggle" type="button" aria-controls="sidebar" aria-expanded="false" aria-label="Abrir menú" title="Menú">
-        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
       <button id="filters-toggle" class="filters-toggle" type="button" aria-controls="filters-panel" aria-expanded="false" aria-label="Abrir filtros" title="Filtros">
         <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M4 7h9m4 0h3M4 17h3m4 0h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>
         </svg>
+      </button>
+      <button id="menu-toggle" class="menu-toggle" type="button" aria-controls="sidebar" aria-expanded="false" aria-label="Abrir menú" title="Menú">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
     </div>
     <section id="filters-panel" class="filters-panel" aria-label="Filtros y capas del mapa" hidden>
@@ -1590,13 +1558,6 @@
     <!-- Layer selector -->
     <details id="layer-section" class="menu-section" open>
       <summary>Capas del mapa</summary>
-      <div class="basemap-control">
-        <span>Mapa base</span>
-        <button id="satellite-toggle" class="satellite-toggle" type="button" aria-pressed="false" title="Alternar vista satélite / mapa">
-          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-          <span id="satellite-toggle-text">Satélite</span>
-        </button>
-      </div>
       <div class="layer-grid">
         <button class="layer-btn active" id="lbtn-search" onclick="setLayer('search')">
           <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 12h18M12 3v18"/><circle cx="12" cy="12" r="9"/></svg>
@@ -2406,8 +2367,12 @@
     if (btn) {
       btn.classList.toggle('active', enable);
       btn.setAttribute('aria-pressed', enable ? 'true' : 'false');
+      const labelText = enable ? 'Mapa normal' : 'Satélite';
+      const actionLabel = enable ? 'Cambiar a mapa normal' : 'Cambiar a vista satélite';
+      btn.setAttribute('aria-label', actionLabel);
+      btn.title = actionLabel;
       const label = document.getElementById('satellite-toggle-text');
-      if (label) label.textContent = enable ? 'Modo mapa' : 'Satélite';
+      if (label) label.textContent = labelText;
     }
     if (map.getLayer('h3-fill')) {
       map.setPaintProperty('h3-fill', 'fill-opacity', enable ? 0.65 : ['/', ['get','_a'], 255]);
@@ -3743,17 +3708,6 @@
         customBtn.setAttribute('aria-expanded', 'false');
         customBtn.focus();
       }
-    });
-  }
-
-  const mapLegendToggle = document.getElementById('map-legend-toggle');
-  if (mapLegendToggle) {
-    mapLegendToggle.addEventListener('click', () => {
-      const legend = document.getElementById('map-legend');
-      const minimized = legend.classList.toggle('minimized');
-      mapLegendToggle.textContent = minimized ? '▸' : '▾';
-      mapLegendToggle.setAttribute('aria-label', minimized ? 'Mostrar leyenda' : 'Ocultar leyenda');
-      mapLegendToggle.title = minimized ? 'Mostrar leyenda' : 'Ocultar leyenda';
     });
   }
 
