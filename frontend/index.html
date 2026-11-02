@@ -463,41 +463,346 @@
       .prov-row { flex-wrap: wrap; }
       .prov-btn { flex: 1 1 28%; }
     }
+
+    .map-toolbar {
+      position: absolute;
+      z-index: 31;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      pointer-events: none;
+    }
+    .map-toolbar > * { pointer-events: auto; }
+    .toolbar-brand, .toolbar-actions, .menu-toggle {
+      display: flex;
+      align-items: center;
+    }
+    .toolbar-brand {
+      flex: 0 0 auto;
+      gap: 9px;
+      padding: 6px 13px 6px 7px;
+      color: #44372a;
+      background: rgba(251, 248, 241, .96);
+      border: 1px solid #e2d8c8;
+      border-radius: 15px;
+      box-shadow: 0 5px 18px rgba(61, 46, 31, .12);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 17px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .toolbar-brand .brand-icon { width: 34px; height: 34px; border-radius: 11px; }
+    .map-toolbar .search-wrap {
+      flex: 1 1 440px;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .map-toolbar .search-input {
+      min-height: 46px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+      box-shadow: 0 5px 18px rgba(61, 46, 31, .12);
+    }
+    .map-toolbar .search-input:focus { background: #fffdf8; }
+    .toolbar-actions { flex: 0 0 auto; gap: 8px; }
+    .menu-toggle {
+      min-height: 44px;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 15px;
+      color: #fffaf3;
+      background: #76563d;
+      border: 1px solid #76563d;
+      border-radius: 12px;
+      box-shadow: 0 5px 18px rgba(61, 46, 31, .18);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .menu-toggle:hover { background: #63452f; }
+    .menu-toggle:focus-visible, .menu-close:focus-visible, .menu-backdrop:focus-visible {
+      outline: 3px solid #a68b60;
+      outline-offset: 2px;
+    }
+    .install-button:not([hidden]) {
+      min-height: 42px;
+      padding: 0 13px;
+      border-radius: 11px;
+      font-size: 12px;
+      box-shadow: 0 5px 18px rgba(61, 46, 31, .12);
+    }
+    .sidebar {
+      position: fixed;
+      z-index: 30;
+      top: 82px;
+      right: auto;
+      bottom: 16px;
+      left: 16px;
+      width: min(390px, calc(100vw - 32px));
+      max-height: none;
+      padding: 18px;
+      gap: 12px;
+      border-radius: 18px;
+      transform: translateX(calc(-100% - 24px));
+      visibility: hidden;
+      pointer-events: none;
+      transition: transform .24s ease, visibility .24s;
+    }
+    body.menu-open .sidebar {
+      transform: translateX(0);
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .sidebar-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-head h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      color: #493b2d;
+      font-size: 21px;
+    }
+    .sidebar-head p { margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .menu-close {
+      flex: 0 0 auto;
+      width: 34px;
+      height: 34px;
+      color: #5e4d3b;
+      background: #f4efe5;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 23px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .menu-backdrop {
+      position: fixed;
+      z-index: 29;
+      inset: 0;
+      padding: 0;
+      background: rgba(42, 34, 26, .2);
+      border: 0;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .2s ease, visibility .2s;
+      cursor: default;
+    }
+    body.menu-open .menu-backdrop {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .prov-row { flex-wrap: wrap; }
+    .prov-btn { min-height: 34px; }
+    .species-control { gap: 9px; }
+    .menu-section {
+      flex: 0 0 auto;
+      overflow: hidden;
+      background: #f8f4ec;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .menu-section > summary {
+      position: relative;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      padding: 0 40px 0 13px;
+      color: #514334;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      list-style: none;
+    }
+    .menu-section > summary::-webkit-details-marker { display: none; }
+    .menu-section > summary::after {
+      content: "+";
+      position: absolute;
+      right: 15px;
+      color: #846b4d;
+      font-size: 20px;
+      font-weight: 400;
+    }
+    .menu-section[open] > summary { border-bottom: 1px solid var(--border); }
+    .menu-section[open] > summary::after { content: "−"; }
+    .menu-section > summary:focus-visible { outline: 3px solid #a68b60; outline-offset: -3px; }
+    .menu-section .guide-buttons, .menu-section .layer-grid, .menu-section-content {
+      padding: 11px;
+    }
+    .menu-section .layer-grid { display: grid; }
+    .menu-section-content { display: flex; flex-direction: column; gap: 9px; }
+    .menu-section-content .slider-card, .menu-section-content .stats, .menu-section-content .legend {
+      margin: 0;
+    }
+    .cell-extra { margin-top: 2px; }
+    .cell-extra > .info-grid { padding: 11px; }
+    .species-comparison > summary {
+      padding: 0 0 8px;
+      color: #776b5b;
+      cursor: pointer;
+      list-style: none;
+    }
+    .species-comparison > summary::-webkit-details-marker { display: none; }
+    .species-comparison > summary::after { content: " +"; color: #846b4d; }
+    .species-comparison[open] > summary::after { content: " −"; }
+    .about-section p {
+      padding: 11px 13px;
+      color: #71685b;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .cell-card[hidden] { display: none; }
+    .cell-card { scroll-margin-top: 12px; }
+    .map-hint {
+      position: absolute;
+      z-index: 14;
+      right: 16px;
+      bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: calc(100vw - 32px);
+      padding: 9px 10px 9px 14px;
+      color: #5b4a38;
+      background: rgba(251, 248, 241, .96);
+      border: 1px solid #e2d8c8;
+      border-radius: 12px;
+      box-shadow: 0 5px 18px rgba(61, 46, 31, .14);
+      font-size: 12px;
+      line-height: 1.4;
+      pointer-events: auto;
+    }
+    .map-hint[hidden] { display: none; }
+    .map-hint button {
+      flex: 0 0 auto;
+      width: 25px;
+      height: 25px;
+      color: #6a5945;
+      background: transparent;
+      border: 0;
+      border-radius: 6px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .maplibregl-ctrl-top-right { top: 76px !important; }
+    @media (max-width: 700px) {
+      .map-toolbar {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+      }
+      .toolbar-brand { min-width: 0; width: fit-content; font-size: 15px; }
+      .toolbar-brand .brand-icon { width: 31px; height: 31px; }
+      .map-toolbar .search-wrap {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        max-width: none;
+        width: 100%;
+      }
+      .map-toolbar .search-input { min-height: 44px; }
+      .toolbar-actions { grid-column: 2; grid-row: 1; }
+      .menu-toggle { min-height: 42px; padding: 0 12px; }
+      .install-button:not([hidden]) { display: none; }
+      .sidebar {
+        top: auto;
+        right: 10px;
+        bottom: 10px;
+        left: 10px;
+        width: auto;
+        max-height: min(64dvh, 580px);
+        padding: 15px;
+        gap: 9px;
+        border-radius: 20px;
+        transform: translateY(calc(100% + 24px));
+      }
+      body.menu-open .sidebar { transform: translateY(0); }
+      .sidebar-head { padding-bottom: 9px; }
+      .sidebar-head h1 { font-size: 19px; }
+      .data-status { padding: 8px 10px; font-size: 11px; }
+      .prov-btn { flex: 1 1 17%; padding: 6px 3px; font-size: 10px; }
+      .species-control { gap: 7px; }
+      .menu-section > summary { min-height: 40px; }
+      .map-hint {
+        right: 10px;
+        bottom: 18px;
+        left: 10px;
+        width: fit-content;
+        max-width: calc(100vw - 20px);
+        margin: 0 auto;
+        font-size: 11px;
+      }
+      .maplibregl-ctrl-top-right { top: 112px !important; right: 10px !important; }
+      .maplibregl-ctrl-bottom-right { bottom: 62px !important; }
+      body.menu-open .map-hint { display: none; }
+    }
+    @media (max-width: 380px) {
+      .sidebar { max-height: 72dvh; }
+      .prov-btn { flex-basis: 28%; }
+      .toolbar-brand { padding-right: 9px; }
+      .menu-toggle { gap: 5px; padding: 0 9px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .sidebar, .menu-backdrop { transition: none; }
+    }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <!-- Brand -->
-    <div class="brand">
-      <div class="brand-left">
-        <div class="brand-icon">
-          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3a9 9 0 0 0-9 9c0 1.2.4 1.8 1.8 1.8h14.4c1.4 0 1.8-.6 1.8-1.8a9 9 0 0 0-9-9z"/>
-            <path d="M10 13.8v6.2a2 2 0 0 0 4 0v-6.2"/>
-          </svg>
-        </div>
-        <div><h1>Mapa setero</h1><small>Explora el bosque · centro peninsular</small></div>
+  <div class="map-toolbar">
+    <div class="toolbar-brand">
+      <div class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a9 9 0 0 0-9 9c0 1.2.4 1.8 1.8 1.8h14.4c1.4 0 1.8-.6 1.8-1.8a9 9 0 0 0-9-9z"/>
+          <path d="M10 13.8v6.2a2 2 0 0 0 4 0v-6.2"/>
+        </svg>
       </div>
-      <div class="brand-actions">
-        <span class="badge">Guía orientativa</span>
-        <button id="install-button" class="install-button" type="button" hidden>Instalar app</button>
-      </div>
+      <span>Mapa setero</span>
     </div>
-
-    <div id="data-status" class="data-status" role="status">
-      El mapa orienta sobre el hábitat y el tiempo reciente, pero no confirma que haya setas.
-    </div>
-
-    <!-- Search -->
     <div class="search-wrap">
       <div class="search-inner">
         <svg class="search-icon" viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.2" fill="none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="search" class="search-input" type="text" placeholder="Escribe un pueblo o zona (ej. Vinuesa, Rascafría...)" autocomplete="off"/>
-        <button id="search-clear" class="search-clear">
+        <input id="search" class="search-input" type="text" placeholder="Busca un pueblo o zona" autocomplete="off" aria-label="Busca un pueblo o zona"/>
+        <button id="search-clear" class="search-clear" type="button" aria-label="Borrar búsqueda">
           <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <div id="suggestions" class="suggestions"></div>
+    </div>
+    <div class="toolbar-actions">
+      <button id="install-button" class="install-button" type="button" hidden>Instalar app</button>
+      <button id="menu-toggle" class="menu-toggle" type="button" aria-controls="sidebar" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <span>Menú</span>
+      </button>
+    </div>
+  </div>
+  <button id="menu-backdrop" class="menu-backdrop" type="button" aria-label="Cerrar menú"></button>
+  <div id="map-hint" class="map-hint">
+    <span>Desplázate por el mapa y toca una celda para explorarla</span>
+    <button id="map-hint-close" type="button" aria-label="Ocultar ayuda">×</button>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <div>
+        <h1>Explora el mapa</h1>
+        <p>Elige una especie o ajusta las capas.</p>
+      </div>
+      <button id="menu-close" class="menu-close" type="button" aria-label="Cerrar menú">×</button>
+    </div>
+
+    <div id="data-status" class="data-status" role="status">
+      Orientativo: el mapa no confirma la presencia de setas.
     </div>
 
     <!-- Province pills -->
@@ -510,10 +815,10 @@
     </div>
 
     <!-- Species -->
-    <div class="ctrl">
+    <div class="ctrl species-control">
       <label class="ctrl-label" for="species">
         <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Especies objetivo
+        ¿Qué especie buscas?
       </label>
       <select id="species">
         <option value="all">Todas las especies</option>
@@ -522,21 +827,20 @@
         <option value="boletus_aereus">Boletus aereus</option>
         <option value="boletus_reticulatus">Boletus reticulatus</option>
       </select>
-      <div class="ctrl-label">Guías de las especies</div>
-      <div class="guide-buttons">
-        <button class="guide-btn" type="button" data-guide="boletus_edulis">Boletus edulis</button>
-        <button class="guide-btn" type="button" data-guide="boletus_pinophilus">Boletus pinophilus</button>
-        <button class="guide-btn" type="button" data-guide="boletus_aereus">Boletus aereus</button>
-        <button class="guide-btn" type="button" data-guide="boletus_reticulatus">Boletus reticulatus</button>
-      </div>
+      <details class="menu-section">
+        <summary>Guía de especies</summary>
+        <div class="guide-buttons">
+          <button class="guide-btn" type="button" data-guide="boletus_edulis">Boletus edulis</button>
+          <button class="guide-btn" type="button" data-guide="boletus_pinophilus">Boletus pinophilus</button>
+          <button class="guide-btn" type="button" data-guide="boletus_aereus">Boletus aereus</button>
+          <button class="guide-btn" type="button" data-guide="boletus_reticulatus">Boletus reticulatus</button>
+        </div>
+      </details>
     </div>
 
     <!-- Layer selector -->
-    <div class="ctrl">
-      <label class="ctrl-label">
-        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-        Capa del mapa
-      </label>
+    <details class="menu-section">
+      <summary>Capas del mapa</summary>
       <div class="layer-grid">
         <button class="layer-btn active" id="lbtn-habitat" onclick="setLayer('habitat')">
           <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="9"/></svg>
@@ -559,43 +863,44 @@
           pH estimado (SoilGrids)
         </button>
       </div>
-    </div>
+    </details>
 
     <!-- Slider -->
-    <div class="slider-card">
-      <div class="slider-head">
-        <span id="slider-title">Hábitat mínimo (orientativo)</span>
-        <strong id="slider-label">0 — Solo celdas candidatas</strong>
+    <details class="menu-section">
+      <summary>Filtros y leyenda</summary>
+      <div class="menu-section-content">
+        <div class="slider-card">
+          <div class="slider-head">
+            <span id="slider-title">Hábitat mínimo (orientativo)</span>
+            <strong id="slider-label">0 — Solo celdas candidatas</strong>
+          </div>
+          <input type="range" id="slider" min="0" max="80" step="5" value="0"/>
+        </div>
+        <div class="stats">
+          <span>Celdas visibles: <strong id="stat-total">—</strong></span>
+          <span id="stat-fav-label">Hábitat ≥50: <strong id="stat-fav">—</strong></span>
+        </div>
+        <div class="legend">
+          <div class="legend-title" id="leg-title">Hábitat potencial (0 – 100)</div>
+          <div class="legend-bar" id="leg-bar">
+            <div class="step" style="background:#334155"></div>
+            <div class="step" style="background:#f97316"></div>
+            <div class="step" style="background:#eab308"></div>
+            <div class="step" style="background:#22c55e"></div>
+            <div class="step" style="background:#10b981"></div>
+          </div>
+          <div class="legend-labels" id="leg-labels">
+            <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+          </div>
+        </div>
       </div>
-      <input type="range" id="slider" min="0" max="80" step="5" value="0"/>
-    </div>
+    </details>
 
     <!-- Loading -->
     <div class="loading-bar" id="loading"><div class="loading-progress"></div></div>
 
-    <!-- Stats -->
-    <div class="stats">
-      <span>Celdas visibles: <strong id="stat-total">—</strong></span>
-      <span id="stat-fav-label">Hábitat ≥50: <strong id="stat-fav">—</strong></span>
-    </div>
-
-    <!-- Legend -->
-    <div class="legend">
-      <div class="legend-title" id="leg-title">Hábitat potencial (0 – 100)</div>
-      <div class="legend-bar" id="leg-bar">
-        <div class="step" style="background:#334155"></div>
-        <div class="step" style="background:#f97316"></div>
-        <div class="step" style="background:#eab308"></div>
-        <div class="step" style="background:#22c55e"></div>
-        <div class="step" style="background:#10b981"></div>
-      </div>
-      <div class="legend-labels" id="leg-labels">
-        <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
-      </div>
-    </div>
-
     <!-- Cell card -->
-    <div class="cell-card">
+    <div id="cell-card" class="cell-card" hidden>
       <div class="cell-head">
         <h3>
           <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
@@ -608,10 +913,14 @@
           <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 19 12 15 12 20 19 4 19 9 12 5 12 12 2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Masa forestal:</span>
           <span id="c-tree">Haz clic en un hexágono</span>
         </div>
-        <div class="info-item info-wide">
-          <span>Lectura del índice:</span>
-          <span id="c-reason">—</span>
+        <div class="info-item">
+          <span>Condiciones recientes:</span>
+          <span id="c-weather-score">—</span>
         </div>
+      </div>
+      <details class="menu-section cell-extra">
+        <summary>Más datos del lugar</summary>
+        <div class="info-grid">
         <div class="info-item">
           <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M10 2v7.31L4.66 17.5A2 2 0 0 0 6.32 20.5h11.36a2 2 0 0 0 1.66-3L14 9.31V2"/></svg> pH SoilGrids (Q05–Q95):</span>
           <span id="c-ph">—</span>
@@ -619,10 +928,6 @@
         <div class="info-item">
           <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Lluvia últimos 14 días:</span>
           <span id="c-rain">—</span>
-        </div>
-        <div class="info-item">
-          <span>Condiciones recientes:</span>
-          <span id="c-weather-score">—</span>
         </div>
         <div class="info-item">
           <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Temperatura media:</span>
@@ -640,19 +945,23 @@
           <span>Fuente meteorológica más cercana:</span>
           <span id="c-weather-distance">—</span>
         </div>
-      </div>
-      <div id="species-comparison" class="species-comparison" hidden>
-        <div class="species-comparison-title">Hábitat y condiciones por especie</div>
+        <div class="info-item info-wide">
+          <span>Lectura del índice:</span>
+          <span id="c-reason">—</span>
+        </div>
+        </div>
+      </details>
+      <details id="species-comparison" class="species-comparison" hidden>
+        <summary class="species-comparison-title">Cómo interpretar este resultado</summary>
         <div id="species-comparison-list" class="species-comparison-list"></div>
         <p class="species-comparison-note">El pH y las condiciones son estimaciones orientativas; no confirman que haya setas.</p>
-      </div>
+      </details>
     </div>
 
-    <!-- Footer -->
-    <div class="footer">
-      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-      <span>El mapa orienta sobre el hábitat y el tiempo reciente, pero no confirma que haya setas. La lluvia, la temperatura y el pH son estimaciones, no mediciones exactas de cada lugar.</span>
-    </div>
+    <details class="menu-section about-section">
+      <summary>Sobre estos datos</summary>
+      <p>La lluvia, la temperatura y el pH son estimaciones; no son mediciones exactas de cada lugar y no confirman que haya setas.</p>
+    </details>
   </div>
 
   <div class="map-wrap">
@@ -1120,6 +1429,7 @@
     const loading = document.getElementById('loading');
     const status = document.getElementById('data-status');
     loading.classList.add('active');
+    document.getElementById('cell-card').hidden = true;
     rawData = null;
 
     try {
@@ -1158,6 +1468,7 @@
   }
 
   function clearDisplayedData() {
+    document.getElementById('cell-card').hidden = true;
     const source = map.getSource('h3');
     if (source) source.setData({ type: 'FeatureCollection', features: [] });
     document.getElementById('stat-total').textContent = '0';
@@ -1271,10 +1582,6 @@
       map.on('mouseleave','h3-fill', () => { map.getCanvas().style.cursor = ''; });
     }
 
-    // Auto-mostrar celda destacada
-    const best = cells.find(c => c.s >= 50) || cells[0];
-    if (best) selectCell(best);
-
     document.getElementById('loading').classList.remove('active');
   }
 
@@ -1284,6 +1591,11 @@
     } else {
       showCell(cell);
     }
+    document.getElementById('map-hint').hidden = true;
+    openMenu();
+    requestAnimationFrame(() => {
+      document.getElementById('cell-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
   }
 
   function formatNumber(value) {
@@ -1458,6 +1770,7 @@
   }
 
   function showCell(p) {
+    document.getElementById('cell-card').hidden = false;
     const s = parseFloat(p.hs ?? p.s) || 0;
     const pill = document.getElementById('score-pill');
     pill.textContent = currentSpecies === 'all'
@@ -1589,6 +1902,26 @@
     el.className = 'pulse';
     marker = new maplibregl.Marker(el).setLngLat([lon, lat]).addTo(map);
     map.flyTo({ center:[lon, lat], zoom: 12, speed: 1.4, essential: true });
+    openMenu();
+    document.getElementById('map-hint').hidden = true;
+    map.once('moveend', () => {
+      if (!map.getLayer('h3-fill')) return;
+      const point = map.project([lon, lat]);
+      const nearbyCells = map.queryRenderedFeatures([
+        [point.x - 80, point.y - 80],
+        [point.x + 80, point.y + 80],
+      ], { layers: ['h3-fill'] });
+      if (!nearbyCells.length) return;
+      nearbyCells.sort((a, b) => {
+        const distance = feature => {
+          const dx = Number(feature.properties.lon) - lon;
+          const dy = Number(feature.properties.lat) - lat;
+          return dx * dx * Math.cos(lat * Math.PI / 180) ** 2 + dy * dy;
+        };
+        return distance(a) - distance(b);
+      });
+      selectCell(nearbyCells[0].properties);
+    });
   }
 
   document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) suggestEl.style.display = 'none'; });
@@ -1644,6 +1977,29 @@
   // ================================================================
   // ARRANQUE
   // ================================================================
+  const menuToggle = document.getElementById('menu-toggle');
+  const menuBackdrop = document.getElementById('menu-backdrop');
+  function openMenu() {
+    document.body.classList.add('menu-open');
+    menuToggle.setAttribute('aria-expanded', 'true');
+  }
+  function closeMenu() {
+    document.body.classList.remove('menu-open');
+    menuToggle.setAttribute('aria-expanded', 'false');
+  }
+  menuToggle.addEventListener('click', () => {
+    if (document.body.classList.contains('menu-open')) closeMenu();
+    else openMenu();
+  });
+  document.getElementById('menu-close').addEventListener('click', closeMenu);
+  menuBackdrop.addEventListener('click', closeMenu);
+  document.getElementById('map-hint-close').addEventListener('click', () => {
+    document.getElementById('map-hint').hidden = true;
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && document.body.classList.contains('menu-open')) closeMenu();
+  });
+
   map.on('load', () => loadSpecies(currentSpecies));
 
   let deferredInstallPrompt = null;
