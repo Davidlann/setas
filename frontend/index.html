@@ -2075,6 +2075,12 @@
     guadalajara: {center:[-2.90, 41.10], zoom: 8.9},
     all:         {center:[-3.42, 41.25], zoom: 7.8}
   };
+  const PROVINCE_LABELS = [
+    {name:'Soria', center:[-2.55, 41.55], capital:[-2.46, 41.76]},
+    {name:'Madrid', center:[-3.75, 40.35], capital:[-3.70, 40.42]},
+    {name:'Segovia', center:[-4.15, 41.15], capital:[-4.12, 40.95]},
+    {name:'Guadalajara', center:[-2.70, 40.98], capital:[-3.17, 40.63]}
+  ];
 
   // Filtros de coordenadas por provincia (bounding box)
   const PROV_BBOX = {
@@ -2353,6 +2359,54 @@
       source: 'satellite-tiles',
       layout: { visibility: 'none' }
     });
+
+    map.addSource('province-labels', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: PROVINCE_LABELS.map(province => ({
+          type: 'Feature',
+          properties: {
+            name: province.name,
+            capitalLon: province.capital[0],
+            capitalLat: province.capital[1]
+          },
+          geometry: { type: 'Point', coordinates: province.center }
+        }))
+      }
+    });
+    map.addLayer({
+      id: 'province-labels',
+      type: 'symbol',
+      source: 'province-labels',
+      maxzoom: 10,
+      layout: {
+        'text-field': ['get', 'name'],
+        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+        'text-size': ['interpolate', ['linear'], ['zoom'], 5, 13, 8, 17, 10, 15],
+        'text-letter-spacing': 0.08,
+        'text-anchor': 'center',
+        'text-allow-overlap': true,
+        'text-ignore-placement': true
+      },
+      paint: {
+        'text-color': '#493b2d',
+        'text-halo-color': 'rgba(255, 255, 255, 0.94)',
+        'text-halo-width': 2.5,
+        'text-halo-blur': 0.3
+      }
+    });
+    map.on('click', 'province-labels', event => {
+      const province = event.features && event.features[0] && event.features[0].properties;
+      if (!province) return;
+      map.flyTo({
+        center: [Number(province.capitalLon), Number(province.capitalLat)],
+        zoom: 10.5,
+        speed: 1.2
+      });
+    });
+    map.on('mouseenter', 'province-labels', () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'province-labels', () => { map.getCanvas().style.cursor = ''; });
   });
 
   function setSatelliteMode(enable) {
@@ -2714,6 +2768,9 @@
       const boundary = h3.cellToBoundary(c.h);  // [[lat,lon], ...]
       const coords = boundary.map(([la, lo]) => [lo, la]);
       coords.push(coords[0]); // cerrar polígono
+      const cellScore = currentLayer === 'search' ? c.cs
+        : currentLayer === 'weather' ? c.ws
+          : currentLayer === 'habitat' ? c.hs : null;
 
       // Elegir color según capa
       let color;
@@ -2726,7 +2783,14 @@
 
       return {
         type: 'Feature',
-        properties: { ...c, _r: color[0], _g: color[1], _b: color[2], _a: color[3] },
+        properties: {
+          ...c,
+          _r: color[0],
+          _g: color[1],
+          _b: color[2],
+          _a: color[3],
+          _scoreLabel: Number.isFinite(cellScore) ? String(Math.round(cellScore)) : ''
+        },
         geometry: { type: 'Polygon', coordinates: [coords] }
       };
     });
@@ -2770,6 +2834,26 @@
         type: 'line',
         source: 'h3',
         paint: { 'line-color':'#fff', 'line-width':0.8, 'line-opacity':0.28 }
+      });
+
+      map.addLayer({
+        id: 'h3-score-label',
+        type: 'symbol',
+        source: 'h3',
+        minzoom: 11,
+        filter: ['!=', ['get', '_scoreLabel'], ''],
+        layout: {
+          'text-field': ['get', '_scoreLabel'],
+          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+          'text-size': 11,
+          'text-anchor': 'center',
+          'text-allow-overlap': false
+        },
+        paint: {
+          'text-color': '#30261d',
+          'text-halo-color': 'rgba(255, 255, 255, 0.92)',
+          'text-halo-width': 1.5
+        }
       });
 
       // Click para inspección

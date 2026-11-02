@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mapa-setero-v8';
+const CACHE_NAME = 'mapa-setero-v9';
 const DATA_PATH = /\/public\/data\/experimental\/boletus_[a-z]+\.json$/;
 const STATIC_ASSET_PATH = /\.(?:webmanifest|svg|png)$/;
 
