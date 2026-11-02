@@ -242,6 +242,44 @@
     .info-wide { grid-column: 1 / -1; }
     .info-item span:first-child { color: var(--dim); font-size: 10.5px; display: flex; align-items: center; gap: 3px; }
     .info-item span:last-child { font-weight: 600; color: #e2e8f0; overflow-wrap: anywhere; }
+    .info-help-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      margin-left: 3px;
+      padding: 0;
+      font-size: 9.5px;
+      font-family: serif;
+      font-style: italic;
+      font-weight: 700;
+      color: #76563d;
+      background: #f4efe5;
+      border: 1px solid #d5c8b5;
+      border-radius: 50%;
+      cursor: pointer;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: background .15s, color .15s;
+    }
+    .info-help-btn:hover, .info-help-btn:focus-visible {
+      background: #76563d;
+      color: #fffaf3;
+      border-color: #76563d;
+      outline: none;
+    }
+    .info-dialog {
+      width: min(440px, calc(100vw - 32px));
+      border-radius: 16px;
+      padding: 18px 20px;
+    }
+    .info-dialog p {
+      margin: 0;
+      color: #493b2d;
+      font-size: 13px;
+      line-height: 1.55;
+    }
 
     /* Footer */
     .footer { font-size: 10.5px; color: var(--dim); border-top: 1px solid var(--border); padding-top: 9px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
@@ -879,9 +917,7 @@
       <button id="menu-close" class="menu-close" type="button" aria-label="Cerrar menú">×</button>
     </div>
 
-    <div id="data-status" class="data-status" role="status">
-      Orientativo: el mapa no confirma la presencia de setas.
-    </div>
+    <div id="data-status" class="data-status" role="status"></div>
 
     <!-- Province pills -->
     <div class="prov-row">
@@ -969,14 +1005,14 @@
           </div>
           <input type="range" id="rain-filter" min="0" max="100" step="5" value="0"
             aria-label="Filtrar por lluvia mínima acumulada en los últimos 14 días"/>
-          <p class="species-comparison-note">Filtra por lluvia estimada; no garantiza que hayan salido setas.</p>
+          <p class="species-comparison-note">Filtra por lluvia acumulada en los últimos 14 días.</p>
         </div>
         <div class="stats">
           <span>Celdas visibles: <strong id="stat-total">—</strong></span>
           <span id="stat-fav-label">Índice ≥50: <strong id="stat-fav">—</strong></span>
         </div>
         <div class="legend">
-          <div class="legend-title" id="leg-title">Índice combinado experimental (0–100)</div>
+          <div class="legend-title" id="leg-title">Índice combinado (0–100)</div>
           <div class="legend-bar" id="leg-bar">
             <div class="step" style="background:#334155"></div>
             <div class="step" style="background:#f97316"></div>
@@ -1005,11 +1041,11 @@
       </div>
       <div class="info-grid">
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 19 12 15 12 20 19 4 19 9 12 5 12 12 2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Masa forestal:</span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 19 12 15 12 20 19 4 19 9 12 5 12 12 2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Masa forestal: <button class="info-help-btn" type="button" aria-label="Información sobre masa forestal" data-title="Masa forestal" data-info="Los Boletus forman micorrizas obligadas asociándose a las raíces de árboles específicos (pinos, robles, hayas, encinas o castaños). Sin la especie arbórea compatible, el hongo no puede asociarse ni fructificar.">i</button></span>
           <span id="c-tree">Haz clic en un hexágono</span>
         </div>
         <div class="info-item">
-          <span>Condiciones recientes:</span>
+          <span>Condiciones recientes: <button class="info-help-btn" type="button" aria-label="Información sobre condiciones recientes" data-title="Condiciones recientes" data-info="Calificación meteorológica de los últimos 14 días. Valora conjuntamente la lluvia caída, las temperaturas y el balance hídrico necesarios para romper la dormancia miceliar y desencadenar la brotada.">i</button></span>
           <span id="c-weather-score">—</span>
         </div>
       </div>
@@ -1017,47 +1053,47 @@
         <summary>Más datos del lugar</summary>
         <div class="info-grid">
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M10 2v7.31L4.66 17.5A2 2 0 0 0 6.32 20.5h11.36a2 2 0 0 0 1.66-3L14 9.31V2"/></svg> pH SoilGrids (Q05–Q95):</span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M10 2v7.31L4.66 17.5A2 2 0 0 0 6.32 20.5h11.36a2 2 0 0 0 1.66-3L14 9.31V2"/></svg> pH SoilGrids (Q05–Q95): <button class="info-help-btn" type="button" aria-label="Información sobre pH del suelo" data-title="pH del suelo" data-info="Los Boletus edulis y B. pinophilus son marcadamente acidófilos (óptimo pH 4,5–6,0). En suelos calizos o básicos (pH > 7) su presencia es prácticamente nula, cediendo su lugar a otras especies.">i</button></span>
           <span id="c-ph">—</span>
         </div>
         <div class="info-item">
-          <span>Textura SoilGrids (5–15 cm):</span>
+          <span>Textura SoilGrids (5–15 cm): <button class="info-help-btn" type="button" aria-label="Información sobre textura del suelo" data-title="Textura del suelo" data-info="Determina la capacidad de retención de agua y oxigenación. Suelos equilibrados o franco-arenosos favorecen el avance del micelio sin encharcar. Suelos muy arcillosos asfixian o pudren los primordios.">i</button></span>
           <span id="c-texture">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Lluvia últimos 14 días:</span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Lluvia últimos 14 días: <button class="info-help-btn" type="button" aria-label="Información sobre lluvia acumulada" data-title="Lluvia últimos 14 días" data-info="La precipitación acumulada es el activador hídrico esencial. Se necesita una recarga profunda (normalmente ≥35–45 mm en 10-14 días) para empapar el mantillo del bosque y permitir la salida de setas.">i</button></span>
           <span id="c-rain">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Temperatura media:</span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Temperatura media: <button class="info-help-btn" type="button" aria-label="Información sobre temperatura media" data-title="Temperatura media" data-info="Temperatura media de los últimos 14 días. Para Boletus edulis el rango ideal se sitúa entre 10 °C y 18 °C. Por debajo de 5 °C o con heladas la actividad se paraliza; con más de 22 °C el ambiente suele desecar el suelo.">i</button></span>
           <span id="c-temp">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> Altitud / orientación:</span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> Altitud / orientación: <button class="info-help-btn" type="button" aria-label="Información sobre altitud y orientación" data-title="Altitud y orientación" data-info="La altitud y exposición solar marcan el microclima. Las laderas norte/noreste preservan mejor la humedad en veranos tardíos y principios de otoño; las solanas templan antes en primavera y otoño avanzado.">i</button></span>
           <span id="c-topo">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> Humedad estimada del suelo:</span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> Humedad estimada del suelo: <button class="info-help-btn" type="button" aria-label="Información sobre humedad del suelo" data-title="Humedad del suelo" data-info="Porcentaje de humedad en las capas superficiales donde se forman los botones florales (primordios). Mantiene hidratada la estructura fúngica antes de emerger del sustrato.">i</button></span>
           <span id="c-moist">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Balance hídrico (P - ET0):</span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Balance hídrico (P - ET0): <button class="info-help-btn" type="button" aria-label="Información sobre balance hídrico" data-title="Balance hídrico (P - ET0)" data-info="Diferencia entre lluvia acumulada y evapotranspiración. Si es negativo, el calor y el viento están evaporando el agua más rápido de lo que llovió, frenando el desarrollo miceliar.">i</button></span>
           <span id="c-water-balance">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Temp. suelo (0–7 cm):</span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Temp. suelo (0–7 cm): <button class="info-help-btn" type="button" aria-label="Información sobre temperatura del suelo" data-title="Temperatura del suelo" data-info="Temperatura en el estrato húmico superior, donde habita el micelio. Es más estable que la del aire y decisiva: el micelio necesita temperaturas de 8 °C a 16 °C para movilizar reservas y alimentar las setas.">i</button></span>
           <span id="c-soil-temp">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Choque térmico reciente:</span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Choque térmico reciente: <button class="info-help-btn" type="button" aria-label="Información sobre choque térmico" data-title="Choque térmico reciente" data-info="Descenso notable de temperatura (caída de 2 °C a 4 °C) tras un episodio de lluvia. En especies otoñales (como B. edulis y B. pinophilus) actúa como señal biológica que dispara el nacimiento masivo de setas.">i</button></span>
           <span id="c-thermal-shock">—</span>
         </div>
         <div class="info-item">
-          <span>Fuente meteorológica más cercana:</span>
+          <span>Fuente meteorológica más cercana: <button class="info-help-btn" type="button" aria-label="Información sobre fuente meteorológica" data-title="Fuente meteorológica" data-info="Distancia en línea recta a la coordenada meteorológica más próxima de la que proceden los registros y predicciones de lluvia y temperatura.">i</button></span>
           <span id="c-weather-distance">—</span>
         </div>
         <div class="info-item info-wide">
-          <span>Lectura del índice:</span>
+          <span>Lectura del índice: <button class="info-help-btn" type="button" aria-label="Información sobre lectura del índice" data-title="Lectura del índice" data-info="Síntesis que pondera el hábitat forestal (tipo de masa y suelo) junto a las condiciones de humedad y temperatura registradas recientemente.">i</button></span>
           <span id="c-reason">—</span>
         </div>
         </div>
@@ -1065,15 +1101,21 @@
       <details id="species-comparison" class="species-comparison" hidden>
         <summary class="species-comparison-title">Detalle de las especies seleccionadas</summary>
         <div id="species-comparison-list" class="species-comparison-list"></div>
-        <p class="species-comparison-note">El índice combinado es la media geométrica de hábitat y tiempo para cada especie. Si eliges varias, se muestra el mejor índice entre ellas. Es experimental: no representa una probabilidad.</p>
+        <p class="species-comparison-note">El índice combinado calcula la media geométrica de hábitat y condiciones meteorológicas recientes para cada especie. Si eliges varias, se muestra el valor más favorable.</p>
       </details>
     </div>
-
-    <details class="menu-section about-section">
-      <summary>Sobre estos datos</summary>
-      <p>El hábitat, la lluvia, la temperatura y el pH son estimaciones regionales, no mediciones exactas de cada lugar. El índice meteorológico ya penaliza las mínimas bajo un umbral térmico experimental por especie. La época del año se explica en las guías, pero aún no se usa como factor numérico: cambia con la región, la altitud y el año. Ningún índice calcula una probabilidad ni confirma o descarta fructificación.</p>
-    </details>
   </div>
+
+  <dialog id="info-dialog" class="species-dialog info-dialog" aria-labelledby="info-dialog-title">
+    <div class="species-dialog-head">
+      <div>
+        <h2 id="info-dialog-title"></h2>
+        <p id="info-dialog-subtitle">Importancia micológica</p>
+      </div>
+      <button id="info-dialog-close" class="species-dialog-close" type="button" aria-label="Cerrar">×</button>
+    </div>
+    <p id="info-dialog-body"></p>
+  </dialog>
 
   <div class="map-wrap">
     <div id="map"></div>
@@ -1365,7 +1407,8 @@
   let currentMinScore = 0;
   let currentRainFilter = 0;
   let currentProv    = 'all';
-  let rawData        = null;   // índice experimental cargado de .json
+  let rawData        = null;   // dataset cargado de .json
+  let selectedCellH  = null;   // H3 index de la celda actualmente seleccionada
   const speciesDatasets = new Map();
   const speciesCellMaps = new Map();
   const pendingSpeciesLoads = new Map();
@@ -1542,7 +1585,10 @@
     const loading = document.getElementById('loading');
     const status = document.getElementById('data-status');
     loading.classList.add('active');
-    document.getElementById('cell-card').hidden = true;
+    const previousSelectedH = selectedCellH;
+    if (!previousSelectedH) {
+      document.getElementById('cell-card').hidden = true;
+    }
     rawData = null;
 
     try {
@@ -1569,9 +1615,31 @@
       const staleDataNotice = rawData.date < todayInSpain
         ? ' La actualización diaria está pendiente.'
         : '';
-      status.textContent = `Datos del ${rawData.date}.${staleDataNotice} El color muestra un índice experimental de búsqueda, no una probabilidad ni confirma que haya setas.`;
+      status.textContent = `Datos del ${rawData.date}.${staleDataNotice}`;
       status.classList.remove('verified');
       render();
+      if (previousSelectedH && rawData) {
+        const cellData = rawData.cells.find(c => c.h === previousSelectedH);
+        if (cellData) {
+          const selectedCells = selectedSpecies
+            .map(speciesId => speciesCellMaps.get(speciesId)?.get(cellData.h))
+            .filter(Boolean);
+          const mergedCell = {
+            ...cellData,
+            hs: Math.max(...selectedCells.map(selectedCell => selectedCell.hs)),
+            ws: Math.max(...selectedCells.map(selectedCell => selectedCell.ws)),
+            cs: Math.max(...selectedCells.map(selectedCell =>
+              Number.isFinite(selectedCell.cs)
+                ? selectedCell.cs
+                : Math.sqrt(Math.max(0, selectedCell.hs) * Math.max(0, selectedCell.ws))
+            )),
+          };
+          selectCell(mergedCell);
+        } else {
+          document.getElementById('cell-card').hidden = true;
+          selectedCellH = null;
+        }
+      }
     } catch (error) {
       if (requestId !== speciesLoadRequest) return;
       console.error(`No se pudieron cargar datos para ${speciesToLoad.join(', ')}.`, error);
@@ -1588,6 +1656,7 @@
   }
 
   function clearDisplayedData() {
+    selectedCellH = null;
     document.getElementById('cell-card').hidden = true;
     const source = map.getSource('h3');
     if (source) source.setData({ type: 'FeatureCollection', features: [] });
@@ -1718,6 +1787,7 @@
   }
 
   function selectCell(cell) {
+    selectedCellH = cell.h;
     showSelectedSpeciesAtCell(cell);
     document.getElementById('map-hint').hidden = true;
     openMenu();
@@ -1846,7 +1916,7 @@
       ? dataset.soil_texture_metadata.scoring.max_points
       : null;
     const textureText = hasTexture
-      ? `SoilGrids (5–15 cm): arena ${formatNumber(cell.sand)}%, limo ${formatNumber(cell.silt)}%, arcilla ${formatNumber(cell.clay)}%. ${Number.isFinite(textureScore) ? `Aporta ${formatNumber(textureScore)}/${formatNumber(textureMaxPoints)} puntos edáficos con una regla general experimental, no calibrada por especie.` : 'No disponible para puntuar.'}`
+      ? `SoilGrids (5–15 cm): arena ${formatNumber(cell.sand)}%, limo ${formatNumber(cell.silt)}%, arcilla ${formatNumber(cell.clay)}%. ${Number.isFinite(textureScore) ? `Aporta ${formatNumber(textureScore)}/${formatNumber(textureMaxPoints)} puntos edáficos con una regla general no calibrada por especie.` : 'No disponible para puntuar.'}`
       : 'Textura no disponible; no se aplica penalización por falta de datos.';
 
     const sourceDistance = Number(cell.weather_distance_km);
@@ -1862,8 +1932,8 @@
     const frostText = Number.isFinite(minTemp)
       ? Number.isFinite(minTempLimit)
         ? minTemp < minTempLimit
-          ? ` Mínima ${formatNumber(minTemp)} °C, por debajo del umbral experimental de ${formatNumber(minTempLimit)} °C; esto reduce el índice meteorológico.`
-          : ` Mínima ${formatNumber(minTemp)} °C; el umbral experimental de esta especie es ${formatNumber(minTempLimit)} °C.`
+          ? ` Mínima ${formatNumber(minTemp)} °C, por debajo del umbral de ${formatNumber(minTempLimit)} °C; esto reduce el índice meteorológico.`
+          : ` Mínima ${formatNumber(minTemp)} °C; el umbral de esta especie es ${formatNumber(minTempLimit)} °C.`
         : ` Mínima ${formatNumber(minTemp)} °C; el índice meteorológico ya aplica un umbral térmico para esta especie.`
       : '';
     const weatherText = `Índice orientativo: ${formatNumber(cell.ws)}/100. Lluvia en 14 días: ${formatNumber(cell.p14)} mm; humedad estimada: ${formatNumber(cell.moist)}%; temperatura media: ${formatNumber(cell.t)} °C.${frostText}${distanceNote}`;
@@ -1956,8 +2026,8 @@
     const hostNote = p.host === 'unknown' ? ' (hospedador incierto)' : '';
     document.getElementById('c-tree').textContent  = forestNameEs(p.tree) + hostNote;
     document.getElementById('c-reason').textContent = currentLayer === 'search'
-      ? 'Índice experimental: combina hábitat y tiempo mediante su media geométrica. No es una probabilidad.'
-      : 'Hábitat y meteorología son índices separados; una puntuación alta no confirma fructificación.';
+      ? 'Combina el hábitat potencial del bosque y las condiciones meteorológicas recientes.'
+      : 'Hábitat potencial y condiciones meteorológicas recientes evaluados por separado.';
     document.getElementById('c-ph').textContent    = p.ph !== undefined
       ? `${formatNumber(p.ph)} (${formatNumber(p.ph05)}–${formatNumber(p.ph95)})` : '—';
     const hasTexture = ['sand', 'silt', 'clay'].every(key =>
@@ -2005,9 +2075,9 @@
   // CAPAS Y LEYENDA
   // ================================================================
   const LEGEND_CFG = {
-    search:  { title:'Índice combinado experimental (0–100)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','70','100'], note:'Media geométrica de hábitat y tiempo reciente; no es una probabilidad.' },
-    habitat: { title:'Hábitat potencial (0–100)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','70','100'], note:'Hábitat adecuado no significa que haya fructificación.' },
-    weather: { title:'Condiciones meteorológicas recientes (0–100)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','70','100'], note:'Señal reciente de lluvia, temperatura y humedad; no confirma presencia.' },
+    search:  { title:'Índice combinado (0–100)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','70','100'], note:'Media geométrica de hábitat forestal y tiempo reciente.' },
+    habitat: { title:'Hábitat potencial (0–100)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','70','100'], note:'Idoneidad de la masa forestal, suelo y relieve.' },
+    weather: { title:'Condiciones meteorológicas recientes (0–100)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','70','100'], note:'Señal reciente de lluvia, temperatura y humedad.' },
     precip: { title:'Lluvia acumulada en 14 días', bar:['#0f172a','#0284c7','#06b6d4','#38bdf8','#7dd3fc'], labels:['0 mm','10 mm','25 mm','45 mm','≥45 mm'], note:'Precipitación estimada. El color oscuro indica 0 mm o dato ausente.' },
     forest: { title:'Masa forestal (MFE50)', categorical:true, bar:['#059669','#d97706','#b45309','#4d7c0f','#475569'], labels:['Pinos','Hayas','Robles / melojos','Encinas','Otros / sin dato'], note:'Formación forestal predominante identificada en el mapa.' },
     ph:     { title:'pH estimado del suelo', bar:['#ef4444','#f59e0b','#10b981','#3b82f6'], labels:['<4,5 ácido','4,5–5,5','5,5–6,5','≥6,5'], note:'Estimación de SoilGrids; gris indica dato ausente. No es una medición local.' }
@@ -2244,6 +2314,32 @@
     if (event.key === 'Escape') {
       event.preventDefault();
       speciesDialog.close();
+    }
+  });
+
+  // Modal de información de métricas (i)
+  document.addEventListener('click', event => {
+    const btn = event.target.closest('.info-help-btn');
+    if (!btn) return;
+    event.stopPropagation();
+    const title = btn.getAttribute('data-title') || 'Información';
+    const info = btn.getAttribute('data-info') || '';
+    document.getElementById('info-dialog-title').textContent = title;
+    document.getElementById('info-dialog-body').textContent = info;
+    document.getElementById('info-dialog').showModal();
+  });
+
+  const infoDialog = document.getElementById('info-dialog');
+  document.getElementById('info-dialog-close').addEventListener('click', () => {
+    infoDialog.close();
+  });
+  infoDialog.addEventListener('click', event => {
+    if (event.target === event.currentTarget) event.currentTarget.close();
+  });
+  infoDialog.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      infoDialog.close();
     }
   });
 
