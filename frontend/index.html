@@ -1021,6 +1021,10 @@
           <span id="c-ph">—</span>
         </div>
         <div class="info-item">
+          <span>Textura SoilGrids (5–15 cm):</span>
+          <span id="c-texture">—</span>
+        </div>
+        <div class="info-item">
           <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Lluvia últimos 14 días:</span>
           <span id="c-rain">—</span>
         </div>
@@ -1035,6 +1039,18 @@
         <div class="info-item">
           <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> Humedad estimada del suelo:</span>
           <span id="c-moist">—</span>
+        </div>
+        <div class="info-item">
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Balance hídrico (P - ET0):</span>
+          <span id="c-water-balance">—</span>
+        </div>
+        <div class="info-item">
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Temp. suelo (0–7 cm):</span>
+          <span id="c-soil-temp">—</span>
+        </div>
+        <div class="info-item">
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Choque térmico reciente:</span>
+          <span id="c-thermal-shock">—</span>
         </div>
         <div class="info-item">
           <span>Fuente meteorológica más cercana:</span>
@@ -1587,6 +1603,9 @@
     document.getElementById('c-temp').textContent = '—';
     document.getElementById('c-topo').textContent = '—';
     document.getElementById('c-moist').textContent = '—';
+    document.getElementById('c-water-balance').textContent = '—';
+    document.getElementById('c-soil-temp').textContent = '—';
+    document.getElementById('c-thermal-shock').textContent = '—';
     document.getElementById('c-weather-distance').textContent = '—';
     document.getElementById('species-comparison').hidden = true;
     document.getElementById('species-comparison-list').replaceChildren();
@@ -1785,7 +1804,7 @@
       : 'Se aplicó una exclusión de hábitat';
     const habitatIndexText = habitatExcluded
       ? `Índice 0/100. ${exclusionReason}. Los indicadores de árbol y altitud se muestran por separado y no anulan esta exclusión.`
-      : `Índice orientativo ${formatNumber(habitatScore)}/100; combina hospedador, cobertura, altitud, pH y relieve.`;
+      : `Índice orientativo ${formatNumber(habitatScore)}/100; combina hospedador, cobertura, altitud, pH, textura y relieve.`;
     const tree = forestNameEs(cell.tree);
     const phRange = profile.ph_tolerated;
     const altitudeRange = profile.altitude_range_meters;
@@ -1818,6 +1837,17 @@
       : cell.ph < phRange[0] || cell.ph > phRange[1];
     const phStatus = phWhollyInside ? 'good' : phWhollyOutside ? 'bad' : 'uncertain';
     const phText = `Estimado ${cell.ph}${phHasInterval ? ` (rango ${ph05}–${ph95})` : ''}; referencia ${phRange[0]}–${phRange[1]}.`;
+    const hasTexture = ['sand', 'silt', 'clay'].every(key =>
+      cell[key] !== undefined && cell[key] !== null && Number.isFinite(Number(cell[key]))
+    );
+    const textureScore = cell.soil_texture_score;
+    const textureMaxPoints = dataset.soil_texture_metadata &&
+      dataset.soil_texture_metadata.scoring
+      ? dataset.soil_texture_metadata.scoring.max_points
+      : null;
+    const textureText = hasTexture
+      ? `SoilGrids (5–15 cm): arena ${formatNumber(cell.sand)}%, limo ${formatNumber(cell.silt)}%, arcilla ${formatNumber(cell.clay)}%. ${Number.isFinite(textureScore) ? `Aporta ${formatNumber(textureScore)}/${formatNumber(textureMaxPoints)} puntos edáficos con una regla general experimental, no calibrada por especie.` : 'No disponible para puntuar.'}`
+      : 'Textura no disponible; no se aplica penalización por falta de datos.';
 
     const sourceDistance = Number(cell.weather_distance_km);
     const distanceNote = cell.weather_distance_km != null && Number.isFinite(sourceDistance)
@@ -1847,6 +1877,7 @@
         text: `${cell.elev} m; referencia ${altitudeRange[0]}–${altitudeRange[1]} m.`
       },
       { label: 'pH estimado', status: phStatus, text: phText },
+      { label: 'Textura del suelo', status: 'uncertain', text: textureText },
       { label: 'Tiempo reciente', status: weatherStatus, text: weatherText }
     ];
   }
@@ -1929,6 +1960,12 @@
       : 'Hábitat y meteorología son índices separados; una puntuación alta no confirma fructificación.';
     document.getElementById('c-ph').textContent    = p.ph !== undefined
       ? `${formatNumber(p.ph)} (${formatNumber(p.ph05)}–${formatNumber(p.ph95)})` : '—';
+    const hasTexture = ['sand', 'silt', 'clay'].every(key =>
+      p[key] !== undefined && p[key] !== null && Number.isFinite(Number(p[key]))
+    );
+    document.getElementById('c-texture').textContent = hasTexture
+      ? `Arena ${formatNumber(p.sand)}% · limo ${formatNumber(p.silt)}% · arcilla ${formatNumber(p.clay)}%${Number.isFinite(p.soil_texture_score) ? ` · ${formatNumber(p.soil_texture_score)}/${formatNumber(p.soil_texture_score_max)} puntos` : ''}`
+      : 'Sin dato';
     document.getElementById('c-rain').textContent  = p.p14 !== undefined && p.p14 !== null
       ? `${formatNumber(p.p14)} mm`
       : '—';
@@ -1939,6 +1976,20 @@
     document.getElementById('c-topo').textContent  = `${p.elev || 0} m · Exp. ${p.asp || 'N'}`;
     document.getElementById('c-moist').textContent = p.moist !== undefined && p.moist !== null
       ? `${formatNumber(p.moist)}%` : '—';
+    document.getElementById('c-water-balance').textContent = p.wb !== undefined && p.wb !== null
+      ? `${p.wb > 0 ? '+' : ''}${formatNumber(p.wb)} mm` : '—';
+    document.getElementById('c-soil-temp').textContent = p.stemp !== undefined && p.stemp !== null
+      ? `${formatNumber(p.stemp)} °C` : '—';
+    let shockText = '—';
+    if (p.tshock !== undefined && p.tshock !== null) {
+      const sign = p.tshock > 0 ? '+' : '';
+      const desc = p.tshock_status === 'triggered_favorable' ? ' (Trigger favorable)'
+        : p.tshock_status === 'cold_suppressed' ? ' (Freno por frío)'
+        : p.tshock_status === 'warming_inhibited' ? ' (Calor continuo)'
+        : '';
+      shockText = `${sign}${formatNumber(p.tshock)} °C${desc}`;
+    }
+    document.getElementById('c-thermal-shock').textContent = shockText;
     document.getElementById('c-weather-distance').textContent =
       Number.isFinite(parseFloat(p.weather_distance_km))
         ? `${formatNumber(p.weather_distance_km)} km`

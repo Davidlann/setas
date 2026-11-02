@@ -32,6 +32,9 @@ class DuckDBManager:
                     slope_deg DOUBLE,
                     aspect_cardinal VARCHAR,
                     soil_ph DOUBLE,
+                    soil_sand_percent DOUBLE,
+                    soil_silt_percent DOUBLE,
+                    soil_clay_percent DOUBLE,
                     dominant_species VARCHAR,
                     canopy_cover DOUBLE,
                     is_forest BOOLEAN,
@@ -43,6 +46,14 @@ class DuckDBManager:
                 ADD COLUMN IF NOT EXISTS environmental_data_quality
                 VARCHAR DEFAULT 'unverified'
             """)
+            for column in (
+                "soil_sand_percent",
+                "soil_silt_percent",
+                "soil_clay_percent",
+            ):
+                con.execute(
+                    f"ALTER TABLE cells_static ADD COLUMN IF NOT EXISTS {column} DOUBLE"
+                )
 
             # 2. Histórico y snapshots de meteorología real diaria
             con.execute("""
@@ -65,6 +76,11 @@ class DuckDBManager:
                 ("weather_sampling_step_deg", "DOUBLE"),
                 ("weather_interpolation", "VARCHAR"),
                 ("weather_nearest_distance_km", "DOUBLE"),
+                ("soil_temp_mean_14d_celsius", "DOUBLE"),
+                ("et0_accum_14d_mm", "DOUBLE"),
+                ("water_balance_14d_mm", "DOUBLE"),
+                ("thermal_shock_celsius", "DOUBLE"),
+                ("wind_max_14d_kmh", "DOUBLE"),
             ):
                 con.execute(
                     f"ALTER TABLE meteo_snapshots ADD COLUMN IF NOT EXISTS "
@@ -94,13 +110,16 @@ class DuckDBManager:
             con.executemany("""
                 INSERT OR REPLACE INTO cells_static (
                     h3_index, latitude, longitude, elevation_m, slope_deg,
-                    aspect_cardinal, soil_ph, dominant_species, canopy_cover, is_forest,
+                    aspect_cardinal, soil_ph, soil_sand_percent, soil_silt_percent,
+                    soil_clay_percent, dominant_species, canopy_cover, is_forest,
                     environmental_data_quality
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, [
                 (
                     c["h3_index"], c["latitude"], c["longitude"], c["elevation_m"],
                     c["slope_deg"], c["aspect_cardinal"], c["soil_ph"],
+                    c.get("soil_sand_percent"), c.get("soil_silt_percent"),
+                    c.get("soil_clay_percent"),
                     c["dominant_species"], c["canopy_cover"], c["is_forest"],
                     c.get("environmental_data_quality", "unverified")
                 )
@@ -120,8 +139,11 @@ class DuckDBManager:
                     temp_mean_14d_celsius, temp_min_14d_celsius,
                     soil_moisture_percent, weather_source,
                     weather_sampling_step_deg, weather_interpolation,
-                    weather_nearest_distance_km
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    weather_nearest_distance_km,
+                    soil_temp_mean_14d_celsius, et0_accum_14d_mm,
+                    water_balance_14d_mm, thermal_shock_celsius,
+                    wind_max_14d_kmh
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, [
                 (
                     r["h3_index"], snapshot_date, r["precip_accum_7d_mm"], r["precip_accum_10d_mm"],
@@ -130,7 +152,12 @@ class DuckDBManager:
                     r["temp_mean_14d_celsius"], r["temp_min_14d_celsius"],
                     r["soil_moisture_percent"], r.get("weather_source"),
                     r.get("weather_sampling_step_deg"), r.get("weather_interpolation"),
-                    r.get("weather_nearest_distance_km")
+                    r.get("weather_nearest_distance_km"),
+                    r.get("soil_temp_mean_14d_celsius"),
+                    r.get("et0_accum_14d_mm"),
+                    r.get("water_balance_14d_mm"),
+                    r.get("thermal_shock_celsius"),
+                    r.get("wind_max_14d_kmh")
                 )
                 for r in records
             ])
@@ -180,6 +207,9 @@ class DuckDBManager:
                     c.elevation_m,
                     c.dominant_species,
                     c.soil_ph,
+                    c.soil_sand_percent,
+                    c.soil_silt_percent,
+                    c.soil_clay_percent,
                     s.score,
                     s.status,
                     s.calculation_date

@@ -1,4 +1,4 @@
-"""Ingesta de relieve IGN y pH de suelo SoilGrids para la malla H3 local."""
+"""Ingesta de relieve IGN y datos edáficos SoilGrids para la malla H3 local."""
 import argparse
 from contextlib import ExitStack
 from datetime import datetime, timezone
@@ -23,11 +23,16 @@ from backend.src.processing.h3_indexer import h3_to_lat_lng
 
 DEM_URL = "https://servicios.idee.es/wcs-inspire/mdt"
 DEM_COVERAGE = "Elevacion4258_200"
-SOIL_BASE_URL = "https://files.isric.org/soilgrids/latest/data/phh2o/"
+SOIL_BASE_URL = "https://files.isric.org/soilgrids/latest/data"
 SOIL_LAYERS = {
-    "mean": "phh2o_0-5cm_mean",
-    "q05": "phh2o_0-5cm_Q0.05",
-    "q95": "phh2o_0-5cm_Q0.95",
+    "mean": "phh2o/phh2o_0-5cm_mean",
+    "q05": "phh2o/phh2o_0-5cm_Q0.05",
+    "q95": "phh2o/phh2o_0-5cm_Q0.95",
+}
+SOIL_TEXTURE_LAYERS = {
+    "sand": "sand/sand_5-15cm_mean",
+    "silt": "silt/silt_5-15cm_mean",
+    "clay": "clay/clay_5-15cm_mean",
 }
 SOIL_SCALE_FACTOR = 10
 
@@ -86,7 +91,7 @@ def _sha256(path: Path) -> str:
 
 
 def _soil_vrt_metadata(session: requests.Session, layer: str):
-    vrt_url = f"{SOIL_BASE_URL}{layer}.vrt"
+    vrt_url = f"{SOIL_BASE_URL}/{layer}.vrt"
     response = session.get(vrt_url, timeout=90)
     response.raise_for_status()
     root = ET.fromstring(response.content)
@@ -161,7 +166,12 @@ def _download_soil_tiles(session, vrt_url, samples, layer_cache_dir, refresh):
                 temp_path = Path(temp_file.name)
             try:
                 with rasterio.open(temp_path) as dataset:
-                    if dataset.width != 600 or dataset.height != 600:
+                    if (
+                        dataset.count != 1
+                        or dataset.width <= 0
+                        or dataset.height <= 0
+                        or dataset.crs is None
+                    ):
                         raise RuntimeError(f"Tesela SoilGrids inesperada: {source_path}")
                 os.replace(temp_path, local_path)
             finally:
@@ -173,7 +183,7 @@ def _download_soil_tiles(session, vrt_url, samples, layer_cache_dir, refresh):
 def _sample_soil(session, coords, layer, cache_dir, refresh):
     vrt_url, srs, affine, rectangles = _soil_vrt_metadata(session, layer)
     samples = _find_soil_sources(coords, srs, affine, rectangles)
-    layer_cache_dir = cache_dir / layer
+    layer_cache_dir = cache_dir / Path(layer)
     paths = _download_soil_tiles(
         session, vrt_url, samples, layer_cache_dir, refresh
     )
@@ -191,7 +201,11 @@ def _sample_soil(session, coords, layer, cache_dir, refresh):
             if sample is None:
                 continue
             filename, row, column = sample
-            if not (0 <= row < 600 and 0 <= column < 600):
+            dataset = datasets[filename]
+            if not (
+                0 <= row < dataset.height
+                and 0 <= column < dataset.width
+            ):
                 continue
             value = rasters[filename][row, column]
             if value != datasets[filename].nodata and np.isfinite(value):
@@ -234,7 +248,7 @@ def _terrain_values(dataset, lat, lon, data):
 def ingest_environmental_layers(refresh=False, cell_limit=None):
     raw_dir = RAW_DATA_DIR / "environmental"
     dem_path = raw_dir / "ign" / "mdt_pnoa_200m_4326.tif"
-    soil_cache = raw_dir / "soilgrids" / "phh2o"
+    soil_cache = raw_dir / "soilgrids"
     session = requests.Session()
     session.headers["User-Agent"] = "MapaSetero/1.0 (environmental data ingestion)"
 
@@ -247,6 +261,14 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
             ALTER TABLE cells_static
             ADD COLUMN IF NOT EXISTS soil_ph_q95 DOUBLE
         """)
+        for column in (
+            "soil_sand_percent",
+            "soil_silt_percent",
+            "soil_clay_percent",
+        ):
+            con.execute(
+                f"ALTER TABLE cells_static ADD COLUMN IF NOT EXISTS {column} DOUBLE"
+            )
         rows = con.execute("""
             SELECT h3_index FROM cells_static WHERE is_forest = TRUE
         """).fetchall()
@@ -295,7 +317,23 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
             (
                 f"soil_ph_{name}",
                 relative_path.removeprefix("./"),
-                f"{SOIL_BASE_URL}{relative_path.removeprefix('./')}",
+                f"{SOIL_BASE_URL}/{layer.rsplit('/', 1)[0]}/{relative_path.removeprefix('./')}",
+                _sha256(path),
+                str(path),
+                retrieved_at,
+            )
+            for relative_path, path in tile_paths.items()
+        )
+    for component, layer in SOIL_TEXTURE_LAYERS.items():
+        soil_results[f"texture_{component}"], tile_paths = _sample_soil(
+            session, coords, layer, soil_cache, refresh
+        )
+        print(f"SoilGrids {layer}: {len(tile_paths)} teselas consultadas.")
+        source_assets.extend(
+            (
+                f"soil_{component}_percent",
+                relative_path.removeprefix("./"),
+                f"{SOIL_BASE_URL}/{layer.rsplit('/', 1)[0]}/{relative_path.removeprefix('./')}",
                 _sha256(path),
                 str(path),
                 retrieved_at,
@@ -309,6 +347,10 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
         soil_mean = soil_results["mean"][index]
         soil_q05 = soil_results["q05"][index]
         soil_q95 = soil_results["q95"][index]
+        texture_values = tuple(
+            soil_results[f"texture_{component}"][index]
+            for component in ("sand", "silt", "clay")
+        )
         soil_values = (soil_mean, soil_q05, soil_q95)
         if all(value is not None for value in soil_values) and not (
             0 <= soil_q05 <= soil_mean <= soil_q95 <= 14
@@ -317,12 +359,18 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
                 f"Valores SoilGrids fuera de rango o cuantiles incoherentes "
                 f"en la celda {cell['h3_index']}: {soil_values}"
             )
+        if any(value is not None and not 0 <= value <= 100 for value in texture_values):
+            raise RuntimeError(
+                f"Textura SoilGrids fuera del rango 0-100 % "
+                f"en la celda {cell['h3_index']}: {texture_values}"
+            )
         has_values = (
             elevation is not None and slope is not None
             and soil_mean is not None and soil_q05 is not None and soil_q95 is not None
         )
         records.append((
             elevation, slope, aspect, soil_mean, soil_q05, soil_q95,
+            *texture_values,
             "sourced_unvalidated" if has_values else "unverified",
             cell["h3_index"],
         ))
@@ -336,6 +384,9 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
                 soil_ph = ?,
                 soil_ph_q05 = ?,
                 soil_ph_q95 = ?,
+                soil_sand_percent = ?,
+                soil_silt_percent = ?,
+                soil_clay_percent = ?,
                 environmental_data_quality = ?
             WHERE h3_index = ?
         """, records)
@@ -365,7 +416,7 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
             *[
                 (
                     f"soil_ph_{key}",
-                    f"{SOIL_BASE_URL}{layer}.vrt",
+                    f"{SOIL_BASE_URL}/{layer}.vrt",
                     f"ISRIC SoilGrids 2.0 pH in H2O, depth 0-5 cm ({key})",
                     "250 m",
                     "pH × 10 in source, divided by 10",
@@ -374,6 +425,19 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
                     "Nearest SoilGrids raster pixel sampled at H3 center.",
                 )
                 for key, layer in SOIL_LAYERS.items()
+            ],
+            *[
+                (
+                    f"soil_{component}_percent",
+                    f"{SOIL_BASE_URL}/{layer}.vrt",
+                    f"ISRIC SoilGrids 2.0 {component} content, depth 5-15 cm (mean)",
+                    "250 m",
+                    "g/kg divided by 10 to percent by mass",
+                    "CC BY 4.0",
+                    retrieved_at,
+                    "Nearest SoilGrids raster pixel sampled at H3 center.",
+                )
+                for component, layer in SOIL_TEXTURE_LAYERS.items()
             ],
         ]
         con.executemany("""
@@ -396,7 +460,7 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
         VALUES (?, ?, ?, ?, ?, ?)
         """, source_assets)
 
-    sourced = sum(record[6] == "sourced_unvalidated" for record in records)
+    sourced = sum(record[9] == "sourced_unvalidated" for record in records)
     print(
         f"Variables ambientales obtenidas para {sourced}/{len(records)} celdas. "
         "Calidad: sourced_unvalidated; no habilita puntuaciones predictivas."
@@ -406,7 +470,10 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
         f"{sum(record[0] is None for record in records)}, pH medio "
         f"{sum(record[3] is None for record in records)}, cuantiles "
         f"q05 {sum(record[4] is None for record in records)} / "
-        f"q95 {sum(record[5] is None for record in records)}."
+        f"q95 {sum(record[5] is None for record in records)}; textura ausente "
+        f"arena {sum(record[6] is None for record in records)}, "
+        f"limo {sum(record[7] is None for record in records)}, "
+        f"arcilla {sum(record[8] is None for record in records)}."
     )
 
 

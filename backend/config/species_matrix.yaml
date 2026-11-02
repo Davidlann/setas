@@ -4,6 +4,21 @@
 version: "1.0"
 target_genus: "Boletus"
 
+soil_texture_scoring:
+  max_points: 7.0
+  sand_penalty:
+    start_percent: 70.0
+    zero_percent: 90.0
+  silt_penalty:
+    start_percent: 60.0
+    zero_percent: 80.0
+  clay_penalty:
+    start_percent: 40.0
+    zero_percent: 60.0
+  rationale: >-
+    Regla general experimental: penaliza extremos de arena, limo y arcilla;
+    no expresa preferencias específicas de especie ni una calibración local.
+
 species:
   boletus_edulis:
     common_name_es: "Calabaza / Hongo Blanco / Porcino"
@@ -32,8 +47,12 @@ species:
       accumulated_precip_14d_threshold_mm: 35.0
       accumulated_precip_14d_optimal_mm: 60.0
       mean_temp_optimal_celsius: [12.0, 18.0]
+      soil_temp_optimal_celsius: [10.0, 16.0]
       min_temp_limit_celsius: 1.0 # Sensible a heladas directas
       soil_moisture_min_percent: 25.0
+      thermal_shock_trigger: true # Sensible a choque térmico otoñal tras lluvias
+      thermal_shock_optimal_drop_celsius: [-6.0, -2.5]
+      wind_max_limit_kmh: 45.0
 
   boletus_aereus:
     common_name_es: "Hongo Negro / Boleto Bronceado"
@@ -60,8 +79,12 @@ species:
       accumulated_precip_14d_threshold_mm: 30.0
       accumulated_precip_14d_optimal_mm: 50.0
       mean_temp_optimal_celsius: [16.0, 24.0]
+      soil_temp_optimal_celsius: [15.0, 23.0]
       min_temp_limit_celsius: 4.0 # Más termófilo, no tolera frío prematuro
       soil_moisture_min_percent: 20.0
+      thermal_shock_trigger: false # Termófilo; el frío prematuro detiene la fructificación
+      thermal_shock_optimal_drop_celsius: [-3.0, 0.0]
+      wind_max_limit_kmh: 40.0
 
   boletus_pinophilus:
     common_name_es: "Hongo Pinícola / Boleto del Pino"
@@ -88,8 +111,12 @@ species:
       accumulated_precip_14d_threshold_mm: 40.0
       accumulated_precip_14d_optimal_mm: 70.0
       mean_temp_optimal_celsius: [10.0, 16.0]
+      soil_temp_optimal_celsius: [8.0, 15.0]
       min_temp_limit_celsius: -2.0 # Gran resistencia al frío de montaña
       soil_moisture_min_percent: 25.0
+      thermal_shock_trigger: true # Fuerte inducción por choque térmico en montaña
+      thermal_shock_optimal_drop_celsius: [-6.0, -2.0]
+      wind_max_limit_kmh: 50.0
 
   boletus_reticulatus:
     common_name_es: "Boleto Reticulado / Boleto de Verano"
@@ -116,5 +143,9 @@ species:
       accumulated_precip_14d_threshold_mm: 30.0
       accumulated_precip_14d_optimal_mm: 50.0
       mean_temp_optimal_celsius: [17.0, 25.0]
+      soil_temp_optimal_celsius: [16.0, 24.0]
       min_temp_limit_celsius: 6.0 # Estival puro, requiere calor para romper dormancia
       soil_moisture_min_percent: 20.0
+      thermal_shock_trigger: false # Estival, sensible a caídas bruscas
+      thermal_shock_optimal_drop_celsius: [-3.0, 0.0]
+      wind_max_limit_kmh: 40.0

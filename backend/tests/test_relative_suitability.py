@@ -40,6 +40,81 @@ class RelativeSuitabilityTests(unittest.TestCase):
         )
         self.assertNotEqual(result["combined_score"], result["weather_score"])
 
+    def test_missing_texture_keeps_the_existing_ph_score(self):
+        baseline = self.engine.calculate_relative_suitability(
+            "boletus_edulis", self.static, self.weather
+        )
+        missing_texture = self.engine.calculate_relative_suitability(
+            "boletus_edulis",
+            {
+                **self.static,
+                "soil_sand_percent": 60.0,
+                "soil_silt_percent": None,
+                "soil_clay_percent": 15.0,
+            },
+            self.weather,
+        )
+
+        self.assertEqual(missing_texture["score"], baseline["score"])
+        self.assertEqual(
+            missing_texture["weather_score"], baseline["weather_score"]
+        )
+        self.assertEqual(
+            missing_texture["breakdown"]["edaphic"],
+            baseline["breakdown"]["edaphic"],
+        )
+        self.assertEqual(
+            missing_texture["breakdown"]["soil_texture_status"], "missing"
+        )
+
+    def test_texture_extremes_reduce_habitat_score_and_are_explained(self):
+        balanced = self.engine.calculate_relative_suitability(
+            "boletus_edulis",
+            {
+                **self.static,
+                "soil_sand_percent": 40.0,
+                "soil_silt_percent": 40.0,
+                "soil_clay_percent": 20.0,
+            },
+            self.weather,
+        )
+        sandy = self.engine.calculate_relative_suitability(
+            "boletus_edulis",
+            {
+                **self.static,
+                "soil_sand_percent": 100.0,
+                "soil_silt_percent": 0.0,
+                "soil_clay_percent": 0.0,
+            },
+            self.weather,
+        )
+
+        self.assertEqual(
+            balanced["breakdown"]["soil_texture_score"], 7.0
+        )
+        self.assertLess(
+            sandy["breakdown"]["soil_texture_score"],
+            balanced["breakdown"]["soil_texture_score"],
+        )
+        self.assertLess(sandy["score"], balanced["score"])
+        self.assertEqual(sandy["weather_score"], balanced["weather_score"])
+        self.assertEqual(
+            sandy["breakdown"]["soil_texture_status"], "scored"
+        )
+
+    def test_texture_fraction_outside_valid_percent_range_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "entre 0 y 100"):
+            self.engine.calculate_relative_suitability(
+                "boletus_edulis",
+                {
+                    **self.static,
+                    "soil_sand_percent": 101.0,
+                    "soil_silt_percent": 0.0,
+                    "soil_clay_percent": 0.0,
+                },
+                self.weather,
+            )
+
     def test_legacy_validated_scoring_still_rejects_sourced_data(self):
         with self.assertRaisesRegex(ValueError, "variables ambientales sin verificar"):
             self.engine.calculate_cell_score(
@@ -233,6 +308,116 @@ class RelativeSuitabilityTests(unittest.TestCase):
         }
 
         self.assertTrue(self.engine.has_potential_habitat(mixed_forest))
+
+    def test_thermal_shock_boosts_autumn_species_fruiting_trigger(self):
+        favorable_shock_weather = {
+            **self.weather,
+            "precip_accum_14d_mm": 50.0,
+            "thermal_shock_celsius": -3.5,
+        }
+        stable_weather = {
+            **self.weather,
+            "precip_accum_14d_mm": 50.0,
+            "thermal_shock_celsius": 0.0,
+        }
+
+        shock_result = self.engine.calculate_relative_suitability(
+            "boletus_edulis", self.static, favorable_shock_weather
+        )
+        stable_result = self.engine.calculate_relative_suitability(
+            "boletus_edulis", self.static, stable_weather
+        )
+
+        self.assertGreater(
+            shock_result["weather_score"], stable_result["weather_score"]
+        )
+        self.assertEqual(
+            shock_result["breakdown"]["thermal_shock_status"],
+            "triggered_favorable",
+        )
+        self.assertEqual(
+            stable_result["breakdown"]["thermal_shock_status"],
+            "stable",
+        )
+
+    def test_cold_shock_suppresses_thermophilic_species(self):
+        encinar = {
+            **self.static,
+            "dominant_species": "Encinares",
+            "elevation_m": 600.0,
+            "soil_ph": 6.5,
+        }
+        warm_weather = {
+            **self.weather,
+            "precip_accum_14d_mm": 40.0,
+            "temp_mean_14d_celsius": 20.0,
+            "thermal_shock_celsius": 0.5,
+        }
+        cold_shock_weather = {
+            **self.weather,
+            "precip_accum_14d_mm": 40.0,
+            "temp_mean_14d_celsius": 20.0,
+            "thermal_shock_celsius": -4.5,
+        }
+
+        warm_res = self.engine.calculate_relative_suitability(
+            "boletus_aereus", encinar, warm_weather
+        )
+        cold_res = self.engine.calculate_relative_suitability(
+            "boletus_aereus", encinar, cold_shock_weather
+        )
+
+        self.assertGreater(
+            warm_res["weather_score"], cold_res["weather_score"]
+        )
+        self.assertEqual(
+            cold_res["breakdown"]["thermal_shock_status"],
+            "cold_suppressed",
+        )
+
+    def test_negative_water_balance_reduces_weather_score(self):
+        deficit_weather = {
+            **self.weather,
+            "precip_accum_14d_mm": 40.0,
+            "water_balance_14d_mm": -30.0, # Evaporación mayor que lluvia
+        }
+        surplus_weather = {
+            **self.weather,
+            "precip_accum_14d_mm": 40.0,
+            "water_balance_14d_mm": 20.0, # Superávit hídrico
+        }
+
+        deficit_res = self.engine.calculate_relative_suitability(
+            "boletus_edulis", self.static, deficit_weather
+        )
+        surplus_res = self.engine.calculate_relative_suitability(
+            "boletus_edulis", self.static, surplus_weather
+        )
+
+        self.assertLess(
+            deficit_res["weather_score"], surplus_res["weather_score"]
+        )
+
+    def test_strong_wind_desiccation_reduces_weather_score(self):
+        calm_weather = {
+            **self.weather,
+            "wind_max_14d_kmh": 20.0,
+        }
+        gale_weather = {
+            **self.weather,
+            "wind_max_14d_kmh": 65.0, # Viento desecante fuerte
+        }
+
+        calm_res = self.engine.calculate_relative_suitability(
+            "boletus_edulis", self.static, calm_weather
+        )
+        gale_res = self.engine.calculate_relative_suitability(
+            "boletus_edulis", self.static, gale_weather
+        )
+
+        self.assertGreater(
+            calm_res["weather_score"], gale_res["weather_score"]
+        )
 
 
 if __name__ == "__main__":

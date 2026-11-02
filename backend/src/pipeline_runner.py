@@ -27,7 +27,8 @@ def run_daily_pipeline(target_species: List[str] = None):
         rows = con.execute("""
             SELECT 
                 h3_index, latitude, longitude, elevation_m, slope_deg,
-                aspect_cardinal, soil_ph, dominant_species, canopy_cover, is_forest,
+                aspect_cardinal, soil_ph, soil_sand_percent, soil_silt_percent,
+                soil_clay_percent, dominant_species, canopy_cover, is_forest,
                 environmental_data_quality
             FROM cells_static
             WHERE is_forest = TRUE

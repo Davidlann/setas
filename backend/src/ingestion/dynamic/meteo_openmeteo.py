@@ -58,21 +58,24 @@ class OpenMeteoClient:
                     "precipitation_sum",
                     "temperature_2m_mean",
                     "temperature_2m_min",
-                    "soil_moisture_0_to_7cm_mean"
+                    "soil_moisture_0_to_7cm_mean",
+                    "soil_temperature_0_to_7cm_mean",
+                    "et0_fao_evapotranspiration",
+                    "wind_speed_10m_max",
                 ],
                 "past_days": past_days,
                 "forecast_days": 1,
                 "timezone": "Europe/Madrid"
             }
 
-            # Manejo de reintentos en caso de 429 o errores de red.
+            # Manejo de reintentos en caso de 429, 503 o errores de red/sobrecarga.
             success = False
-            for attempt in range(4):
+            for attempt in range(5):
                 try:
-                    resp = self.session.get(self.BASE_URL, params=params, timeout=20)
-                    if resp.status_code == 429:
+                    resp = self.session.get(self.BASE_URL, params=params, timeout=25)
+                    if resp.status_code in (429, 500, 502, 503, 504):
                         wait_t = 3 * (attempt + 1)
-                        print(f"   [!] Rate limit (429), pausando {wait_t}s...")
+                        print(f"   [!] Open-Meteo {resp.status_code}, reintentando en {wait_t}s (intento {attempt+1}/5)...")
                         time.sleep(wait_t)
                         continue
                     resp.raise_for_status()
@@ -80,7 +83,7 @@ class OpenMeteoClient:
                     success = True
                     break
                 except requests.RequestException:
-                    if attempt == 3:
+                    if attempt == 4:
                         raise
                     time.sleep(2)
 
@@ -95,6 +98,9 @@ class OpenMeteoClient:
                 temperatures = daily.get("temperature_2m_mean", [])
                 minimum_temperatures = daily.get("temperature_2m_min", [])
                 soil_moisture = daily.get("soil_moisture_0_to_7cm_mean", [])
+                soil_temperatures = daily.get("soil_temperature_0_to_7cm_mean", [])
+                evapotranspiration = daily.get("et0_fao_evapotranspiration", [])
+                wind_speeds = daily.get("wind_speed_10m_max", [])
 
                 today = datetime.now(ZoneInfo("Europe/Madrid")).date()
                 completed_days = [
@@ -118,6 +124,10 @@ class OpenMeteoClient:
                 temp_mean = values_for(completed_days, temperatures)
                 temp_min = values_for(completed_days, minimum_temperatures)
                 soil_m = values_for(completed_days, soil_moisture)
+                soil_t = values_for(completed_days, soil_temperatures)
+                et0_vals = values_for(completed_days, evapotranspiration)
+                wind_vals = values_for(completed_days, wind_speeds)
+
                 if any(len(values) != past_days for values in (
                     precip, temp_mean, temp_min, soil_m
                 )):
@@ -125,6 +135,28 @@ class OpenMeteoClient:
                         "Open-Meteo devolvió datos diarios incompletos para "
                         f"({loc.get('latitude')}, {loc.get('longitude')})."
                     )
+
+                soil_temp_mean_14d = (
+                    round(sum(soil_t) / len(soil_t), 2)
+                    if len(soil_t) == past_days else None
+                )
+                et0_accum_14d = (
+                    round(sum(et0_vals), 2)
+                    if len(et0_vals) == past_days else None
+                )
+                water_balance_14d = (
+                    round(sum(precip) - sum(et0_vals), 2)
+                    if len(et0_vals) == past_days else None
+                )
+                # Choque térmico: diferencia entre los últimos 5 días y los 5 primeros de la ventana
+                thermal_shock = (
+                    round(sum(temp_mean[-5:]) / 5.0 - sum(temp_mean[:5]) / 5.0, 2)
+                    if len(temp_mean) >= 10 else None
+                )
+                wind_max_14d = (
+                    round(max(wind_vals), 2)
+                    if len(wind_vals) == past_days else None
+                )
 
                 result = {
                     "latitude": loc.get("latitude"),
@@ -136,7 +168,12 @@ class OpenMeteoClient:
                     "precip_accum_14d_mm": round(sum(precip), 2),
                     "temp_mean_14d_celsius": round(sum(temp_mean) / len(temp_mean), 2),
                     "temp_min_14d_celsius": round(min(temp_min), 2),
-                    "soil_moisture_percent": round((sum(soil_m) / len(soil_m)) * 100.0, 2)
+                    "soil_moisture_percent": round((sum(soil_m) / len(soil_m)) * 100.0, 2),
+                    "soil_temp_mean_14d_celsius": soil_temp_mean_14d,
+                    "et0_accum_14d_mm": et0_accum_14d,
+                    "water_balance_14d_mm": water_balance_14d,
+                    "thermal_shock_celsius": thermal_shock,
+                    "wind_max_14d_kmh": wind_max_14d,
                 }
                 location_key = (
                     round(result["latitude"], 4),
@@ -195,6 +232,13 @@ class OpenMeteoClient:
             "temp_min_14d_celsius",
             "soil_moisture_percent",
         )
+        optional_weather_fields = (
+            "soil_temp_mean_14d_celsius",
+            "et0_accum_14d_mm",
+            "water_balance_14d_mm",
+            "thermal_shock_celsius",
+            "wind_max_14d_kmh",
+        )
         interpolated = []
         for target, node_distances, node_indices in zip(
             targets, distances, indices
@@ -228,6 +272,25 @@ class OpenMeteoClient:
                     sum(value * weight for value, weight in available) / total_weight,
                     2,
                 )
+
+            for field in optional_weather_fields:
+                samples = [
+                    (meteo_grid[index].get(field), weights[position])
+                    for position, index in enumerate(selected)
+                ]
+                available = [
+                    (value, weight)
+                    for value, weight in samples
+                    if isinstance(value, (int, float)) and math.isfinite(value)
+                ]
+                if available:
+                    total_weight = sum(weight for _, weight in available)
+                    values[field] = round(
+                        sum(value * weight for value, weight in available) / total_weight,
+                        2,
+                    )
+                else:
+                    values[field] = None
 
             daily_series = [
                 node.get("precip_daily_mm") for node in (

@@ -128,6 +128,26 @@ class MushroomScoringEngine:
             value = (cell_static_data if key in required_static else cell_meteo_data)[key]
             if not isinstance(value, (int, float)) or not math.isfinite(value):
                 raise ValueError(f"La variable '{key}' no contiene un valor numérico válido.")
+        texture_fields = (
+            "soil_sand_percent", "soil_silt_percent", "soil_clay_percent"
+        )
+        for key in texture_fields:
+            value = cell_static_data.get(key)
+            if value is not None and (
+                not isinstance(value, (int, float))
+                or not math.isfinite(value)
+                or not 0 <= value <= 100
+            ):
+                raise ValueError(
+                    f"La variable '{key}' debe estar entre 0 y 100 %."
+                )
+        texture_is_complete = all(
+            cell_static_data.get(key) is not None for key in texture_fields
+        )
+        if texture_is_complete and sum(
+            cell_static_data[key] for key in texture_fields
+        ) <= 0:
+            raise ValueError("La composición del suelo no puede sumar cero.")
         aspect = cell_static_data.get("aspect_cardinal")
         if aspect is None and not allow_missing_aspect:
             raise ValueError("La orientación es obligatoria para el índice validado.")
@@ -216,6 +236,15 @@ class MushroomScoringEngine:
                 )
             ) / weight_mean
 
+        # Ajuste por balance hídrico (evapotranspiración) si está disponible
+        water_balance = cell_meteo_data.get("water_balance_14d_mm")
+        if water_balance is not None:
+            if water_balance < 0:
+                drying_factor = max(0.80, 1.0 + (water_balance / 150.0))
+                effective_precip *= drying_factor
+            elif water_balance > 25.0:
+                effective_precip = min(opt_precip * 1.2, effective_precip * 1.05)
+
         if effective_precip < thresh_precip:
             # Lluvia insuficiente para romper la dormancia miceliar
             precip_pts = (effective_precip / thresh_precip) * 8.0
@@ -227,13 +256,47 @@ class MushroomScoringEngine:
             precip_pts = 8.0 + progress * 17.0
 
         # Factor Temperatura Térmica (0 a 15 pts)
-        t_opt_min, t_opt_max = meteo_rules["mean_temp_optimal_celsius"]
-        if t_opt_min <= temp_mean <= t_opt_max:
+        # Si se dispone de temperatura del suelo superficial (0-7 cm), se pondera con la temperatura ambiental
+        soil_temp = cell_meteo_data.get("soil_temp_mean_14d_celsius")
+        if soil_temp is not None and "soil_temp_optimal_celsius" in meteo_rules:
+            t_opt_min, t_opt_max = meteo_rules["soil_temp_optimal_celsius"]
+            eval_temp = soil_temp * 0.7 + temp_mean * 0.3
+        else:
+            t_opt_min, t_opt_max = meteo_rules["mean_temp_optimal_celsius"]
+            eval_temp = temp_mean
+
+        if t_opt_min <= eval_temp <= t_opt_max:
             temp_pts = 15.0
-        elif abs(temp_mean - t_opt_min) <= 4.0 or abs(temp_mean - t_opt_max) <= 4.0:
+        elif abs(eval_temp - t_opt_min) <= 4.0 or abs(eval_temp - t_opt_max) <= 4.0:
             temp_pts = 9.0
         else:
             temp_pts = 3.0
+
+        # Choque térmico (disparador fisiológico de fructificación otoñal/estival)
+        thermal_shock = cell_meteo_data.get("thermal_shock_celsius")
+        thermal_shock_status = None
+        thermal_shock_adj = 0.0
+        if thermal_shock is not None:
+            shock_trigger = meteo_rules.get("thermal_shock_trigger")
+            if shock_trigger is True:
+                # Especies otoñales que responden a caída térmica tras lluvia acumulada
+                if thermal_shock <= -2.0 and effective_precip >= thresh_precip:
+                    thermal_shock_adj = 2.5
+                    thermal_shock_status = "triggered_favorable"
+                elif thermal_shock > 2.0:
+                    thermal_shock_adj = -2.0
+                    thermal_shock_status = "warming_inhibited"
+                else:
+                    thermal_shock_status = "stable"
+            elif shock_trigger is False:
+                # Especies termófilas que se inhiben ante frío prematuro
+                if thermal_shock <= -3.5:
+                    thermal_shock_adj = -4.0
+                    thermal_shock_status = "cold_suppressed"
+                elif thermal_shock >= 0.0:
+                    thermal_shock_status = "warm_favorable"
+                else:
+                    thermal_shock_status = "stable"
 
         # Penalización por heladas tempranas destructivas del carpóforo
         min_limit = meteo_rules.get("min_temp_limit_celsius", 0.0)
@@ -244,7 +307,17 @@ class MushroomScoringEngine:
         min_soil_m = meteo_rules.get("soil_moisture_min_percent", 20.0)
         soil_pts = 5.0 if soil_moisture >= min_soil_m else (soil_moisture / min_soil_m) * 5.0
 
-        score_meteo = precip_pts + temp_pts + soil_pts
+        score_meteo = precip_pts + temp_pts + soil_pts + thermal_shock_adj
+        score_meteo = max(0.0, min(45.0, score_meteo))
+
+        # Factor viento (desecación de primordios en cumbres/laderas)
+        wind_max = cell_meteo_data.get("wind_max_14d_kmh")
+        if wind_max is not None:
+            wind_limit = meteo_rules.get("wind_max_limit_kmh", 45.0)
+            if wind_max > wind_limit:
+                wind_penalty = min(0.20, (wind_max - wind_limit) / 100.0)
+                score_meteo *= (1.0 - wind_penalty)
+
         weather_score = min(100.0, round(score_meteo / 45.0 * 100.0, 1))
 
         # ==============================================================
@@ -253,7 +326,7 @@ class MushroomScoringEngine:
         ph_opt_min, ph_opt_max = edaphic["ph_optimal"]
         ph_tol_min, ph_tol_max = edaphic["ph_tolerated"]
         if ph_opt_min <= soil_ph <= ph_opt_max:
-            score_edaphic = 35.0
+            score_ph = 35.0
         else:
             # Distancia al rango óptimo dentro del tolerado
             if soil_ph < ph_opt_min:
@@ -264,7 +337,18 @@ class MushroomScoringEngine:
                 max_d = ph_tol_max - ph_opt_max
 
             ratio = max(0.0, 1.0 - (dist / max(0.1, max_d)))
-            score_edaphic = 15.0 + ratio * 20.0
+            score_ph = 15.0 + ratio * 20.0
+
+        texture_score = None
+        if texture_is_complete:
+            texture_score = self._soil_texture_score(
+                cell_static_data["soil_sand_percent"],
+                cell_static_data["soil_silt_percent"],
+                cell_static_data["soil_clay_percent"],
+            )
+            score_edaphic = score_ph * (28.0 / 35.0) + texture_score
+        else:
+            score_edaphic = score_ph
 
         # ==============================================================
         # 4. PONDERACIÓN TOPOGRÁFICA (Máximo 20 puntos)
@@ -311,6 +395,22 @@ class MushroomScoringEngine:
             ),
             breakdown={
                 "meteorology": round(score_meteo, 1),
+                "soil_ph_score": round(score_ph, 1),
+                "soil_texture_score": (
+                    round(texture_score, 1)
+                    if texture_score is not None else None
+                ),
+                "soil_texture_status": (
+                    "scored" if texture_score is not None else "missing"
+                ),
+                "soil_texture_percent": (
+                    {
+                        "sand": cell_static_data["soil_sand_percent"],
+                        "silt": cell_static_data["soil_silt_percent"],
+                        "clay": cell_static_data["soil_clay_percent"],
+                    }
+                    if texture_score is not None else None
+                ),
                 "weather_score": weather_score,
                 "edaphic": round(score_edaphic, 1),
                 "topography": round(score_topo, 1),
@@ -326,6 +426,11 @@ class MushroomScoringEngine:
                 "precip_14d_mm": precip_14d,
                 "effective_precip_14d_mm": round(effective_precip, 2),
                 "temp_mean_c": temp_mean,
+                "soil_temp_mean_c": soil_temp,
+                "water_balance_14d_mm": water_balance,
+                "thermal_shock_celsius": thermal_shock,
+                "thermal_shock_status": thermal_shock_status,
+                "wind_max_14d_kmh": wind_max,
                 "soil_ph": soil_ph,
                 "host_tree": dominant_tree
             }
@@ -333,6 +438,30 @@ class MushroomScoringEngine:
         if relative_mode:
             result["weather_score"] = weather_score
         return result
+
+    def _soil_texture_score(
+        self, sand_percent: float, silt_percent: float, clay_percent: float
+    ) -> float:
+        """Puntúa la textura sin asignar preferencias específicas por especie."""
+        total = sand_percent + silt_percent + clay_percent
+        sand_fraction = sand_percent / total * 100
+        clay_fraction = clay_percent / total * 100
+        texture_rules = self.config["soil_texture_scoring"]
+
+        def component_score(value: float, penalty_rules: Dict[str, float]) -> float:
+            start = penalty_rules["start_percent"]
+            zero = penalty_rules["zero_percent"]
+            if value <= start:
+                return 1.0
+            return max(0.0, 1.0 - (value - start) / (zero - start))
+
+        silt_fraction = silt_percent / total * 100
+        balanced_fraction = sum((
+            component_score(sand_fraction, texture_rules["sand_penalty"]),
+            component_score(silt_fraction, texture_rules["silt_penalty"]),
+            component_score(clay_fraction, texture_rules["clay_penalty"]),
+        )) / 3
+        return texture_rules["max_points"] * balanced_fraction
 
     def _static_habitat_exclusion(
         self,

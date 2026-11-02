@@ -44,6 +44,18 @@ def export_relative_suitability(
         ).fetchone()[0]
         if snapshot_date is None:
             raise RuntimeError("No hay snapshots meteorológicos para calcular el índice.")
+        static_table_columns = {
+            row[0] for row in con.execute("DESCRIBE cells_static").fetchall()
+        }
+        texture_select = ", ".join(
+            f"c.{column}" if column in static_table_columns
+            else f"NULL AS {column}"
+            for column in (
+                "soil_sand_percent",
+                "soil_silt_percent",
+                "soil_clay_percent",
+            )
+        )
         meteo_table_columns = {
             row[0] for row in con.execute("DESCRIBE meteo_snapshots").fetchall()
         }
@@ -53,6 +65,11 @@ def export_relative_suitability(
             "weather_sampling_step_deg",
             "weather_interpolation",
             "weather_nearest_distance_km",
+            "soil_temp_mean_14d_celsius",
+            "et0_accum_14d_mm",
+            "water_balance_14d_mm",
+            "thermal_shock_celsius",
+            "wind_max_14d_kmh",
         )
         metadata_select = ", ".join(
             f"m.{column}" if column in meteo_table_columns
@@ -63,13 +80,14 @@ def export_relative_suitability(
             SELECT
                 c.h3_index, c.latitude, c.longitude, c.elevation_m, c.slope_deg,
                 c.aspect_cardinal, c.soil_ph, c.soil_ph_q05, c.soil_ph_q95,
+                {texture_select},
                 c.dominant_species, c.canopy_cover, c.environmental_data_quality,
                 m.precip_accum_14d_mm, m.temp_mean_14d_celsius,
                 m.temp_min_14d_celsius, m.soil_moisture_percent,
                 {metadata_select}
             FROM cells_static c
             JOIN meteo_snapshots m
-              ON m.h3_index = c.h3_index AND m.snapshot_date = ?
+                ON m.h3_index = c.h3_index AND m.snapshot_date = ?
             WHERE c.is_forest = TRUE
               AND c.environmental_data_quality = 'sourced_unvalidated'
               AND c.longitude BETWEEN ? AND ?
@@ -112,6 +130,7 @@ def export_relative_suitability(
             key: source[key]
             for key in (
                 "elevation_m", "soil_ph", "dominant_species", "canopy_cover",
+                "soil_sand_percent", "soil_silt_percent", "soil_clay_percent",
             )
         }
         if engine.has_potential_habitat(static):
@@ -182,6 +201,7 @@ def export_relative_suitability(
                 for key in (
                     "elevation_m", "slope_deg", "aspect_cardinal",
                     "soil_ph", "dominant_species", "canopy_cover",
+                    "soil_sand_percent", "soil_silt_percent", "soil_clay_percent",
                     "environmental_data_quality",
                 )
             }
@@ -190,6 +210,11 @@ def export_relative_suitability(
                 "temp_mean_14d_celsius": source["temp_mean_14d_celsius"],
                 "temp_min_14d_celsius": source["temp_min_14d_celsius"],
                 "soil_moisture_percent": source["soil_moisture_percent"],
+                "soil_temp_mean_14d_celsius": source.get("soil_temp_mean_14d_celsius"),
+                "et0_accum_14d_mm": source.get("et0_accum_14d_mm"),
+                "water_balance_14d_mm": source.get("water_balance_14d_mm"),
+                "thermal_shock_celsius": source.get("thermal_shock_celsius"),
+                "wind_max_14d_kmh": source.get("wind_max_14d_kmh"),
             }
             if source["precip_daily_mm_json"]:
                 meteo["precip_daily_mm"] = json.loads(
@@ -216,6 +241,12 @@ def export_relative_suitability(
                 "ph": source["soil_ph"],
                 "ph05": source["soil_ph_q05"],
                 "ph95": source["soil_ph_q95"],
+                "sand": source["soil_sand_percent"],
+                "silt": source["soil_silt_percent"],
+                "clay": source["soil_clay_percent"],
+                "soil_texture_score_max": engine.config[
+                    "soil_texture_scoring"
+                ]["max_points"],
                 "tree": source["dominant_species"],
                 "cc": source["canopy_cover"],
                 "p14": meteo["precip_accum_14d_mm"],
@@ -223,9 +254,17 @@ def export_relative_suitability(
                 "t": meteo["temp_mean_14d_celsius"],
                 "tmin": meteo["temp_min_14d_celsius"],
                 "moist": meteo["soil_moisture_percent"],
+                "stemp": breakdown.get("soil_temp_mean_c"),
+                "wb": breakdown.get("water_balance_14d_mm"),
+                "tshock": breakdown.get("thermal_shock_celsius"),
+                "tshock_status": breakdown.get("thermal_shock_status"),
+                "wind": breakdown.get("wind_max_14d_kmh"),
                 "weather_distance_km": source["weather_nearest_distance_km"],
                 "met": breakdown.get("meteorology"),
                 "edaphic": breakdown.get("edaphic"),
+                "soil_ph_score": breakdown.get("soil_ph_score"),
+                "soil_texture_score": breakdown.get("soil_texture_score"),
+                "soil_texture_status": breakdown.get("soil_texture_status"),
                 "topo": breakdown.get("topography"),
             })
 
@@ -244,6 +283,26 @@ def export_relative_suitability(
                 "unknown_hosts_retained": True,
             },
             "weather_metadata": weather_metadata,
+            "soil_texture_metadata": {
+                "source": "ISRIC SoilGrids 2.0",
+                "depth_cm": "5-15",
+                "units": "percent by mass",
+                "note": (
+                    "Aporta hasta 7 de 35 puntos edáficos. Regla general "
+                    "experimental: penaliza de forma gradual los extremos "
+                    "de arena (>70-90%), limo (>60-80%) y arcilla (>40-60%). "
+                    "No está calibrada por especie ni con fructificaciones locales."
+                ),
+                "scoring": engine.config["soil_texture_scoring"],
+                "missing_data": (
+                    "Sin las tres fracciones, se conserva la puntuación de pH "
+                    "anterior y la textura no aporta ni resta puntos."
+                ),
+                "normalization": (
+                    "Las fracciones disponibles se normalizan para calcular "
+                    "su composición relativa antes de aplicar los umbrales."
+                ),
+            },
             "cells_count": len(cells),
             "species_id": species_id,
             "species_profile": {
@@ -271,6 +330,10 @@ def export_relative_suitability(
                 "Las reglas ecológicas aún no se han calibrado con validación independiente.",
                 "El índice de hábitat potencial excluye meteorología; la señal meteorológica "
                 "reciente se muestra por separado y no es una predicción de presencia.",
+                "La textura edáfica aporta hasta 7 de 35 puntos; los umbrales generales "
+                "son experimentales y no están calibrados por especie ni con observaciones.",
+                "Si falta alguna fracción de textura, no se aplica ni bonificación ni "
+                "penalización textural; se conserva el cálculo edáfico basado en pH.",
                 "La lluvia eficaz usa una ponderación heurística de 14 días: la lluvia "
                 "intermedia pesa más que la de ayer; el retardo no se ha calibrado "
                 "con fructificaciones locales.",

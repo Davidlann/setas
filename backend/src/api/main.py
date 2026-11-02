@@ -105,7 +105,10 @@ def get_scores_geojson(
                 c.canopy_cover,
                 m.precip_accum_14d_mm,
                 m.temp_mean_14d_celsius,
-                m.soil_moisture_percent
+                m.soil_moisture_percent,
+                c.soil_sand_percent,
+                c.soil_silt_percent,
+                c.soil_clay_percent
             FROM fruiting_scores s
             JOIN cells_static c ON s.h3_index = c.h3_index
             LEFT JOIN meteo_snapshots m ON (s.h3_index = m.h3_index AND s.calculation_date = m.snapshot_date)
@@ -134,6 +137,9 @@ def get_scores_geojson(
             "slope_deg": row_dict["slope_deg"],
             "aspect": row_dict["aspect_cardinal"],
             "soil_ph": row_dict["soil_ph"],
+            "soil_sand_percent": row_dict["soil_sand_percent"],
+            "soil_silt_percent": row_dict["soil_silt_percent"],
+            "soil_clay_percent": row_dict["soil_clay_percent"],
             "dominant_species": row_dict["dominant_species"],
             "precip_14d_mm": row_dict["precip_accum_14d_mm"],
             "temp_mean_c": row_dict["temp_mean_14d_celsius"],

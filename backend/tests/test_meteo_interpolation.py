@@ -85,6 +85,31 @@ class WeatherInterpolationTests(unittest.TestCase):
                 [(40.1, -4.1)], nodes
             )
 
+    def test_interpolates_optional_physical_metrics_when_present(self):
+        nodes = [
+            {
+                **weather_node(40.0, -4.0, 10.0),
+                "soil_temp_mean_14d_celsius": 12.0,
+                "water_balance_14d_mm": 5.0,
+                "thermal_shock_celsius": -3.0,
+            },
+            {
+                **weather_node(40.0, -3.0, 20.0),
+                "soil_temp_mean_14d_celsius": 16.0,
+                "water_balance_14d_mm": 15.0,
+                "thermal_shock_celsius": -1.0,
+            },
+        ]
+
+        result = OpenMeteoClient.batch_interpolate_weather(
+            [(40.0, -3.5)], nodes
+        )[0]
+
+        self.assertEqual(result["soil_temp_mean_14d_celsius"], 14.0)
+        self.assertEqual(result["water_balance_14d_mm"], 10.0)
+        self.assertEqual(result["thermal_shock_celsius"], -2.0)
+        self.assertIsNone(result["wind_max_14d_kmh"])
+
 
 if __name__ == "__main__":
     unittest.main()

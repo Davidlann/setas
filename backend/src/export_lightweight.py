@@ -25,6 +25,18 @@ SPECIES = ["boletus_edulis", "boletus_aereus", "boletus_pinophilus", "boletus_re
 def export_lightweight():
     con = duckdb.connect(str(DB_PATH))
     min_lon, min_lat, max_lon, max_lat = TARGET_REGION_BOUNDS
+    static_table_columns = {
+        row[0] for row in con.execute("DESCRIBE cells_static").fetchall()
+    }
+    texture_select = ", ".join(
+        f"c.{column}" if column in static_table_columns
+        else f"NULL AS {column}"
+        for column in (
+            "soil_sand_percent",
+            "soil_silt_percent",
+            "soil_clay_percent",
+        )
+    )
     verified_cells = con.execute("""
         SELECT COUNT(*) FROM cells_static
         WHERE is_forest = TRUE AND environmental_data_quality = 'verified'
@@ -48,7 +60,7 @@ def export_lightweight():
         if calc_date is None:
             raise RuntimeError(f"No hay puntuaciones verificadas para {sp}.")
 
-        rows = con.execute("""
+        rows = con.execute(f"""
             SELECT
                 s.h3_index,
                 s.score,
@@ -64,7 +76,8 @@ def export_lightweight():
                 m.precip_accum_14d_mm,
                 m.temp_mean_14d_celsius,
                 m.temp_min_14d_celsius,
-                m.soil_moisture_percent
+                m.soil_moisture_percent,
+                {texture_select}
             FROM fruiting_scores s
             JOIN cells_static c ON s.h3_index = c.h3_index
             LEFT JOIN meteo_snapshots m
@@ -97,7 +110,10 @@ def export_lightweight():
                 "p14": round(float(r[11]), 1) if r[11] else 0,  # precip 14d
                 "t": round(float(r[12]), 1) if r[12] else 0,    # temp mean
                 "tmin": round(float(r[13]), 1) if r[13] else 0, # temp min
-                "moist": round(float(r[14]), 1) if r[14] else 0
+                "moist": round(float(r[14]), 1) if r[14] else 0,
+                "sand": round(float(r[15]), 1) if r[15] is not None else None,
+                "silt": round(float(r[16]), 1) if r[16] is not None else None,
+                "clay": round(float(r[17]), 1) if r[17] is not None else None,
             })
 
         out = {

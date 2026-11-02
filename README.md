@@ -22,9 +22,19 @@ ni una guía de recolección.**
   Obtiene el
   [MDT de 200 m del IGN/SCNE](https://servicios.idee.es/wcs-inspire/mdt) y pH
   de 0–5 cm de [SoilGrids/ISRIC](https://files.isric.org/soilgrids/latest/data/phh2o/)
-  (media y cuantiles 5–95), los muestrea en los centros de celdas H3 forestales,
-  y registra fuente, unidades, resolución, fecha y hashes SHA-256 en DuckDB.
+  (media y cuantiles 5–95), además de arena, limo y arcilla de 5–15 cm. Estas
+  proporciones se almacenan como porcentaje en masa y se muestrean en los centros
+  de celdas H3 forestales; la fuente, unidades, resolución, fecha y hashes SHA-256
+  quedan registrados en DuckDB.
   Las teselas originales se guardan bajo `backend/data/raw/environmental/`.
+- La textura de SoilGrids contribuye hasta 7 de los 35 puntos edáficos: la
+  matriz aplica una regla general y gradual que penaliza valores extremos de
+  arena (>70–90%), limo (>60–80%) y arcilla (>40–60%). Es una heurística
+  experimental, no una preferencia validada de cada especie. Si falta alguna
+  fracción, no se penaliza su ausencia y se mantiene la puntuación anterior
+  basada en pH. La textura no permite inferir por sí sola si el sustrato es
+  silíceo o calizo. Para obtenerla, vuelve a ejecutar la ingesta ambiental y
+  después el exportador experimental.
 - Estas capas tienen procedencia, pero se marcan `sourced_unvalidated`, nunca
   `verified`: la resolución de 200/250 m es mucho más gruesa que algunas
   variables locales, y las entradas no han sido contrastadas con mediciones
@@ -45,7 +55,7 @@ ni una guía de recolección.**
   detecciones. Este paso **no es necesario** para generar el índice orientativo.
 - La matriz ecológica y sus puntuaciones son reglas orientativas, sin validación
   frente a fructificaciones. El visor separa el hábitat potencial (hospedador,
-  suelo y relieve) de la señal meteorológica reciente; la capa «Índice
+  pH, textura y relieve) de la señal meteorológica reciente; la capa «Índice
   combinado» usa la media geométrica de ambos scores por especie. Las tres
   escalas 0–100 son relativas, **no probabilidades** ni tasas de éxito. La
   meteorología no reduce la capa de hábitat; una señal meteorológica baja
@@ -68,20 +78,28 @@ ni una guía de recolección.**
   no borra datos de la base DuckDB.
 - La capa de hábitat potencial no se reduce por el tiempo meteorológico del
   día: representa condiciones estáticas orientativas. La capa de meteorología
-  reciente muestra una señal separada que combina lluvia, temperatura y
-  humedad, sin interpretarla como presencia o ausencia.
-- Los snapshots nuevos guardan la serie diaria de precipitación de 14 días.
+  reciente muestra una señal separada que combina lluvia efectiva con retardo,
+  balance hídrico ($P - ET_0$ con evapotranspiración FAO), temperatura del suelo
+  a 0–7 cm, choque térmico fisiológico y viento desecante, sin interpretarla
+  como presencia o ausencia confirmada.
+- Los snapshots meteorológicos guardan la serie diaria de precipitación de 14 días.
   La señal meteorológica pondera menos la lluvia del día anterior y más la
-  caída varios días atrás, como hipótesis de retardo explícita y configurable
-  en el motor. Este retardo es una suposición y no está calibrado localmente; los
-  snapshots anteriores no contienen la serie y recurren al acumulado simple
-  hasta que se actualice la meteorología.
+  caída varios días atrás (fase de incubación), ajustando la humedad efectiva
+  según el balance hídrico real frente a la evapotranspiración.
+- Para *Boletus edulis* y *Boletus pinophilus*, el motor detecta el choque térmico
+  (caída brusca de temperatura tras un evento de lluvia suficiente) como estímulo
+  fisiológico favorable para la inducción de primordios, penalizando en cambio
+  las olas de calor otoñales continuas. Para especies termófilas (*Boletus aereus*
+  y *Boletus reticulatus*), el frío prematuro o heladas reducen la señal meteorológica.
+- Rachas de viento superiores al umbral de cada especie (40–50 km/h) penalizan
+  la señal por riesgo de desecación y aborto de carpóforos en cumbres y laderas.
 - La meteorología experimental se puede actualizar, aunque todavía no se pueda
   ejecutar el pipeline de scores validados, con
   `.\backend\venv\Scripts\python.exe -m backend.src.ingestion.dynamic.meteo_snapshots`.
   Después, vuelve a ejecutar el exportador experimental. La consulta usa una
-  malla de 0,1° e interpolación IDW-4; esto suaviza la asignación entre nodos,
-  pero no aporta precisión meteorológica real a escala de hexágono.
+  malla de 0,1° e interpolación IDW-4 con reintentos exponenciales ante sobrecarga;
+  esto suaviza la asignación entre nodos, pero no aporta precisión meteorológica
+  real a escala de hexágono microclimático.
 - En formaciones MFE50 reconocibles se interpretan nombres comunes de
   hospedadores. Cuando una formación mixta no permite identificar la especie
   arbórea, el índice la penaliza por incertidumbre en vez de afirmar que el
