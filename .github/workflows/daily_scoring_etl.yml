@@ -41,17 +41,33 @@ jobs:
       - name: Instalar dependencias del actualizador
         run: python -m pip install duckdb h3 pyyaml requests numpy scipy
 
+      - name: Guardar los últimos datos publicados
+        run: |
+          mkdir -p "$RUNNER_TEMP/mapa-setero-data-backup"
+          cp frontend/public/data/experimental/*.json "$RUNNER_TEMP/mapa-setero-data-backup/"
+
       - name: Actualizar meteorología y exportar índices experimentales
+        id: update_data
+        continue-on-error: true
         run: |
           python -m backend.src.ingestion.dynamic.meteo_snapshots
           python -m backend.src.export_relative_suitability
 
+      - name: Recuperar los datos publicados si falla la actualización
+        if: steps.update_data.outcome == 'failure'
+        run: |
+          cp "$RUNNER_TEMP"/mapa-setero-data-backup/*.json frontend/public/data/experimental/
+          echo "::warning::Falló la actualización meteorológica; se publicará la interfaz con los últimos datos válidos disponibles."
+
       - name: Validar los cuatro conjuntos de datos
+        env:
+          DATA_REFRESH_OUTCOME: ${{ steps.update_data.outcome }}
         run: |
           python - <<'PY'
           import json
+          import os
           from pathlib import Path
-          from datetime import datetime
+          from datetime import date, datetime
           from zoneinfo import ZoneInfo
 
           species = (
@@ -61,20 +77,36 @@ jobs:
               "boletus_reticulatus",
           )
           directory = Path("frontend/public/data/experimental")
-          today = datetime.now(ZoneInfo("Europe/Madrid")).date().isoformat()
+          today = datetime.now(ZoneInfo("Europe/Madrid")).date()
+          today_iso = today.isoformat()
+          dataset_dates = set()
           for species_id in species:
               path = directory / f"{species_id}.json"
               with path.open(encoding="utf-8") as file:
                   dataset = json.load(file)
+              dataset_date = dataset.get("date")
+              try:
+                  parsed_date = date.fromisoformat(dataset_date)
+              except (TypeError, ValueError):
+                  raise SystemExit(f"Fecha ausente o inválida: {path}")
               if (
                   dataset.get("species_id") != species_id
-                  or dataset.get("date") != today
+                  or not isinstance(dataset_date, str)
+                  or parsed_date.isoformat() != dataset_date
+                  or parsed_date > today
                   or dataset.get("data_quality") != "sourced_unvalidated"
                   or dataset.get("score_type") != "experimental_separated_habitat_weather"
                   or not dataset.get("cells")
               ):
                   raise SystemExit(f"Datos ausentes o inválidos: {path}")
-              print(f"{species_id}: {len(dataset['cells'])} celdas, {dataset['date']}")
+              dataset_dates.add(dataset_date)
+              if os.environ["DATA_REFRESH_OUTCOME"] == "success" and dataset_date != today_iso:
+                  raise SystemExit(f"El conjunto no contiene datos de hoy: {path}")
+              print(f"{species_id}: {len(dataset['cells'])} celdas, {dataset_date}")
+          if len(dataset_dates) != 1:
+              raise SystemExit("Los cuatro conjuntos de especies no comparten la misma fecha.")
+          if os.environ["DATA_REFRESH_OUTCOME"] == "failure":
+              print(f"::warning::Se conserva el último snapshot válido ({next(iter(dataset_dates))}); revisa el fallo del ETL.")
           PY
 
       - name: Preparar GitHub Pages

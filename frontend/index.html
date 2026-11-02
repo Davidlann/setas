@@ -1484,7 +1484,13 @@
         throw new Error('Las especies seleccionadas tienen fechas de datos distintas; vuelve a intentarlo más tarde.');
       }
       rawData = datasets[0];
-      status.textContent = `Datos del ${rawData.date}. La capa Hábitat + tiempo combina ambos índices; no es una probabilidad ni confirma que haya setas.`;
+      const todayInSpain = new Date().toLocaleDateString('sv-SE', {
+        timeZone: 'Europe/Madrid',
+      });
+      const staleDataNotice = rawData.date < todayInSpain
+        ? ' La actualización diaria está pendiente.'
+        : '';
+      status.textContent = `Datos del ${rawData.date}.${staleDataNotice} La capa Hábitat + tiempo combina ambos índices; no es una probabilidad ni confirma que haya setas.`;
       status.classList.remove('verified');
       render();
     } catch (error) {
@@ -1752,7 +1758,7 @@
         ? minTemp < minTempLimit
           ? ` Mínima ${formatNumber(minTemp)} °C, por debajo del umbral experimental de ${formatNumber(minTempLimit)} °C; esto reduce el índice meteorológico.`
           : ` Mínima ${formatNumber(minTemp)} °C; el umbral experimental de esta especie es ${formatNumber(minTempLimit)} °C.`
-        : ` Mínima ${formatNumber(minTemp)} °C; umbral térmico no disponible.`
+        : ` Mínima ${formatNumber(minTemp)} °C; el índice meteorológico ya aplica un umbral térmico para esta especie.`
       : '';
     const weatherText = `Índice orientativo: ${formatNumber(cell.ws)}/100. Lluvia en 14 días: ${formatNumber(cell.p14)} mm; humedad estimada: ${formatNumber(cell.moist)}%; temperatura media: ${formatNumber(cell.t)} °C.${frostText}${distanceNote}`;
 

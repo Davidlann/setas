@@ -180,7 +180,10 @@ Los datos nuevos aparecen al abrir o recargar la app con conexión. El modo
 instalable guarda la última versión visitada de la interfaz y los datos que ya
 se consultaron; el mapa base y las actualizaciones necesitan conexión.
 
-Si un día falla la descarga o el cálculo, GitHub Actions marca la ejecución como
-fallida y no despliega los datos incompletos. Revisa el registro en la pestaña
-`Actions`; el sitio conserva la última publicación correcta. Los índices siguen
-siendo experimentales, no probabilidades ni confirmaciones de fructificación.
+Si falla la descarga o el cálculo diario, el workflow restaura los cuatro
+conjuntos de datos válidos anteriores, publica la interfaz y avisa que la
+actualización está pendiente; la app muestra la fecha real de esos datos.
+Revisa el detalle de la ejecución en `Actions` para investigar el ETL. Si los
+datos guardados tampoco pasan la validación, no se publica una versión
+incompleta. Los índices siguen siendo experimentales, no probabilidades ni
+confirmaciones de fructificación.
