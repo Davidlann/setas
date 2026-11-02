@@ -43,15 +43,16 @@ ni una guía de recolección.**
   `.\backend\venv\Scripts\python.exe -m backend.src.ingestion.dynamic.field_surveys --template .\field_surveys.csv`.
   Cada visita debe indicar fecha, coordenadas, esfuerzo y detecciones/no
   detecciones. Este paso **no es necesario** para generar el índice orientativo.
-- La matriz ecológica y sus puntuaciones son reglas orientativas, sin validación frente
-  a fructificaciones. El visor separa el hábitat potencial (hospedador, suelo
-  y relieve) de la señal meteorológica reciente. Ambas escalas 0–100 son
-  relativas, **no probabilidades** ni tasas de éxito. La meteorología no reduce
-  la capa de hábitat; una señal meteorológica baja tampoco demuestra ausencia
-  de fructificación. El GBIF disponible es escaso y sesgado: se muestra como
-  contexto, no se usa para calibrar las puntuaciones.
-- Los índices experimentales (hábitat potencial y meteorología reciente por
-  separado) se exportan con
+- La matriz ecológica y sus puntuaciones son reglas orientativas, sin validación
+  frente a fructificaciones. El visor separa el hábitat potencial (hospedador,
+  suelo y relieve) de la señal meteorológica reciente; la capa «Índice
+  combinado» usa la media geométrica de ambos scores por especie. Las tres
+  escalas 0–100 son relativas, **no probabilidades** ni tasas de éxito. La
+  meteorología no reduce la capa de hábitat; una señal meteorológica baja
+  tampoco demuestra ausencia de fructificación. El GBIF disponible es escaso y
+  sesgado: se muestra como contexto, no se usa para calibrar las puntuaciones.
+- Los índices experimentales (hábitat potencial, meteorología reciente e índice
+  combinado) se exportan con
   `.\backend\venv\Scripts\python.exe -m backend.src.export_relative_suitability`.
   Usa el snapshot meteorológico más reciente y escribe los cuatro conjuntos
   experimentales en `frontend/public/data/experimental/`. Ejecuta el comando
@@ -109,11 +110,13 @@ python -m http.server 3000
 Abre `http://localhost:3000`. La interfaz muestra índices ambientales
 experimentales, no probabilidades ni predicciones validadas. Puedes marcar una o
 varias especies; al seleccionar una celda se muestran sus indicadores de
-hábitat, altitud, pH y meteorología. La capa inicial «Hábitat + tiempo» combina
-ambos índices tomando el menor para cada especie y, entre las especies elegidas,
-muestra el mayor resultado. Es una orientación conservadora, no un modelo
-validado de fructificación. Las capas de hábitat y meteorología también se
-pueden consultar por separado.
+hábitat, altitud, pH y meteorología. La capa inicial «Índice combinado» calcula
+la media geométrica de los índices experimentales de hábitat y tiempo para cada
+especie; si se eligen varias, muestra el mayor índice combinado entre ellas.
+Esto evita que el índice combinado copie sistemáticamente el valor meteorológico
+cuando el hábitat tiene una puntuación superior. Sigue siendo una orientación
+experimental, no una probabilidad ni un modelo validado de fructificación. Las
+capas de hábitat y meteorología también se pueden consultar por separado.
 
 El filtro de lluvia limita las celdas según la precipitación estimada acumulada
 en los últimos 14 días. La meteorología es regional y no representa diferencias

@@ -222,7 +222,8 @@
     .species-explanation { background: rgba(255,255,255,.035); border: 1px solid var(--border); border-radius: 8px; padding: 8px 9px; display: flex; flex-direction: column; gap: 6px; }
     .species-explanation-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
     .species-explanation-name { font-size: 12px; font-weight: 700; }
-    .species-explanation-score { font-size: 11px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .species-explanation-score { font-size: 11px; font-weight: 700; color: var(--accent); text-align: right; }
+    .species-explanation-components { grid-column: 1 / -1; color: var(--muted); font-size: 10px; text-align: right; }
     .species-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
     .species-check { min-width: 0; display: flex; align-items: flex-start; gap: 5px; font-size: 10.5px; line-height: 1.35; color: #cbd5e1; }
     .species-check-mark { width: 15px; height: 15px; flex: 0 0 15px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 10px; font-weight: 800; }
@@ -925,7 +926,7 @@
       <div class="layer-grid">
         <button class="layer-btn active" id="lbtn-search" onclick="setLayer('search')">
           <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 12h18M12 3v18"/><circle cx="12" cy="12" r="9"/></svg>
-          Hábitat + tiempo
+          Índice combinado
         </button>
         <button class="layer-btn" id="lbtn-habitat" onclick="setLayer('habitat')">
           <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="9"/></svg>
@@ -956,7 +957,7 @@
       <div class="menu-section-content">
         <div class="slider-card">
           <div class="slider-head">
-            <span id="slider-title">Búsqueda mínima (orientativa)</span>
+            <span id="slider-title">Índice combinado mínimo</span>
             <strong id="slider-label">0 — Todas las celdas candidatas</strong>
           </div>
           <input type="range" id="slider" min="0" max="80" step="5" value="0"/>
@@ -972,10 +973,10 @@
         </div>
         <div class="stats">
           <span>Celdas visibles: <strong id="stat-total">—</strong></span>
-          <span id="stat-fav-label">Hábitat ≥50: <strong id="stat-fav">—</strong></span>
+          <span id="stat-fav-label">Índice ≥50: <strong id="stat-fav">—</strong></span>
         </div>
         <div class="legend">
-          <div class="legend-title" id="leg-title">Búsqueda orientativa (menor de hábitat y tiempo)</div>
+          <div class="legend-title" id="leg-title">Índice combinado experimental (0–100)</div>
           <div class="legend-bar" id="leg-bar">
             <div class="step" style="background:#334155"></div>
             <div class="step" style="background:#f97316"></div>
@@ -1048,7 +1049,7 @@
       <details id="species-comparison" class="species-comparison" hidden>
         <summary class="species-comparison-title">Detalle de las especies seleccionadas</summary>
         <div id="species-comparison-list" class="species-comparison-list"></div>
-        <p class="species-comparison-note">“Hábitat + tiempo” muestra el menor de ambos índices por especie y, si eliges varias, el mejor resultado entre ellas. Es una orientación, no una probabilidad.</p>
+        <p class="species-comparison-note">El índice combinado es la media geométrica de hábitat y tiempo para cada especie. Si eliges varias, se muestra el mejor índice entre ellas. Es experimental: no representa una probabilidad.</p>
       </details>
     </div>
 
@@ -1552,7 +1553,7 @@
       const staleDataNotice = rawData.date < todayInSpain
         ? ' La actualización diaria está pendiente.'
         : '';
-      status.textContent = `Datos del ${rawData.date}.${staleDataNotice} La capa Hábitat + tiempo combina ambos índices; no es una probabilidad ni confirma que haya setas.`;
+      status.textContent = `Datos del ${rawData.date}.${staleDataNotice} El color muestra un índice experimental de búsqueda, no una probabilidad ni confirma que haya setas.`;
       status.classList.remove('verified');
       render();
     } catch (error) {
@@ -1610,13 +1611,15 @@
         ...cell,
         hs: Math.max(...selectedCells.map(selectedCell => selectedCell.hs)),
         ws: Math.max(...selectedCells.map(selectedCell => selectedCell.ws)),
-        ss: Math.max(...selectedCells.map(selectedCell =>
-          Math.min(selectedCell.hs, selectedCell.ws)
+        cs: Math.max(...selectedCells.map(selectedCell =>
+          Number.isFinite(selectedCell.cs)
+            ? selectedCell.cs
+            : Math.sqrt(Math.max(0, selectedCell.hs) * Math.max(0, selectedCell.ws))
         )),
       };
     });
     const activeScore = currentLayer === 'search'
-      ? 'ss'
+      ? 'cs'
       : currentLayer === 'weather' ? 'ws' : 'hs';
     const cells = mapCells.filter(c =>
       (currentLayer !== 'habitat' || c.hs > 0) &&
@@ -1637,7 +1640,7 @@
       else if (currentLayer === 'forest') color = colorForest(c.tree);
       else if (currentLayer === 'ph') color = colorPh(c.ph);
       else if (currentLayer === 'weather') color = colorScore(c.ws);
-      else if (currentLayer === 'search') color = colorScore(c.ss);
+      else if (currentLayer === 'search') color = colorScore(c.cs);
       else color = colorScore(c.hs);
 
       return {
@@ -1656,7 +1659,7 @@
     document.getElementById('stat-total').textContent = cells.length.toLocaleString('es-ES');
     document.getElementById('stat-fav').textContent = fav.toLocaleString('es-ES');
     document.getElementById('stat-fav-label').firstChild.textContent =
-      currentLayer === 'search' ? 'Hábitat + tiempo ≥50: '
+      currentLayer === 'search' ? 'Índice combinado ≥50: '
         : currentLayer === 'weather' ? 'Tiempo ≥50: '
           : currentLayer === 'precip' ? 'Lluvia ≥25 mm: '
             : 'Hábitat ≥50: ';
@@ -1772,6 +1775,17 @@
 
   function getSpeciesChecks(cell, dataset) {
     const profile = dataset.species_profile;
+    const habitatScore = Number(cell.hs);
+    const habitatExcluded = habitatScore <= 0;
+    const habitatIndexStatus = habitatExcluded
+      ? 'bad'
+      : habitatScore >= 50 ? 'good' : 'uncertain';
+    const exclusionReason = typeof cell.reason === 'string' && cell.reason.trim()
+      ? cell.reason.trim()
+      : 'Se aplicó una exclusión de hábitat';
+    const habitatIndexText = habitatExcluded
+      ? `Índice 0/100. ${exclusionReason}. Los indicadores de árbol y altitud se muestran por separado y no anulan esta exclusión.`
+      : `Índice orientativo ${formatNumber(habitatScore)}/100; combina hospedador, cobertura, altitud, pH y relieve.`;
     const tree = forestNameEs(cell.tree);
     const phRange = profile.ph_tolerated;
     const altitudeRange = profile.altitude_range_meters;
@@ -1825,6 +1839,7 @@
     const weatherText = `Índice orientativo: ${formatNumber(cell.ws)}/100. Lluvia en 14 días: ${formatNumber(cell.p14)} mm; humedad estimada: ${formatNumber(cell.moist)}%; temperatura media: ${formatNumber(cell.t)} °C.${frostText}${distanceNote}`;
 
     return [
+      { label: 'Índice de hábitat', status: habitatIndexStatus, text: habitatIndexText },
       { label: 'Árbol y cubierta', status: habitatStatus, text: `${habitatText}${canopyText}` },
       {
         label: 'Altitud',
@@ -1846,10 +1861,16 @@
     const name = document.createElement('span');
     name.className = 'species-explanation-name';
     name.textContent = profile.scientific_name;
+    const combinedScore = Number.isFinite(cell.cs)
+      ? cell.cs
+      : Math.sqrt(Math.max(0, cell.hs) * Math.max(0, cell.ws));
     const score = document.createElement('span');
     score.className = 'species-explanation-score';
-    score.textContent = `${formatNumber(cell.hs)}/100 hábitat · ${formatNumber(cell.ws)}/100 tiempo`;
-    heading.append(name, score);
+    score.textContent = `${formatNumber(combinedScore)}/100 índice combinado`;
+    const components = document.createElement('span');
+    components.className = 'species-explanation-components';
+    components.textContent = `Hábitat ${formatNumber(cell.hs)} · tiempo ${formatNumber(cell.ws)}`;
+    heading.append(name, score, components);
 
     const checks = document.createElement('div');
     checks.className = 'species-checks';
@@ -1890,13 +1911,13 @@
   function showCell(p) {
     document.getElementById('cell-card').hidden = false;
     const displayScore = currentLayer === 'search'
-      ? Number(p.ss)
+      ? Number(p.cs)
       : currentLayer === 'weather' ? Number(p.ws)
         : currentLayer === 'precip' ? Number(p.p14)
           : Number(p.hs);
     const pill = document.getElementById('score-pill');
     pill.textContent = currentLayer === 'search'
-      ? `Búsqueda ${formatNumber(displayScore)}/100`
+      ? `Índice combinado ${formatNumber(displayScore)}/100`
       : currentLayer === 'precip' ? `Lluvia ${formatNumber(displayScore)} mm`
         : `${currentLayer === 'weather' ? 'Tiempo' : 'Hábitat'} ${formatNumber(displayScore)}/100`;
     pill.className = 'score-badge ' + (displayScore >= 50 ? 'b-ok' : displayScore > 0 ? 'b-mod' : 'b-no');
@@ -1904,7 +1925,7 @@
     const hostNote = p.host === 'unknown' ? ' (hospedador incierto)' : '';
     document.getElementById('c-tree').textContent  = forestNameEs(p.tree) + hostNote;
     document.getElementById('c-reason').textContent = currentLayer === 'search'
-      ? 'La capa de búsqueda toma el menor índice de hábitat y tiempo para cada especie y muestra el mejor de las especies elegidas. No es una probabilidad.'
+      ? 'Índice experimental: combina hábitat y tiempo mediante su media geométrica. No es una probabilidad.'
       : 'Hábitat y meteorología son índices separados; una puntuación alta no confirma fructificación.';
     document.getElementById('c-ph').textContent    = p.ph !== undefined
       ? `${formatNumber(p.ph)} (${formatNumber(p.ph05)}–${formatNumber(p.ph95)})` : '—';
@@ -1932,7 +1953,7 @@
   // CAPAS Y LEYENDA
   // ================================================================
   const LEGEND_CFG = {
-    search:  { title:'Búsqueda orientativa · hábitat + tiempo', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','70','100'], note:'Combina hábitat y tiempo reciente; no es una probabilidad.' },
+    search:  { title:'Índice combinado experimental (0–100)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','70','100'], note:'Media geométrica de hábitat y tiempo reciente; no es una probabilidad.' },
     habitat: { title:'Hábitat potencial (0–100)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','70','100'], note:'Hábitat adecuado no significa que haya fructificación.' },
     weather: { title:'Condiciones meteorológicas recientes (0–100)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','70','100'], note:'Señal reciente de lluvia, temperatura y humedad; no confirma presencia.' },
     precip: { title:'Lluvia acumulada en 14 días', bar:['#0f172a','#0284c7','#06b6d4','#38bdf8','#7dd3fc'], labels:['0 mm','10 mm','25 mm','45 mm','≥45 mm'], note:'Precipitación estimada. El color oscuro indica 0 mm o dato ausente.' },
@@ -1994,7 +2015,7 @@
     const slider = document.getElementById('slider');
     slider.disabled = currentLayer === 'precip';
     document.getElementById('slider-title').textContent =
-      currentLayer === 'search' ? 'Búsqueda mínima (orientativa)'
+      currentLayer === 'search' ? 'Índice combinado mínimo'
         : currentLayer === 'weather' ? 'Condiciones recientes mínimas'
           : currentLayer === 'precip' ? 'Filtro de índice (no aplica a lluvia)'
             : 'Hábitat mínimo (orientativo)';

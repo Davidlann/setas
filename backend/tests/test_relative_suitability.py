@@ -1,3 +1,4 @@
+import math
 import unittest
 
 from backend.src.scoring.engine import MushroomScoringEngine
@@ -33,6 +34,11 @@ class RelativeSuitabilityTests(unittest.TestCase):
         self.assertEqual(result["data_quality"], "sourced_unvalidated")
         self.assertGreater(result["score"], 0)
         self.assertIn("heurístico", result["reason"])
+        self.assertEqual(
+            result["combined_score"],
+            round(math.sqrt(result["score"] * result["weather_score"]), 1),
+        )
+        self.assertNotEqual(result["combined_score"], result["weather_score"])
 
     def test_legacy_validated_scoring_still_rejects_sourced_data(self):
         with self.assertRaisesRegex(ValueError, "variables ambientales sin verificar"):
@@ -55,6 +61,7 @@ class RelativeSuitabilityTests(unittest.TestCase):
         )
 
         self.assertEqual(result["score"], 0)
+        self.assertEqual(result["combined_score"], 0)
         self.assertEqual(result["breakdown"]["host_assessment"], "compatible")
         self.assertEqual(result["breakdown"]["host_tree"], "Pinares de pino albar")
 

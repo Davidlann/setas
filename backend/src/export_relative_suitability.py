@@ -204,6 +204,7 @@ def export_relative_suitability(
                 "s": result["score"],
                 "hs": result["score"],
                 "ws": result["weather_score"],
+                "cs": result["combined_score"],
                 "st": result["status"],
                 "reason": result["reason"],
                 "host": breakdown.get("host_assessment", "unknown"),

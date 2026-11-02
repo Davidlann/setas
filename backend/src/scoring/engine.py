@@ -58,6 +58,9 @@ class MushroomScoringEngine:
         )
         result["data_quality"] = "sourced_unvalidated"
         result["score_type"] = "experimental_separated_habitat_weather"
+        result["combined_score"] = round(
+            math.sqrt(result["score"] * result["weather_score"]), 1
+        )
         return result
 
     def has_potential_habitat(self, cell_static_data: Dict[str, Any]) -> bool:
