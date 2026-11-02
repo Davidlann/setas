@@ -136,16 +136,25 @@
     .suggestions {
       position: absolute; top: calc(100% + 5px); left: 0; right: 0;
       background: #1a2540; border: 1px solid var(--border); border-radius: 10px;
-      max-height: 200px; overflow-y: auto; z-index: 50; display: none;
+      max-height: min(320px, 50vh); overflow-y: auto; z-index: 50; display: none;
       box-shadow: 0 12px 30px rgba(0,0,0,.5);
     }
     .sug-item {
-      padding: 9px 13px; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; gap: 9px;
-      border-bottom: 1px solid rgba(255,255,255,.05); transition: background .15s;
+      padding: 9px 12px; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.06); transition: background .15s; text-align: left;
     }
     .sug-item:last-child { border: none; }
-    .sug-item:hover { background: rgba(16,185,129,.15); }
-    .sug-item svg { color: var(--accent); flex-shrink: 0; }
+    .sug-item:hover, .sug-item.selected { background: rgba(16,185,129,.18); }
+    .sug-item .sug-icon { color: var(--accent); flex-shrink: 0; }
+    .sug-item .sug-icon.geo { color: #f59e0b; }
+    .sug-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .sug-title { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sug-sub { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sug-tag {
+      flex-shrink: 0; font-size: 9.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px;
+      background: rgba(255,255,255,.07); color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .sug-item:hover .sug-tag, .sug-item.selected .sug-tag { background: rgba(16,185,129,.25); color: #fff; }
 
     /* Province pills */
     .prov-row { display: flex; gap: 5px; }
@@ -376,10 +385,15 @@
       box-shadow: 0 0 0 3px rgba(121, 83, 58, .13);
     }
     .search-clear:hover { color: var(--accent); }
-    .suggestions { color: var(--text); background: #fffdf8; border-color: var(--border); }
+    .suggestions { color: var(--text); background: #fffdf8; border-color: var(--border); box-shadow: 0 12px 28px rgba(73, 59, 45, 0.16); }
     .sug-item { border-color: #eee7dc; }
-    .sug-item:hover { background: #f1ebdf; }
-    .sug-item svg, .search-icon { color: var(--accent); }
+    .sug-item:hover, .sug-item.selected { background: #f3ece0; }
+    .sug-title { color: #3b2f23; }
+    .sug-sub { color: #7f7362; }
+    .sug-tag { background: #eee7dc; color: #716452; }
+    .sug-item:hover .sug-tag, .sug-item.selected .sug-tag { background: #ded2c0; color: #2e2316; }
+    .sug-item .sug-icon, .search-icon { color: var(--accent); }
+    .sug-item .sug-icon.geo { color: #b45309; }
     .prov-row { gap: 6px; }
     .prov-btn {
       padding: 7px 4px;
@@ -1686,23 +1700,39 @@
     {n:"Cabrejas del Pinar (Soria)", lat:41.7994, lon:-2.8514},
     {n:"Talveila (Soria)", lat:41.7833, lon:-2.9667},
     {n:"Muriel Viejo (Soria)", lat:41.7847, lon:-2.9153},
+    {n:"Muriel de la Fuente (Monumento Natural La Fuentona, Soria)", lat:41.7247, lon:-2.8611},
+    {n:"Calatañazor (Sabinar de Calatañazor, Soria)", lat:41.6997, lon:-2.8181},
+    {n:"Casarejos (Pinares, Soria)", lat:41.7967, lon:-3.0319},
+    {n:"Vadillo (Pinares, Soria)", lat:41.7917, lon:-3.0078},
+    {n:"Herrera de Soria (Pinares, Soria)", lat:41.7639, lon:-3.0139},
+    {n:"Ucero (Cañón del Río Lobos, Soria)", lat:41.7167, lon:-3.0514},
     {n:"Valonsadero (Monte Valonsadero, Soria)", lat:41.7950, lon:-2.5310},
     {n:"Almarza (Sierra de Cebollera, Soria)", lat:41.9481, lon:-2.4703},
     {n:"El Royo (Valle del Razón, Soria)", lat:41.9083, lon:-2.6481},
     {n:"Sotillo del Rincón (Valle del Razón, Soria)", lat:41.9333, lon:-2.6281},
     {n:"Valdeavellano de Tera (Soria)", lat:41.9411, lon:-2.5761},
     {n:"Montenegro de Cameros (Paso de Santa Inés, Soria)", lat:42.0889, lon:-2.7528},
+    {n:"Punto de Nieve Santa Inés (Soria)", lat:42.0389, lon:-2.7667},
+    {n:"Laguna Negra de Urbión (Soria)", lat:41.9997, lon:-2.8483},
+    {n:"Puerto de Piqueras (Soria/La Rioja)", lat:42.0333, lon:-2.4833},
+    {n:"San Pedro Manrique (Tierras Altas, Soria)", lat:42.0308, lon:-2.2308},
+    {n:"Oncala (Puerto de Oncala, Soria)", lat:41.9708, lon:-2.2981},
+    {n:"Yanguas (Sierra de Cameros, Soria)", lat:42.1011, lon:-2.3400},
+    {n:"Villar del Río (Tierras Altas, Soria)", lat:42.0747, lon:-2.3681},
     {n:"Almazán (Pinares del Duero, Soria)", lat:41.4861, lon:-2.5322},
+    {n:"Tardelcuende (Pinares de Tardelcuende, Soria)", lat:41.5931, lon:-2.5931},
+    {n:"Quintana Redonda (Soria)", lat:41.6372, lon:-2.6142},
     {n:"El Burgo de Osma (Soria)", lat:41.5861, lon:-3.0722},
     {n:"San Esteban de Gormaz (Soria)", lat:41.5731, lon:-3.2044},
     {n:"Berlanga de Duero (Soria)", lat:41.4653, lon:-2.8550},
-    {n:"Tardelcuende (Pinares de Tardelcuende, Soria)", lat:41.5931, lon:-2.5931},
-    {n:"Quintana Redonda (Soria)", lat:41.6372, lon:-2.6142},
     {n:"Ólvega (Faldas del Moncayo, Soria)", lat:41.7781, lon:-1.9850},
     {n:"Ágreda (Sierra del Moncayo, Soria)", lat:41.8542, lon:-1.9192},
     {n:"Santa María de Huerta (Valle del Jalón, Soria)", lat:41.2611, lon:-2.1761},
     {n:"Arcos de Jalón (Soria)", lat:41.2161, lon:-2.2742},
     {n:"Medinaceli (Soria)", lat:41.1711, lon:-2.4344},
+    {n:"Cidones (Embalse Cuerda del Pozo, Soria)", lat:41.8189, lon:-2.6419},
+    {n:"Golmayo (Soria)", lat:41.7719, lon:-2.5186},
+    {n:"Garray (Soria)", lat:41.8153, lon:-2.4475},
 
     // Madrid - Sierra de Guadarrama, Valle del Lozoya y Sierra del Rincón
     {n:"Rascafría — Valle del Lozoya (Madrid)", lat:40.9064, lon:-3.8797},
@@ -1721,15 +1751,35 @@
     {n:"Navacerrada (Sierra de Guadarrama, Madrid)", lat:40.7289, lon:-4.0161},
     {n:"Puerto de Navacerrada (Madrid/Segovia)", lat:40.7889, lon:-4.0042},
     {n:"Puerto de Cotos (Sierra de Guadarrama, Madrid)", lat:40.8250, lon:-3.9622},
+    {n:"Puerto de la Morcuera (Madrid)", lat:40.8267, lon:-3.8306},
+    {n:"Puerto de los Leones (Guadarrama, Madrid)", lat:40.7064, lon:-4.1378},
+    {n:"Puerto de la Fuenfría (Madrid/Segovia)", lat:40.7550, lon:-4.0583},
     {n:"Los Molinos (Guadarrama, Madrid)", lat:40.7142, lon:-4.0744},
     {n:"Guadarrama (Madrid)", lat:40.6722, lon:-4.0889},
+    {n:"Becerril de la Sierra (Madrid)", lat:40.7100, lon:-3.9928},
+    {n:"Moralzarzal (Madrid)", lat:40.6789, lon:-3.9708},
+    {n:"El Boalo (Sierra de Guadarrama, Madrid)", lat:40.7161, lon:-3.9189},
+    {n:"Hoyo de Manzanares (Madrid)", lat:40.6222, lon:-3.9078},
+    {n:"Collado Mediano (Madrid)", lat:40.6942, lon:-4.0247},
+    {n:"Alpedrete (Madrid)", lat:40.6583, lon:-4.0194},
     {n:"San Lorenzo de El Escorial (Monte Abantos, Madrid)", lat:40.5922, lon:-4.1481},
     {n:"Santa María de la Alameda (Pinar de Peguerinos, Madrid)", lat:40.5981, lon:-4.2611},
     {n:"Robledo de Chavela (Madrid)", lat:40.5011, lon:-4.2381},
     {n:"Manzanares el Real (La Pedriza, Madrid)", lat:40.7272, lon:-3.8644},
-    {n:"Miraflores de la Sierra (Puerto de la Morcuera, Madrid)", lat:40.8122, lon:-3.7672},
+    {n:"Miraflores de la Sierra (Madrid)", lat:40.8122, lon:-3.7672},
     {n:"Bustarviejo (Madrid)", lat:40.8581, lon:-3.7081},
     {n:"Soto del Real (Madrid)", lat:40.7531, lon:-3.7842},
+    {n:"Lozoyuela (Sierra Norte, Madrid)", lat:40.9278, lon:-3.6214},
+    {n:"El Berrueco (Sierra Norte, Madrid)", lat:40.8889, lon:-3.5611},
+    {n:"La Cabrera (Madrid)", lat:40.8639, lon:-3.6139},
+    {n:"Patones (Madrid)", lat:40.8556, lon:-3.4833},
+    {n:"Torrelaguna (Madrid)", lat:40.8278, lon:-3.5389},
+    {n:"Robregordo (Sierra Norte, Madrid)", lat:41.1097, lon:-3.5939},
+    {n:"Braojos de la Sierra (Madrid)", lat:41.0389, lon:-3.6439},
+    {n:"San Martín de Valdeiglesias (Madrid)", lat:40.3622, lon:-4.3997},
+    {n:"Pelayos de la Presa (Madrid)", lat:40.3600, lon:-4.3333},
+    {n:"Cadalso de los Vidrios (Madrid)", lat:40.3000, lon:-4.4422},
+    {n:"Rozas de Puerto Real (Castañar de las Rozas, Madrid)", lat:40.3094, lon:-4.4928},
 
     // Segovia - Montes de Valsaín, Riaza, Ayllón y Pinares
     {n:"Valsaín (Montes de Valsaín, Segovia)", lat:40.8794, lon:-4.0336},
@@ -1741,17 +1791,30 @@
     {n:"Collado Hermoso (Segovia)", lat:41.0392, lon:-3.9181},
     {n:"Sotosalbos (Segovia)", lat:41.0342, lon:-3.9431},
     {n:"Navafría (Pinar y Chorro de Navafría, Segovia)", lat:41.0522, lon:-3.8222},
+    {n:"Puerto de Navafría (Segovia/Madrid)", lat:40.9850, lon:-3.8217},
     {n:"Pedraza (Sierra de Guadarrama, Segovia)", lat:41.1311, lon:-3.8111},
     {n:"Prádena (Acebal de Prádena, Segovia)", lat:41.1392, lon:-3.6892},
     {n:"Casla (Segovia)", lat:41.1642, lon:-3.6572},
     {n:"Arcones (Segovia)", lat:41.1181, lon:-3.7222},
     {n:"Santo Tomé del Puerto (Segovia)", lat:41.1942, lon:-3.6153},
-    {n:"Cerezo de Arriba (La Pinilla, Segovia)", lat:41.2403, lon:-3.5550},
+    {n:"Cerezo de Arriba (Segovia)", lat:41.2403, lon:-3.5550},
+    {n:"La Pinilla (Sierra de Ayllón, Segovia)", lat:41.2056, lon:-3.4939},
     {n:"Riaza (Hayedo de la Pedrosa, Segovia)", lat:41.2797, lon:-3.4808},
     {n:"Riofrío de Riaza (Hayedo de la Pedrosa, Segovia)", lat:41.2481, lon:-3.4511},
     {n:"Ayllón (Sierra de Ayllón, Segovia)", lat:41.4194, lon:-3.3761},
     {n:"Sepúlveda (Hoces del Río Duratón, Segovia)", lat:41.2972, lon:-3.7492},
     {n:"Cantalejo (Tierra de Pinares, Segovia)", lat:41.2583, lon:-3.9272},
+    {n:"Cuéllar (Tierra de Pinares, Segovia)", lat:41.4000, lon:-4.3167},
+    {n:"Coca (Pinares de Coca, Segovia)", lat:41.2167, lon:-4.5247},
+    {n:"Carbonero el Mayor (Segovia)", lat:41.1219, lon:-4.2639},
+    {n:"Turégano (Segovia)", lat:41.1550, lon:-4.0069},
+    {n:"Otero de Herreros (Segovia)", lat:40.8197, lon:-4.2089},
+    {n:"La Losa (Segovia)", lat:40.8542, lon:-4.1611},
+    {n:"Ortigosa del Monte (Segovia)", lat:40.8422, lon:-4.1772},
+    {n:"Trescasas (Segovia)", lat:40.9575, lon:-4.0392},
+    {n:"Torrecaballeros (Segovia)", lat:40.9917, lon:-4.0250},
+    {n:"Basardilla (Segovia)", lat:41.0267, lon:-3.9939},
+    {n:"Fresno de Cantespino (Segovia)", lat:41.3697, lon:-3.4997},
 
     // Guadalajara - Sierra Norte, Tejera Negra y Alto Tajo
     {n:"Cantalojas (Hayedo de Tejera Negra, Guadalajara)", lat:41.2344, lon:-3.2458},
@@ -1760,26 +1823,70 @@
     {n:"Valverde de los Arroyos (Pico Ocejón, Guadalajara)", lat:41.1292, lon:-3.2403},
     {n:"Galve de Sorbe (Sierra Pela, Guadalajara)", lat:41.2231, lon:-3.1811},
     {n:"Condemios de Arriba (Pinar de Condemios, Guadalajara)", lat:41.2022, lon:-3.1250},
+    {n:"Condemios de Abajo (Guadalajara)", lat:41.2189, lon:-3.1097},
     {n:"Campisábalos (Sierra de Pela, Guadalajara)", lat:41.2672, lon:-3.1461},
+    {n:"Albendiego (Sierra Norte, Guadalajara)", lat:41.2269, lon:-3.0517},
+    {n:"Somolinos (Laguna de Somolinos, Guadalajara)", lat:41.2458, lon:-3.0478},
+    {n:"Prádena de Atienza (Guadalajara)", lat:41.1719, lon:-3.0039},
+    {n:"Bustares (Alto Rey, Guadalajara)", lat:41.1367, lon:-3.0722},
     {n:"Tamajón (Sierra Norte, Guadalajara)", lat:41.0022, lon:-3.2492},
     {n:"Cogolludo (Guadalajara)", lat:40.9481, lon:-3.0881},
     {n:"Hiendelaencina (Alto Rey, Guadalajara)", lat:41.0842, lon:-3.0031},
     {n:"Atienza (Serranía de Guadalajara)", lat:41.2047, lon:-2.8708},
+    {n:"Jadraque (Guadalajara)", lat:40.9258, lon:-2.9239},
     {n:"Sigüenza (Pinar de Sigüenza, Guadalajara)", lat:41.0694, lon:-2.6419},
     {n:"Pelegrina (Barranco del Río Dulce, Guadalajara)", lat:41.0131, lon:-2.6392},
     {n:"Molina de Aragón (Guadalajara)", lat:40.8431, lon:-1.8842},
     {n:"Checa (Montes Universales, Guadalajara)", lat:40.5853, lon:-1.7911},
     {n:"Orea (Montes Universales, Guadalajara)", lat:40.5581, lon:-1.7281},
+    {n:"Alcoroches (Montes Universales, Guadalajara)", lat:40.5789, lon:-1.7489},
+    {n:"Peralejos de las Truchas (Alto Tajo, Guadalajara)", lat:40.5933, lon:-1.9089},
     {n:"Zaorejas (Parque Natural Alto Tajo, Guadalajara)", lat:40.7603, lon:-2.2031},
+    {n:"Peñalén (Alto Tajo, Guadalajara)", lat:40.6681, lon:-2.1708},
     {n:"Poveda de la Sierra (Alto Tajo, Guadalajara)", lat:40.6431, lon:-2.0622},
+    {n:"Villanueva de Alcorón (Alto Tajo, Guadalajara)", lat:40.6789, lon:-2.2519},
+    {n:"Cifuentes (La Alcarria, Guadalajara)", lat:40.7858, lon:-2.6219},
+    {n:"Trillo (Alto Tajo, Guadalajara)", lat:40.7025, lon:-2.5897},
 
-    // Burgos - Comarca de Pinares y Lagunas de Neila
+    // Burgos - Comarca de Pinares, Lagunas de Neila y Sierra de la Demanda
     {n:"Quintanar de la Sierra (Pinares de Burgos)", lat:41.9756, lon:-3.0255},
     {n:"Neila (Parque Natural Lagunas de Neila, Burgos)", lat:42.0592, lon:-2.9961},
     {n:"Regumiel de la Sierra (Burgos)", lat:41.9542, lon:-2.9881},
     {n:"Canicosa de la Sierra (Burgos)", lat:41.9322, lon:-3.0422},
-    {n:"Palacios de la Sierra (Burgos)", lat:41.9661, lon:-3.1272}
+    {n:"Palacios de la Sierra (Burgos)", lat:41.9661, lon:-3.1272},
+    {n:"Vilviestre del Pinar (Burgos)", lat:41.9528, lon:-3.0789},
+    {n:"Hontoria del Pinar (Burgos)", lat:41.8483, lon:-3.1611},
+    {n:"Rabanera del Pinar (Burgos)", lat:41.8889, lon:-3.1972},
+    {n:"Cabezón de la Sierra (Burgos)", lat:41.9189, lon:-3.2431},
+    {n:"Pinilla de los Barruecos (Burgos)", lat:41.9167, lon:-3.3083},
+    {n:"Salas de los Infantes (Burgos)", lat:42.0222, lon:-3.2917},
+    {n:"Barbadillo de Herreros (Sierra de la Demanda, Burgos)", lat:42.1500, lon:-3.1778},
+    {n:"Monterrubio de la Demanda (Burgos)", lat:42.1558, lon:-3.1117},
+    {n:"Huerta de Arriba (Sierra de la Demanda, Burgos)", lat:42.1197, lon:-3.0819},
+    {n:"Huerta de Abajo (Burgos)", lat:42.0833, lon:-3.1000},
+    {n:"Valle de Valdelaguna (Burgos)", lat:42.0917, lon:-3.1361},
+    {n:"Pineda de la Sierra (Sierra de la Demanda, Burgos)", lat:42.2197, lon:-3.2981},
+    {n:"Pradoluengo (Sierra de la Demanda, Burgos)", lat:42.3250, lon:-3.2000},
+    {n:"Fresneda de la Sierra Tirón (Burgos)", lat:42.3167, lon:-3.1333},
+    {n:"Santa Cruz del Valle Urbión (Burgos)", lat:42.3028, lon:-3.2689},
+    {n:"Santo Domingo de Silos (Burgos)", lat:41.9639, lon:-3.4189},
+    {n:"Covarrubias (Valle del Arlanza, Burgos)", lat:42.0583, lon:-3.5333},
+
+    // Ávila / Zona limítrofe Sistema Central
+    {n:"Peguerinos (Pinar de Peguerinos, Ávila)", lat:40.6278, lon:-4.2389},
+    {n:"Las Navas del Marqués (Pinares, Ávila)", lat:40.6039, lon:-4.3319},
+    {n:"El Hoyo de Pinares (Ávila)", lat:40.5000, lon:-4.4222},
+    {n:"Cebreros (Ávila)", lat:40.4556, lon:-4.4639}
   ];
+
+  function normStr(str) {
+    return (str || '')
+      .toString()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  }
 
   function getDistanceKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
@@ -3061,82 +3168,319 @@
   }
 
   // ================================================================
-  // BÚSQUEDA DE PUEBLOS
+  // BÚSQUEDA DE PUEBLOS Y ZONAS SETERAS
   // ================================================================
   const searchEl    = document.getElementById('search');
   const clearEl     = document.getElementById('search-clear');
   const suggestEl   = document.getElementById('suggestions');
 
+  let activeIndex = -1;
+  let currentSuggestions = [];
+  let currentSearchId = 0;
+  let nominatimAbortController = null;
+  const nominatimCache = new Map();
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function searchLocalSpots(q) {
+    const qNorm = normStr(q);
+    if (!qNorm) return [];
+
+    const matches = [];
+    for (const s of KNOWN_SPOTS) {
+      const raw = s.n;
+      let title = raw;
+      let sub = '';
+      const dashIdx = raw.indexOf('—');
+      const parenIdx = raw.indexOf('(');
+      if (dashIdx !== -1) {
+        title = raw.slice(0, dashIdx).trim();
+        sub = raw.slice(dashIdx + 1).replace(/[()]/g, '').trim();
+      } else if (parenIdx !== -1) {
+        title = raw.slice(0, parenIdx).trim();
+        sub = raw.slice(parenIdx + 1).replace(/[()]/g, '').trim();
+      }
+
+      const titleNorm = normStr(title);
+      const subNorm = normStr(sub);
+
+      let score = 0;
+      if (titleNorm === qNorm) {
+        score = 100;
+      } else if (titleNorm.startsWith(qNorm)) {
+        score = 85;
+      } else {
+        const titleWords = titleNorm.split(/[\s-]+/);
+        if (titleWords.some(w => w === qNorm)) {
+          score = 80;
+        } else if (titleWords.some(w => w.startsWith(qNorm))) {
+          score = 70;
+        } else if (titleNorm.includes(qNorm)) {
+          score = 55;
+        } else if (subNorm.startsWith(qNorm)) {
+          score = 45;
+        } else {
+          const subWords = subNorm.split(/[\s,-]+/);
+          if (subWords.some(w => w.startsWith(qNorm))) {
+            score = 35;
+          } else if (subNorm.includes(qNorm)) {
+            score = 25;
+          }
+        }
+      }
+
+      if (score > 0) {
+        matches.push({
+          title,
+          sub: sub || 'Zona micológica',
+          raw,
+          lat: s.lat,
+          lon: s.lon,
+          score,
+          type: 'mico'
+        });
+      }
+    }
+
+    matches.sort((a, b) => b.score - a.score || a.title.length - b.title.length);
+    return matches;
+  }
+
+  async function fetchNominatim(q, searchId) {
+    const qNorm = normStr(q);
+    if (nominatimCache.has(qNorm)) {
+      return nominatimCache.get(qNorm);
+    }
+
+    if (nominatimAbortController) {
+      nominatimAbortController.abort();
+    }
+    nominatimAbortController = new AbortController();
+
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=es&limit=6&addressdetails=1&viewbox=-5.5,42.8,-1.2,39.8&bounded=0`;
+      const resp = await fetch(url, { signal: nominatimAbortController.signal });
+      if (!resp.ok) return [];
+      const data = await resp.json();
+      if (searchId !== currentSearchId) return [];
+
+      const items = data.map(item => {
+        const parts = item.display_name.split(',').map(p => p.trim());
+        const title = parts[0] || q;
+        const sub = parts.slice(1, 4).join(', ');
+        return {
+          title,
+          sub: sub || 'Municipio / Lugar',
+          raw: item.display_name,
+          lat: parseFloat(item.lat),
+          lon: parseFloat(item.lon),
+          score: 10,
+          type: 'geo'
+        };
+      });
+
+      nominatimCache.set(qNorm, items);
+      return items;
+    } catch (err) {
+      return [];
+    }
+  }
+
+  function renderSuggestions(items, query) {
+    currentSuggestions = items.slice(0, 8);
+    activeIndex = -1;
+
+    if (!currentSuggestions.length) {
+      suggestEl.innerHTML = `<div class="sug-item" style="color:var(--dim); cursor:default;">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>No se encontraron resultados para "${escapeHtml(query)}"</span>
+      </div>`;
+      suggestEl.style.display = 'block';
+      return;
+    }
+
+    suggestEl.innerHTML = currentSuggestions.map((it, idx) => {
+      const isMico = it.type === 'mico';
+      const tagText = isMico ? 'Zona setera' : 'Lugar';
+      const iconSvg = isMico
+        ? `<svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" class="sug-icon"><path d="M12 2a9 9 0 0 0-9 9c0 1.5.5 2.5 1.5 3.5 1 1 2.5 1.5 3.5 1.5h8c1 0 2.5-.5 3.5-1.5 1-1 1.5-2 1.5-3.5a9 9 0 0 0-9-9z"/><path d="M10 16v5a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-5"/></svg>`
+        : `<svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" class="sug-icon geo"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+
+      return `<div class="sug-item" data-idx="${idx}">
+        ${iconSvg}
+        <div class="sug-text">
+          <div class="sug-title">${escapeHtml(it.title)}</div>
+          <div class="sug-sub">${escapeHtml(it.sub)}</div>
+        </div>
+        <span class="sug-tag">${tagText}</span>
+      </div>`;
+    }).join('');
+
+    suggestEl.querySelectorAll('.sug-item[data-idx]').forEach(el => {
+      el.addEventListener('click', () => {
+        const idx = parseInt(el.dataset.idx, 10);
+        const it = currentSuggestions[idx];
+        if (it) selectSpot(it.lat, it.lon, it.title);
+      });
+    });
+
+    suggestEl.style.display = 'block';
+  }
+
   searchEl.addEventListener('input', e => {
     const q = e.target.value.trim();
     clearEl.style.display = q ? 'block' : 'none';
-    if (q.length < 2) { suggestEl.style.display = 'none'; return; }
+    if (q.length < 2) {
+      suggestEl.style.display = 'none';
+      suggestEl.replaceChildren();
+      currentSuggestions = [];
+      activeIndex = -1;
+      if (nominatimAbortController) nominatimAbortController.abort();
+      return;
+    }
+
+    const searchId = ++currentSearchId;
+    const localResults = searchLocalSpots(q);
+    renderSuggestions(localResults, q);
+
     clearTimeout(debounce);
-    debounce = setTimeout(() => doSearch(q), 220);
+    if (localResults.length < 5 && q.length >= 3) {
+      debounce = setTimeout(async () => {
+        const geoResults = await fetchNominatim(q, searchId);
+        if (searchId !== currentSearchId) return;
+
+        const combined = [...localResults];
+        for (const gr of geoResults) {
+          const isDuplicate = combined.some(cr =>
+            normStr(cr.title) === normStr(gr.title) ||
+            getDistanceKm(cr.lat, cr.lon, gr.lat, gr.lon) < 2.5
+          );
+          if (!isDuplicate) {
+            combined.push(gr);
+          }
+        }
+        renderSuggestions(combined, q);
+      }, 260);
+    }
   });
+
+  searchEl.addEventListener('keydown', e => {
+    if (suggestEl.style.display === 'none' || !currentSuggestions.length) {
+      if (e.key === 'Enter') {
+        const q = searchEl.value.trim();
+        if (q.length >= 2) {
+          const local = searchLocalSpots(q);
+          if (local.length) selectSpot(local[0].lat, local[0].lon, local[0].title);
+        }
+      }
+      return;
+    }
+
+    const items = suggestEl.querySelectorAll('.sug-item[data-idx]');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIndex = (activeIndex + 1) % items.length;
+      updateActiveSuggestion(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIndex = activeIndex <= 0 ? items.length - 1 : activeIndex - 1;
+      updateActiveSuggestion(items);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const chosen = (activeIndex >= 0 && activeIndex < currentSuggestions.length)
+        ? currentSuggestions[activeIndex]
+        : currentSuggestions[0];
+      if (chosen) selectSpot(chosen.lat, chosen.lon, chosen.title);
+    } else if (e.key === 'Escape') {
+      suggestEl.style.display = 'none';
+      searchEl.blur();
+    }
+  });
+
+  function updateActiveSuggestion(items) {
+    items.forEach((el, idx) => {
+      if (idx === activeIndex) {
+        el.classList.add('selected');
+        el.scrollIntoView({ block: 'nearest' });
+      } else {
+        el.classList.remove('selected');
+      }
+    });
+  }
 
   clearEl.addEventListener('click', () => {
     searchEl.value = '';
     clearEl.style.display = 'none';
     suggestEl.style.display = 'none';
+    currentSuggestions = [];
+    activeIndex = -1;
     if (marker) { marker.remove(); marker = null; }
   });
 
-  async function doSearch(q) {
-    const qlo = q.toLowerCase();
-    let items = KNOWN_SPOTS.filter(s => s.n.toLowerCase().includes(qlo)).map(s => ({label: s.n, lat: s.lat, lon: s.lon}));
-
-    if (items.length < 4) {
-      try {
-        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=es&limit=5`, {headers:{'User-Agent':'MapaSetero/1.0'}});
-        if (r.ok) {
-          const d = await r.json();
-          d.forEach(x => items.push({ label: x.display_name.split(',').slice(0,3).join(', '), lat: parseFloat(x.lat), lon: parseFloat(x.lon) }));
-        }
-      } catch {}
+  function findNearestDataCell(lat, lon, maxDistanceKm = 35) {
+    if (!rawData || !rawData.cells || !rawData.cells.length) return null;
+    let best = null;
+    let minD = Infinity;
+    for (const c of rawData.cells) {
+      const d = getDistanceKm(lat, lon, c.lat, c.lon);
+      if (d < minD) {
+        minD = d;
+        best = c;
+      }
     }
+    return (best && minD <= maxDistanceKm) ? { cell: best, distanceKm: minD } : null;
+  }
 
-    if (!items.length) {
-      suggestEl.innerHTML = `<div class="sug-item" style="color:var(--dim)">Sin resultados para "${q}"</div>`;
-    } else {
-      suggestEl.innerHTML = items.slice(0,7).map(it =>
-        `<div class="sug-item" onclick="selectSpot(${it.lat},${it.lon},'${it.label.replace(/'/g,"\\'").replace(/"/g,'\\"')}')">
-          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <span>${it.label}</span>
-        </div>`
-      ).join('');
-    }
-    suggestEl.style.display = 'block';
+  function getEnrichedCell(cellData) {
+    if (!cellData) return null;
+    const selectedCells = selectedSpecies
+      .map(speciesId => speciesCellMaps.get(speciesId)?.get(cellData.h))
+      .filter(Boolean);
+    return {
+      ...cellData,
+      hs: selectedCells.length ? Math.max(...selectedCells.map(c => c.hs)) : (cellData.hs ?? 0),
+      ws: selectedCells.length ? Math.max(...selectedCells.map(c => c.ws)) : (cellData.ws ?? 0),
+      cs: selectedCells.length
+        ? Math.max(...selectedCells.map(c => Number.isFinite(c.cs) ? c.cs : Math.sqrt(Math.max(0, c.hs) * Math.max(0, c.ws))))
+        : (cellData.cs ?? 0),
+    };
   }
 
   function selectSpot(lat, lon, label) {
-    searchEl.value = label.split('(')[0].split(',')[0].trim();
+    searchEl.value = label;
     suggestEl.style.display = 'none';
+    currentSuggestions = [];
+    activeIndex = -1;
+
     if (marker) marker.remove();
     const el = document.createElement('div');
     el.className = 'pulse';
     marker = new maplibregl.Marker(el).setLngLat([lon, lat]).addTo(map);
-    map.flyTo({ center:[lon, lat], zoom: 12, speed: 1.4, essential: true });
+
+    map.flyTo({ center: [lon, lat], zoom: 12.5, speed: 1.4, essential: true });
     openMenu();
     document.getElementById('map-hint').hidden = true;
-    map.once('moveend', () => {
-      if (!map.getLayer('h3-fill')) return;
-      const point = map.project([lon, lat]);
-      const nearbyCells = map.queryRenderedFeatures([
-        [point.x - 80, point.y - 80],
-        [point.x + 80, point.y + 80],
-      ], { layers: ['h3-fill'] });
-      if (!nearbyCells.length) return;
-      nearbyCells.sort((a, b) => {
-        const distance = feature => {
-          const dx = Number(feature.properties.lon) - lon;
-          const dy = Number(feature.properties.lat) - lat;
-          return dx * dx * Math.cos(lat * Math.PI / 180) ** 2 + dy * dy;
-        };
-        return distance(a) - distance(b);
-      });
-      selectCell(nearbyCells[0].properties);
-    });
+
+    // Buscar celda forestal más cercana en los datos
+    const nearest = findNearestDataCell(lat, lon, 35);
+    if (nearest) {
+      const enriched = getEnrichedCell(nearest.cell);
+      selectCell(enriched);
+    } else {
+      // Si la ubicación está fuera de la cobertura micológica
+      if (cellPopup) cellPopup.remove();
+      cellPopup = new maplibregl.Popup({ offset: 12, closeButton: false, className: 'map-cell-popup' })
+        .setLngLat([lon, lat])
+        .setHTML(`<div style="font-size:12px; font-weight:700; color:#493b2d; line-height:1.35; padding:2px;">📍 ${escapeHtml(label)}<div style="font-size:10px; font-weight:500; color:#71685b;">Ubicación fuera del área de celdas micológicas actuales (Soria, Madrid, Segovia, Guadalajara, Burgos).</div></div>`)
+        .addTo(map);
+    }
   }
 
   document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) suggestEl.style.display = 'none'; });
