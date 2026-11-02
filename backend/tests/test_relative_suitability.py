@@ -84,6 +84,20 @@ class RelativeSuitabilityTests(unittest.TestCase):
             "separate_habitat_and_weather",
         )
 
+    def test_recent_freezing_minimum_reduces_weather_score(self):
+        mild_weather = {**self.weather, "temp_min_14d_celsius": 2.0}
+        freezing_weather = {**self.weather, "temp_min_14d_celsius": -1.0}
+
+        mild = self.engine.calculate_relative_suitability(
+            "boletus_edulis", self.static, mild_weather
+        )
+        freezing = self.engine.calculate_relative_suitability(
+            "boletus_edulis", self.static, freezing_weather
+        )
+
+        self.assertEqual(mild["score"], freezing["score"])
+        self.assertLess(freezing["weather_score"], mild["weather_score"])
+
     def test_subthreshold_rain_limits_other_weather_contributions(self):
         encinar = {
             **self.static,

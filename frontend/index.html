@@ -158,6 +158,21 @@
     /* Controls */
     .ctrl { display: flex; flex-direction: column; gap: 6px; }
     .ctrl-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+    .species-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .species-option {
+      display: flex; align-items: center; gap: 7px; padding: 8px;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: rgba(255,255,255,.04); color: var(--text);
+      font-size: 11px; font-weight: 600; cursor: pointer;
+    }
+    .species-option:has(input:checked) { border-color: var(--accent); background: var(--accent2); }
+    .species-option input { accent-color: var(--accent); margin: 0; }
+    .species-selection-actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .species-selection-count { color: var(--muted); font-size: 11px; }
+    .species-selection-all {
+      border: 0; padding: 3px 0; background: none; color: var(--accent);
+      font-size: 11px; font-weight: 700; cursor: pointer;
+    }
     select {
       background: rgba(10,15,30,.9); color: #fff; border: 1px solid var(--border);
       border-radius: 9px; padding: 9px 12px; font-size: 13px; font-weight: 600; cursor: pointer; outline: none; transition: border-color .2s;
@@ -820,13 +835,17 @@
         <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         ¿Qué especie buscas?
       </label>
-      <select id="species">
-        <option value="all">Todas las especies</option>
-        <option value="boletus_edulis" selected>Boletus edulis</option>
-        <option value="boletus_pinophilus">Boletus pinophilus</option>
-        <option value="boletus_aereus">Boletus aereus</option>
-        <option value="boletus_reticulatus">Boletus reticulatus</option>
-      </select>
+      <div class="species-selection-actions">
+        <span id="species-selection-count" class="species-selection-count">1 especie seleccionada</span>
+        <button id="select-all-species" class="species-selection-all" type="button">Seleccionar todas</button>
+      </div>
+      <div id="species-picker" class="species-picker">
+        <label class="species-option"><input type="checkbox" value="boletus_edulis" checked/>Boletus edulis</label>
+        <label class="species-option"><input type="checkbox" value="boletus_pinophilus"/>Boletus pinophilus</label>
+        <label class="species-option"><input type="checkbox" value="boletus_aereus"/>Boletus aereus</label>
+        <label class="species-option"><input type="checkbox" value="boletus_reticulatus"/>Boletus reticulatus</label>
+      </div>
+      <p class="species-comparison-note">La época cambia según la zona y la altitud; consulta las guías. Las mínimas recientes sí reducen el índice meteorológico, pero el mes aún no se usa como factor numérico.</p>
       <details class="menu-section">
         <summary>Guía de especies</summary>
         <div class="guide-buttons">
@@ -842,7 +861,11 @@
     <details class="menu-section">
       <summary>Capas del mapa</summary>
       <div class="layer-grid">
-        <button class="layer-btn active" id="lbtn-habitat" onclick="setLayer('habitat')">
+        <button class="layer-btn active" id="lbtn-search" onclick="setLayer('search')">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 12h18M12 3v18"/><circle cx="12" cy="12" r="9"/></svg>
+          Hábitat + tiempo
+        </button>
+        <button class="layer-btn" id="lbtn-habitat" onclick="setLayer('habitat')">
           <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="9"/></svg>
           Hábitat potencial
         </button>
@@ -871,17 +894,26 @@
       <div class="menu-section-content">
         <div class="slider-card">
           <div class="slider-head">
-            <span id="slider-title">Hábitat mínimo (orientativo)</span>
-            <strong id="slider-label">0 — Solo celdas candidatas</strong>
+            <span id="slider-title">Búsqueda mínima (orientativa)</span>
+            <strong id="slider-label">0 — Todas las celdas candidatas</strong>
           </div>
           <input type="range" id="slider" min="0" max="80" step="5" value="0"/>
+        </div>
+        <div class="slider-card">
+          <div class="slider-head">
+            <span>Lluvia mínima en 14 días</span>
+            <strong id="rain-filter-label">Sin filtro</strong>
+          </div>
+          <input type="range" id="rain-filter" min="0" max="100" step="5" value="0"
+            aria-label="Filtrar por lluvia mínima acumulada en los últimos 14 días"/>
+          <p class="species-comparison-note">Filtra por lluvia estimada; no garantiza que hayan salido setas.</p>
         </div>
         <div class="stats">
           <span>Celdas visibles: <strong id="stat-total">—</strong></span>
           <span id="stat-fav-label">Hábitat ≥50: <strong id="stat-fav">—</strong></span>
         </div>
         <div class="legend">
-          <div class="legend-title" id="leg-title">Hábitat potencial (0 – 100)</div>
+          <div class="legend-title" id="leg-title">Búsqueda orientativa (menor de hábitat y tiempo)</div>
           <div class="legend-bar" id="leg-bar">
             <div class="step" style="background:#334155"></div>
             <div class="step" style="background:#f97316"></div>
@@ -952,15 +984,15 @@
         </div>
       </details>
       <details id="species-comparison" class="species-comparison" hidden>
-        <summary class="species-comparison-title">Cómo interpretar este resultado</summary>
+        <summary class="species-comparison-title">Detalle de las especies seleccionadas</summary>
         <div id="species-comparison-list" class="species-comparison-list"></div>
-        <p class="species-comparison-note">El pH y las condiciones son estimaciones orientativas; no confirman que haya setas.</p>
+        <p class="species-comparison-note">“Hábitat + tiempo” muestra el menor de ambos índices por especie y, si eliges varias, el mejor resultado entre ellas. Es una orientación, no una probabilidad.</p>
       </details>
     </div>
 
     <details class="menu-section about-section">
       <summary>Sobre estos datos</summary>
-      <p>La lluvia, la temperatura y el pH son estimaciones; no son mediciones exactas de cada lugar y no confirman que haya setas.</p>
+      <p>El hábitat, la lluvia, la temperatura y el pH son estimaciones regionales, no mediciones exactas de cada lugar. El índice meteorológico ya penaliza las mínimas bajo un umbral térmico experimental por especie. La época del año se explica en las guías, pero aún no se usa como factor numérico: cambia con la región, la altitud y el año. Ningún índice calcula una probabilidad ni confirma o descarta fructificación.</p>
     </details>
   </div>
 
@@ -1055,18 +1087,18 @@
           ]
         },
         {
-          title: 'Suelo, plantas y pH',
+          title: 'Lluvia y microhábitat',
           items: [
-            'No hay una hierba que confirme que el suelo tenga el pH adecuado. Arándanos y brezos suelen asociarse a suelos ácidos; tomillos y romeros aparecen a menudo en lugares más secos y básicos, pero hay excepciones.',
-            'Los helechos suelen señalar rincones sombríos y húmedos, no la presencia de esta especie. El musgo puede ayudar a localizar zonas que retienen humedad.',
-            'La capa de pH del mapa es una estimación amplia: úsala como pista secundaria, no como una medición del suelo bajo cada árbol.'
+            'Después de varios días húmedos, recorre el suelo entre musgo, hojarasca y acículas; busca humedad fresca, no zonas encharcadas.',
+            'Empieza por claros pequeños, bordes y zonas con sombra parcial bajo árboles adultos: combinan luz y suelo que tarda más en secarse.',
+            'Si la superficie está seca, prioriza umbrías y vaguadas protegidas. La lluvia acumulada del mapa cubre una zona amplia, no mide cada rincón del bosque.'
           ]
         },
         {
-          title: 'Sombra y orientación',
+          title: 'Época orientativa',
           items: [
-            'Prueba en bosque con sombra ligera o intermedia, claros y bordes; el suelo debe guardar humedad sin estar encharcado.',
-            'En periodos secos, las laderas norte y este suelen conservar mejor la humedad. La orientación no es una regla fija: importan también la altitud, el arbolado y las lluvias.'
+            'En buena parte de la península se busca sobre todo desde finales de verano y durante el otoño; en montaña la altitud puede retrasar o adelantar la temporada.',
+            'Un episodio de lluvia ayuda, pero no basta: el suelo necesita conservar humedad y las temperaturas deben seguir siendo favorables.'
           ]
         },
         {
@@ -1108,18 +1140,18 @@
           ]
         },
         {
-          title: 'Suelo, plantas y pH',
+          title: 'Lluvia y microhábitat',
           items: [
-            'Se encuentra a menudo en pinares sobre suelos ácidos, pero el pino y el contexto del bosque son pistas mejores que inferir el pH por una hierba.',
-            'Brezos y arándanos pueden acompañar suelos ácidos; no demuestran que allí crezca el hongo. Tomillo y romero tampoco descartan una seta.',
-            'Los helechos pueden señalar sombra o humedad local, no una relación directa con el pinícola. El pH del mapa es aproximado.'
+            'En pinares, revisa el suelo entre acículas y musgo, especialmente donde la cobertura mantiene la humedad tras varios días de lluvia.',
+            'Recorre claros pequeños y bordes del pinar, además del interior; comprueba el suelo bajo pinos adultos y en distintos puntos del rodal.',
+            'En periodos secos, empieza por umbrías y zonas frescas. El pH del mapa es una referencia regional, no una medición del punto.'
           ]
         },
         {
-          title: 'Sombra y orientación',
+          title: 'Época orientativa',
           items: [
-            'Busca sombra ligera o intermedia bajo los pinos, pero revisa también claros donde el suelo no se seque demasiado.',
-            'En verano seco, las laderas norte y este pueden guardar más humedad; no descartes otras orientaciones si el pinar conserva humedad.'
+            'Puede aparecer en temporadas frescas y húmedas de primavera u otoño, según la zona y la altitud; el calendario local cambia de un año a otro.',
+            'Las heladas fuertes pueden dañar los cuerpos fructíferos. La capa de tiempo refleja mínimas recientes, pero no predice por sí sola el momento de salida.'
           ]
         },
         {
@@ -1160,18 +1192,18 @@
           ]
         },
         {
-          title: 'Suelo, plantas y pH',
+          title: 'Lluvia y microhábitat',
           items: [
-            'La presencia de un bosque adecuado es una pista más útil que una planta indicadora. Encinas o robles adultos importan porque el hongo vive asociado a sus raíces.',
-            'Tomillo y romero pueden aparecer en ambientes mediterráneos secos o básicos, pero no indican que haya Boletus aereus ni permiten conocer el pH exacto.',
-            'Los helechos suelen señalar sombra o humedad; pueden aparecer en microhábitats frescos, pero no son un indicador específico de esta seta.'
+            'Tras lluvias de verano o comienzos de otoño, revisa encinares, alcornocales y robledales cálidos con suelo aún húmedo.',
+            'Busca bajo copas con sombra moteada y en bordes resguardados; los lugares muy expuestos se secan antes, incluso después de llover.',
+            'Comprueba varios árboles adultos del mismo rodal. La precipitación del mapa es regional y no indica cuánto tardó en secarse cada suelo.'
           ]
         },
         {
-          title: 'Sombra y orientación',
+          title: 'Época orientativa',
           items: [
-            'Aunque prefiere ambientes cálidos, suele encontrarse protegido bajo las copas. Busca sombra moteada y bordes cálidos, no suelo totalmente expuesto y reseco.',
-            'En zonas frescas, una orientación más soleada puede calentar el lugar; en verano seco, una ladera sur muy expuesta puede perder demasiada humedad. La orientación por sí sola no predice la fructificación.'
+            'Es una especie de ambientes templados o cálidos; suele buscarse en periodos cálidos con humedad, a menudo en verano y comienzos de otoño.',
+            'El frío y las heladas reducen las condiciones favorables. En zonas altas o frías, una misma fecha puede dar condiciones muy distintas a un encinar bajo.'
           ]
         },
         {
@@ -1212,18 +1244,18 @@
           ]
         },
         {
-          title: 'Suelo, plantas y pH',
+          title: 'Lluvia y microhábitat',
           items: [
-            'No uses tomillo, helechos ni otra planta como prueba de pH o de presencia. La relación con robles y el tipo de bosque son indicios más útiles.',
-            'Los tomillares suelen aparecer en lugares abiertos y secos; un helechal suele señalar humedad o sombra local. Ninguno confirma esta especie.',
-            'El valor de pH del visor es una estimación del entorno, no una medida del suelo bajo el árbol.'
+            'Tras lluvias en tiempo templado, revisa robledales, castañares y otros bosques de frondosas, tanto bajo las copas como en claros parcialmente sombreados.',
+            'En primavera, los rincones que reciben sol pueden calentarse antes; con calor y sequía, vuelve a los suelos frescos que retengan humedad.',
+            'Anota qué rodal y qué condiciones encuentras: repetir la visita después de lluvia aporta más que una sola lectura del mapa.'
           ]
         },
         {
-          title: 'Sombra y orientación',
+          title: 'Época orientativa',
           items: [
-            'Prefiere ambientes cálidos, pero busca ejemplares bajo la copa o en claros parcialmente sombreados, donde el suelo no esté completamente seco.',
-            'Las laderas soleadas pueden calentarse antes en primavera; si el verano es seco, los rincones frescos y húmedos pueden ser mejores. No hay una orientación universal.'
+            'Suele asociarse a periodos cálidos, desde finales de primavera o verano; las lluvias y el clima local pueden prolongar o desplazar la temporada.',
+            'La temperatura mínima reciente ayuda a detectar frío o heladas, pero no existe un umbral universal que confirme o descarte la fructificación.'
           ]
         },
         {
@@ -1249,9 +1281,10 @@
   // ================================================================
   // ESTADO GLOBAL
   // ================================================================
-  let currentSpecies = 'boletus_edulis';
-  let currentLayer   = 'habitat';
+  let selectedSpecies = ['boletus_edulis'];
+  let currentLayer   = 'search';
   let currentMinScore = 0;
+  let currentRainFilter = 0;
   let currentProv    = 'all';
   let rawData        = null;   // índice experimental cargado de .json
   const speciesDatasets = new Map();
@@ -1424,8 +1457,9 @@
     }
   }
 
-  async function loadSpecies(sp) {
+  async function loadSpecies(speciesIds = selectedSpecies) {
     const requestId = ++speciesLoadRequest;
+    const speciesToLoad = [...speciesIds];
     const loading = document.getElementById('loading');
     const status = document.getElementById('data-status');
     loading.classList.add('active');
@@ -1433,28 +1467,29 @@
     rawData = null;
 
     try {
-      if (sp === 'all') {
-        const results = await Promise.allSettled(SPECIES_IDS.map(fetchSpeciesDataset));
-        const failures = results
-          .map((result, index) => result.status === 'rejected'
-            ? `${SPECIES_IDS[index]}: ${result.reason.message}`
-            : null)
-          .filter(Boolean);
-        if (failures.length) {
-          throw new Error(`No se pudieron cargar todas las especies. ${failures.join(' ')}`);
-        }
-        rawData = speciesDatasets.get('boletus_edulis');
-      } else {
-        rawData = await fetchSpeciesDataset(sp);
+      const results = await Promise.allSettled(speciesToLoad.map(fetchSpeciesDataset));
+      const failures = results
+        .map((result, index) => result.status === 'rejected'
+          ? `${speciesToLoad[index]}: ${result.reason.message}`
+          : null)
+        .filter(Boolean);
+      if (failures.length) {
+        throw new Error(`No se pudieron cargar las especies seleccionadas. ${failures.join(' ')}`);
       }
 
       if (requestId !== speciesLoadRequest) return;
-      status.textContent = `Datos del ${rawData.date}. El mapa orienta sobre el hábitat y el tiempo reciente, pero no confirma que haya setas.`;
+      const datasets = speciesToLoad.map(speciesId => speciesDatasets.get(speciesId));
+      const dates = new Set(datasets.map(dataset => dataset.date));
+      if (dates.size !== 1) {
+        throw new Error('Las especies seleccionadas tienen fechas de datos distintas; vuelve a intentarlo más tarde.');
+      }
+      rawData = datasets[0];
+      status.textContent = `Datos del ${rawData.date}. La capa Hábitat + tiempo combina ambos índices; no es una probabilidad ni confirma que haya setas.`;
       status.classList.remove('verified');
       render();
     } catch (error) {
       if (requestId !== speciesLoadRequest) return;
-      console.error(`No se pudieron cargar datos para ${sp}.`, error);
+      console.error(`No se pudieron cargar datos para ${speciesToLoad.join(', ')}.`, error);
       const message = error instanceof Error ? error.message : String(error);
       const protocolHint = location.protocol === 'file:'
         ? ' Sirve el visor mediante HTTP; no lo abras como fichero local.'
@@ -1499,25 +1534,26 @@
     if (!rawData) return;
     document.getElementById('loading').classList.add('active');
 
-    const mapCells = currentSpecies === 'all'
-      ? rawData.cells.map(cell => {
-          const habitatScore = Math.max(...SPECIES_IDS.map(speciesId =>
-            speciesCellMaps.get(speciesId).get(cell.h)?.hs ?? 0
-          ));
-          return {
-            ...cell,
-            s: habitatScore,
-            hs: habitatScore,
-            ws: Math.max(...SPECIES_IDS.map(speciesId =>
-            speciesCellMaps.get(speciesId).get(cell.h)?.ws ?? 0
-            )),
-          };
-        })
-      : rawData.cells;
-    const activeScore = currentLayer === 'weather' ? 'ws' : 'hs';
+    const mapCells = rawData.cells.map(cell => {
+      const selectedCells = selectedSpecies
+        .map(speciesId => speciesCellMaps.get(speciesId)?.get(cell.h))
+        .filter(Boolean);
+      return {
+        ...cell,
+        hs: Math.max(...selectedCells.map(selectedCell => selectedCell.hs)),
+        ws: Math.max(...selectedCells.map(selectedCell => selectedCell.ws)),
+        ss: Math.max(...selectedCells.map(selectedCell =>
+          Math.min(selectedCell.hs, selectedCell.ws)
+        )),
+      };
+    });
+    const activeScore = currentLayer === 'search'
+      ? 'ss'
+      : currentLayer === 'weather' ? 'ws' : 'hs';
     const cells = mapCells.filter(c =>
       (currentLayer !== 'habitat' || c.hs > 0) &&
-      c[activeScore] >= currentMinScore &&
+      (currentLayer === 'precip' || c[activeScore] >= currentMinScore) &&
+      c.p14 >= currentRainFilter &&
       inProvBounds(c)
     );
 
@@ -1533,6 +1569,7 @@
       else if (currentLayer === 'forest') color = colorForest(c.tree);
       else if (currentLayer === 'ph') color = colorPh(c.ph);
       else if (currentLayer === 'weather') color = colorScore(c.ws);
+      else if (currentLayer === 'search') color = colorScore(c.ss);
       else color = colorScore(c.hs);
 
       return {
@@ -1545,11 +1582,16 @@
     const geojson = { type: 'FeatureCollection', features };
 
     // Estadísticas
-    const fav = cells.filter(c => c[activeScore] >= 50).length;
+    const fav = cells.filter(c =>
+      (currentLayer === 'precip' ? c.p14 >= 25 : c[activeScore] >= 50)
+    ).length;
     document.getElementById('stat-total').textContent = cells.length.toLocaleString('es-ES');
     document.getElementById('stat-fav').textContent = fav.toLocaleString('es-ES');
     document.getElementById('stat-fav-label').firstChild.textContent =
-      currentLayer === 'weather' ? 'Tiempo ≥50: ' : 'Hábitat ≥50: ';
+      currentLayer === 'search' ? 'Hábitat + tiempo ≥50: '
+        : currentLayer === 'weather' ? 'Tiempo ≥50: '
+          : currentLayer === 'precip' ? 'Lluvia ≥25 mm: '
+            : 'Hábitat ≥50: ';
 
     // Actualizar fuente o crearla
     if (map.getSource('h3')) {
@@ -1586,11 +1628,7 @@
   }
 
   function selectCell(cell) {
-    if (currentSpecies === 'all') {
-      showAllSpeciesAtCell(cell);
-    } else {
-      showCell(cell);
-    }
+    showSelectedSpeciesAtCell(cell);
     document.getElementById('map-hint').hidden = true;
     openMenu();
     requestAnimationFrame(() => {
@@ -1643,7 +1681,7 @@
 
     const note = document.createElement('p');
     note.className = 'species-comparison-note';
-    note.textContent = 'Las plantas y el relieve dan pistas generales; no miden el pH ni garantizan que fructifique aquí.';
+    note.textContent = 'Empieza por los árboles asociados a la especie y revisa suelos que conserven humedad tras la lluvia; el mapa orienta zonas amplias, no puntos exactos.';
     content.append(note);
 
     for (const sectionData of guide.sections) {
@@ -1699,12 +1737,24 @@
     const phStatus = phWhollyInside ? 'good' : phWhollyOutside ? 'bad' : 'uncertain';
     const phText = `Estimado ${cell.ph}${phHasInterval ? ` (rango ${ph05}–${ph95})` : ''}; referencia ${phRange[0]}–${phRange[1]}.`;
 
-    const weatherStatus = 'uncertain';
     const sourceDistance = Number(cell.weather_distance_km);
     const distanceNote = cell.weather_distance_km != null && Number.isFinite(sourceDistance)
       ? ` Fuente meteorológica más cercana: ${formatNumber(sourceDistance)} km.`
       : '';
-    const weatherText = `Puntuación orientativa: ${formatNumber(cell.ws)}/100. Lluvia en 14 días: ${formatNumber(cell.p14)} mm; humedad estimada: ${formatNumber(cell.moist)}%; temperatura media: ${formatNumber(cell.t)} °C.${distanceNote}`;
+    const minTempLimit = Number(profile.min_temp_limit_celsius);
+    const minTemp = Number(cell.tmin);
+    const weatherStatus = Number.isFinite(minTemp) &&
+      Number.isFinite(minTempLimit) && minTemp < minTempLimit
+      ? 'bad'
+      : 'uncertain';
+    const frostText = Number.isFinite(minTemp)
+      ? Number.isFinite(minTempLimit)
+        ? minTemp < minTempLimit
+          ? ` Mínima ${formatNumber(minTemp)} °C, por debajo del umbral experimental de ${formatNumber(minTempLimit)} °C; esto reduce el índice meteorológico.`
+          : ` Mínima ${formatNumber(minTemp)} °C; el umbral experimental de esta especie es ${formatNumber(minTempLimit)} °C.`
+        : ` Mínima ${formatNumber(minTemp)} °C; umbral térmico no disponible.`
+      : '';
+    const weatherText = `Índice orientativo: ${formatNumber(cell.ws)}/100. Lluvia en 14 días: ${formatNumber(cell.p14)} mm; humedad estimada: ${formatNumber(cell.moist)}%; temperatura media: ${formatNumber(cell.t)} °C.${frostText}${distanceNote}`;
 
     return [
       { label: 'Árbol y cubierta', status: habitatStatus, text: `${habitatText}${canopyText}` },
@@ -1755,35 +1805,39 @@
     return card;
   }
 
-  function showAllSpeciesAtCell(cell) {
+  function showSelectedSpeciesAtCell(cell) {
     showCell(cell);
     const comparison = document.getElementById('species-comparison');
     const list = document.getElementById('species-comparison-list');
     list.replaceChildren();
 
-    for (const speciesId of SPECIES_IDS) {
+    for (const speciesId of selectedSpecies) {
       const dataset = speciesDatasets.get(speciesId);
-      const speciesCell = speciesCellMaps.get(speciesId).get(cell.h);
+      const speciesCell = speciesCellMaps.get(speciesId)?.get(cell.h);
       if (speciesCell) list.append(createSpeciesCard(speciesCell, dataset));
     }
-    comparison.hidden = false;
+    comparison.hidden = list.childElementCount === 0;
   }
 
   function showCell(p) {
     document.getElementById('cell-card').hidden = false;
-    const s = parseFloat(p.hs ?? p.s) || 0;
+    const displayScore = currentLayer === 'search'
+      ? Number(p.ss)
+      : currentLayer === 'weather' ? Number(p.ws)
+        : currentLayer === 'precip' ? Number(p.p14)
+          : Number(p.hs);
     const pill = document.getElementById('score-pill');
-    pill.textContent = currentSpecies === 'all'
-      ? `Hábitat ${formatNumber(s)}/100 · tiempo ${formatNumber(p.ws)}/100`
-      : `Hábitat ${formatNumber(s)}/100`;
-    pill.className = 'score-badge ' + (s >= 50 ? 'b-ok' : s > 0 ? 'b-mod' : 'b-no');
+    pill.textContent = currentLayer === 'search'
+      ? `Búsqueda ${formatNumber(displayScore)}/100`
+      : currentLayer === 'precip' ? `Lluvia ${formatNumber(displayScore)} mm`
+        : `${currentLayer === 'weather' ? 'Tiempo' : 'Hábitat'} ${formatNumber(displayScore)}/100`;
+    pill.className = 'score-badge ' + (displayScore >= 50 ? 'b-ok' : displayScore > 0 ? 'b-mod' : 'b-no');
 
     const hostNote = p.host === 'unknown' ? ' (hospedador incierto)' : '';
     document.getElementById('c-tree').textContent  = forestNameEs(p.tree) + hostNote;
-    const dataset = speciesDatasets.get(currentSpecies);
-    document.getElementById('c-reason').textContent = currentSpecies === 'all'
-      ? 'El hábitat y las condiciones recientes se muestran por separado; debajo se comparan las especies.'
-      : 'El hábitat y las condiciones recientes se muestran por separado.';
+    document.getElementById('c-reason').textContent = currentLayer === 'search'
+      ? 'La capa de búsqueda toma el menor índice de hábitat y tiempo para cada especie y muestra el mejor de las especies elegidas. No es una probabilidad.'
+      : 'Hábitat y meteorología son índices separados; una puntuación alta no confirma fructificación.';
     document.getElementById('c-ph').textContent    = p.ph !== undefined
       ? `${formatNumber(p.ph)} (${formatNumber(p.ph05)}–${formatNumber(p.ph95)})` : '—';
     document.getElementById('c-rain').textContent  = p.p14 !== undefined && p.p14 !== null
@@ -1803,18 +1857,14 @@
     const comparison = document.getElementById('species-comparison');
     const list = document.getElementById('species-comparison-list');
     list.replaceChildren();
-    if (dataset) {
-      list.append(createSpeciesCard(p, dataset));
-      comparison.hidden = false;
-    } else {
-      comparison.hidden = true;
-    }
+    comparison.hidden = true;
   }
 
   // ================================================================
   // CAPAS Y LEYENDA
   // ================================================================
   const LEGEND_CFG = {
+    search:  { title:'Búsqueda orientativa (menor de hábitat y tiempo; no es probabilidad)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','75','100'] },
     habitat: { title:'Hábitat potencial (0–100; no indica presencia)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','75','100'] },
     weather: { title:'Condiciones recientes (0–100; orientación, no confirma presencia)', bar:['#334155','#f97316','#eab308','#22c55e','#10b981'], labels:['0','25','50','75','100'] },
     precip: { title:'Precipitación acumulada 14 días (mm)', bar:['#0f172a','#0284c7','#06b6d4','#38bdf8','#7dd3fc'], labels:['0mm','10mm','25mm','45mm','>70mm'] },
@@ -1835,14 +1885,22 @@
   }
 
   function updateScoreFilterLabel() {
+    const slider = document.getElementById('slider');
+    slider.disabled = currentLayer === 'precip';
     document.getElementById('slider-title').textContent =
-      currentLayer === 'weather' ? 'Condiciones recientes mínimas' : 'Hábitat mínimo (orientativo)';
+      currentLayer === 'search' ? 'Búsqueda mínima (orientativa)'
+        : currentLayer === 'weather' ? 'Condiciones recientes mínimas'
+          : currentLayer === 'precip' ? 'Filtro de índice (no aplica a lluvia)'
+            : 'Hábitat mínimo (orientativo)';
     const label = currentMinScore === 0
-      ? currentLayer === 'weather'
-        ? '0 — Todas las celdas candidatas'
-        : '0 — Solo celdas candidatas'
+      ? currentLayer === 'precip'
+        ? 'Usa el filtro de lluvia inferior'
+        : '0 — Todas las celdas candidatas'
       : `≥ ${currentMinScore} puntos`;
     document.getElementById('slider-label').textContent = label;
+    document.getElementById('rain-filter-label').textContent = currentRainFilter === 0
+      ? 'Sin filtro'
+      : `≥ ${currentRainFilter} mm`;
   }
 
   // ================================================================
@@ -1949,12 +2007,48 @@
     render();
   });
 
+  document.getElementById('rain-filter').addEventListener('input', e => {
+    currentRainFilter = parseInt(e.target.value);
+    updateScoreFilterLabel();
+    render();
+  });
+
   // ================================================================
   // SPECIES SELECTOR
   // ================================================================
-  document.getElementById('species').addEventListener('change', e => {
-    currentSpecies = e.target.value;
-    loadSpecies(currentSpecies);
+  const speciesPicker = document.getElementById('species-picker');
+  const speciesSelectionCount = document.getElementById('species-selection-count');
+  const selectAllSpeciesButton = document.getElementById('select-all-species');
+
+  function updateSpeciesSelection() {
+    const checkedSpecies = [...speciesPicker.querySelectorAll('input:checked')]
+      .map(input => input.value);
+    if (checkedSpecies.length === 0) {
+      const previousSpecies = selectedSpecies[0];
+      speciesPicker.querySelector(`input[value="${previousSpecies}"]`).checked = true;
+      document.getElementById('data-status').textContent =
+        'Deja al menos una especie seleccionada para explorar el mapa.';
+      return;
+    }
+
+    selectedSpecies = checkedSpecies;
+    const count = checkedSpecies.length;
+    speciesSelectionCount.textContent =
+      `${count} especie${count === 1 ? '' : 's'} seleccionada${count === 1 ? '' : 's'}`;
+    selectAllSpeciesButton.textContent = count === SPECIES_IDS.length
+      ? 'Dejar solo Boletus edulis'
+      : 'Seleccionar todas';
+    loadSpecies(selectedSpecies);
+  }
+
+  speciesPicker.addEventListener('change', updateSpeciesSelection);
+  selectAllSpeciesButton.addEventListener('click', () => {
+    const selectAll = selectedSpecies.length !== SPECIES_IDS.length;
+    const nextSelection = selectAll ? SPECIES_IDS : ['boletus_edulis'];
+    speciesPicker.querySelectorAll('input').forEach(input => {
+      input.checked = nextSelection.includes(input.value);
+    });
+    updateSpeciesSelection();
   });
 
   document.querySelectorAll('.guide-btn').forEach(button => {
@@ -2000,7 +2094,7 @@
     if (event.key === 'Escape' && document.body.classList.contains('menu-open')) closeMenu();
   });
 
-  map.on('load', () => loadSpecies(currentSpecies));
+  map.on('load', () => loadSpecies(selectedSpecies));
 
   let deferredInstallPrompt = null;
   const installButton = document.getElementById('install-button');

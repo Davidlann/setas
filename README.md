@@ -106,19 +106,24 @@ Set-Location .\frontend
 python -m http.server 3000
 ```
 
-Abre `http://localhost:3000`. La interfaz muestra el índice ambiental
-experimental cuando existe el conjunto generado e indica que no es una
-probabilidad ni una predicción validada. En «Todas las especies», el mapa
-colorea cada celda según el mayor índice de los cuatro boletus; al seleccionar
-una celda, el panel muestra cuatro indicadores por especie: hospedador/cubierta,
-altitud, pH estimado y condiciones recientes. Estos indicadores son orientativos:
-no confirman ni descartan fructificación. Los botones de guía abren consejos
-de búsqueda e identificación de cada especie, con fotografías acreditadas.
-Un índice 0 indica que
-una o más reglas limitan esa celda, no que se haya comprobado la ausencia de
-setas. La meteorología se marca como contexto regional incierto en cada
-hexágono: no debe usarse para afirmar diferencias meteorológicas entre dos
-celdas vecinas. El pH se estima con SoilGrids y no es una medición local.
+Abre `http://localhost:3000`. La interfaz muestra índices ambientales
+experimentales, no probabilidades ni predicciones validadas. Puedes marcar una o
+varias especies; al seleccionar una celda se muestran sus indicadores de
+hábitat, altitud, pH y meteorología. La capa inicial «Hábitat + tiempo» combina
+ambos índices tomando el menor para cada especie y, entre las especies elegidas,
+muestra el mayor resultado. Es una orientación conservadora, no un modelo
+validado de fructificación. Las capas de hábitat y meteorología también se
+pueden consultar por separado.
+
+El filtro de lluvia limita las celdas según la precipitación estimada acumulada
+en los últimos 14 días. La meteorología es regional y no representa diferencias
+fiables entre hexágonos vecinos; la humedad y el pH tampoco son mediciones
+locales. Las mínimas recientes bajo el umbral térmico experimental de cada
+especie reducen el índice meteorológico. Las guías ofrecen temporadas generales,
+pero el mes aún no se usa como factor numérico: la época cambia según región,
+altitud, bosque y año. Una puntuación baja o cero no demuestra que no haya setas.
+Las guías incluyen consejos prácticos de hábitat y búsqueda e imágenes
+acreditadas; no sustituyen la identificación experta.
 
 ## Pipeline
 

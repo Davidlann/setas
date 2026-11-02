@@ -259,6 +259,7 @@ def export_relative_suitability(
                     meteo_rules["accumulated_precip_14d_optimal_mm"]
                 ),
                 "mean_temp_optimal_celsius": meteo_rules["mean_temp_optimal_celsius"],
+                "min_temp_limit_celsius": meteo_rules["min_temp_limit_celsius"],
                 "soil_moisture_min_percent": meteo_rules["soil_moisture_min_percent"],
             },
             "gbif_occurrences_with_uncertainty_le_250m": observation_counts.get(
