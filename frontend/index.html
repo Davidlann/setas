@@ -1986,6 +1986,7 @@
       const desc = p.tshock_status === 'triggered_favorable' ? ' (Trigger favorable)'
         : p.tshock_status === 'cold_suppressed' ? ' (Freno por frío)'
         : p.tshock_status === 'warming_inhibited' ? ' (Calor continuo)'
+        : p.tshock_status === 'stable' ? ' (Estable)'
         : '';
       shockText = `${sign}${formatNumber(p.tshock)} °C${desc}`;
     }
