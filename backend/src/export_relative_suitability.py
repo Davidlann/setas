@@ -27,10 +27,10 @@ GBIF_TAXON_KEYS = {
 def export_relative_suitability(
     db_path: Path = DB_PATH,
     output_dir: Path | None = None,
-    season_phase: str = "early",
+    season_phase: str | None = None,
 ):
-    if season_phase not in {"early", "late"}:
-        raise ValueError("season_phase debe ser 'early' o 'late'.")
+    if season_phase is not None and season_phase not in {"early", "late", "auto"}:
+        raise ValueError("season_phase debe ser 'early', 'late' o 'auto'.")
     if output_dir is None:
         project_root = Path(__file__).resolve().parents[2]
         output_dir = project_root / "frontend" / "public" / "data" / "experimental"
@@ -44,6 +44,8 @@ def export_relative_suitability(
         ).fetchone()[0]
         if snapshot_date is None:
             raise RuntimeError("No hay snapshots meteorológicos para calcular el índice.")
+        if season_phase in (None, "auto"):
+            season_phase = MushroomScoringEngine.resolve_season_phase(snapshot_date)
         static_table_columns = {
             row[0] for row in con.execute("DESCRIBE cells_static").fetchall()
         }
@@ -61,11 +63,15 @@ def export_relative_suitability(
         }
         weather_metadata_columns = (
             "precip_daily_mm_json",
+            "precip_last_3d_mm",
             "weather_source",
             "weather_sampling_step_deg",
             "weather_interpolation",
             "weather_nearest_distance_km",
             "soil_temp_mean_14d_celsius",
+            "temp_mean_recent_3d_celsius",
+            "temp_min_recent_3d_celsius",
+            "humidity_mean_7d_percent",
             "et0_accum_14d_mm",
             "water_balance_14d_mm",
             "thermal_shock_celsius",
@@ -129,8 +135,9 @@ def export_relative_suitability(
         static = {
             key: source[key]
             for key in (
-                "elevation_m", "soil_ph", "dominant_species", "canopy_cover",
-                "soil_sand_percent", "soil_silt_percent", "soil_clay_percent",
+                "elevation_m", "soil_ph", "soil_ph_q05", "dominant_species",
+                "canopy_cover", "soil_sand_percent", "soil_silt_percent",
+                "soil_clay_percent",
             )
         }
         if engine.has_potential_habitat(static):
@@ -170,9 +177,9 @@ def export_relative_suitability(
                 2,
             ),
             "resolution_note": (
-                "La malla de consulta y la interpolación suavizan la asignación, "
-                "pero el modelo meteorológico sigue siendo regional y no resuelve "
-                "el microclima de cada hexágono H3."
+                "La malla de consulta y la interpolación IDW-4 con ajuste "
+                "altitudinal suavizan la asignación, pero el modelo meteorológico "
+                "sigue siendo regional y no resuelve el microclima de cada hexágono H3."
             ),
         }
     else:
@@ -187,6 +194,11 @@ def export_relative_suitability(
                 "con el pipeline para regenerar estos datos."
             ),
         }
+    snapshot_date_iso = (
+        snapshot_date.isoformat()
+        if hasattr(snapshot_date, "isoformat")
+        else str(snapshot_date)
+    )
     outputs = {}
     for species_id in SPECIES:
         species_rules = engine.species_matrix[species_id]
@@ -200,16 +212,21 @@ def export_relative_suitability(
                 key: source[key]
                 for key in (
                     "elevation_m", "slope_deg", "aspect_cardinal",
-                    "soil_ph", "dominant_species", "canopy_cover",
+                    "soil_ph", "soil_ph_q05", "dominant_species", "canopy_cover",
                     "soil_sand_percent", "soil_silt_percent", "soil_clay_percent",
                     "environmental_data_quality",
                 )
             }
             meteo = {
+                "snapshot_date": snapshot_date_iso,
                 "precip_accum_14d_mm": source["precip_accum_14d_mm"],
+                "precip_last_3d_mm": source.get("precip_last_3d_mm"),
                 "temp_mean_14d_celsius": source["temp_mean_14d_celsius"],
+                "temp_mean_recent_3d_celsius": source.get("temp_mean_recent_3d_celsius"),
                 "temp_min_14d_celsius": source["temp_min_14d_celsius"],
+                "temp_min_recent_3d_celsius": source.get("temp_min_recent_3d_celsius"),
                 "soil_moisture_percent": source["soil_moisture_percent"],
+                "humidity_mean_7d_percent": source.get("humidity_mean_7d_percent"),
                 "soil_temp_mean_14d_celsius": source.get("soil_temp_mean_14d_celsius"),
                 "et0_accum_14d_mm": source.get("et0_accum_14d_mm"),
                 "water_balance_14d_mm": source.get("water_balance_14d_mm"),
@@ -239,6 +256,7 @@ def export_relative_suitability(
                 "slope": source["slope_deg"],
                 "asp": source["aspect_cardinal"],
                 "ph": source["soil_ph"],
+                "eph": breakdown.get("effective_soil_ph", source["soil_ph"]),
                 "ph05": source["soil_ph_q05"],
                 "ph95": source["soil_ph_q95"],
                 "sand": source["soil_sand_percent"],
@@ -250,26 +268,40 @@ def export_relative_suitability(
                 "tree": source["dominant_species"],
                 "cc": source["canopy_cover"],
                 "p14": meteo["precip_accum_14d_mm"],
+                "p3": breakdown.get("precip_last_3d_mm"),
+                "pinc": breakdown.get("precip_incubation_mm"),
+                "prec": breakdown.get("precip_recent_4d_mm"),
+                "rtstat": breakdown.get("rain_timing_status"),
                 "pe": breakdown["effective_precip_14d_mm"],
                 "t": meteo["temp_mean_14d_celsius"],
+                "t3": breakdown.get("temp_recent_3d_c"),
                 "tmin": meteo["temp_min_14d_celsius"],
+                "tmin3": breakdown.get("temp_min_recent_3d_c"),
                 "moist": meteo["soil_moisture_percent"],
+                "rh": breakdown.get("humidity_mean_7d_pct"),
                 "stemp": breakdown.get("soil_temp_mean_c"),
                 "wb": breakdown.get("water_balance_14d_mm"),
                 "tshock": breakdown.get("thermal_shock_celsius"),
                 "tshock_status": breakdown.get("thermal_shock_status"),
                 "wind": breakdown.get("wind_max_14d_kmh"),
+                "phen": breakdown.get("phenology_factor"),
+                "sstat": breakdown.get("season_status"),
                 "weather_distance_km": source["weather_nearest_distance_km"],
                 "met": breakdown.get("meteorology"),
+                "p_pts": breakdown.get("precip_score"),
+                "t_pts": breakdown.get("temp_score"),
+                "m_pts": breakdown.get("soil_moisture_score"),
                 "edaphic": breakdown.get("edaphic"),
                 "soil_ph_score": breakdown.get("soil_ph_score"),
                 "soil_texture_score": breakdown.get("soil_texture_score"),
                 "soil_texture_status": breakdown.get("soil_texture_status"),
                 "topo": breakdown.get("topography"),
+                "sl_pts": breakdown.get("slope_score"),
+                "asp_pts": breakdown.get("aspect_score"),
             })
 
         payload = {
-            "date": snapshot_date.isoformat(),
+            "date": snapshot_date_iso,
             "generated_at": generated_at,
             "res": 8,
             "data_quality": "sourced_unvalidated",
@@ -327,21 +359,19 @@ def export_relative_suitability(
             ),
             "limitations": [
                 "Índice heurístico, no probabilidad de encontrar fructificación.",
-                "Las reglas ecológicas aún no se han calibrado con validación independiente.",
+                "Las reglas ecológicas combinan hábitat potencial, fenología estacional y meteorología diaria.",
                 "El índice de hábitat potencial excluye meteorología; la señal meteorológica "
                 "reciente se muestra por separado y no es una predicción de presencia.",
                 "La textura edáfica aporta hasta 7 de 35 puntos; los umbrales generales "
                 "son experimentales y no están calibrados por especie ni con observaciones.",
                 "Si falta alguna fracción de textura, no se aplica ni bonificación ni "
                 "penalización textural; se conserva el cálculo edáfico basado en pH.",
-                "La lluvia eficaz usa una ponderación heurística de 14 días: la lluvia "
-                "intermedia pesa más que la de ayer; el retardo no se ha calibrado "
-                "con fructificaciones locales.",
+                "La lluvia eficaz usa una ponderación de 14 días junto con la humedad superficial y radicular de los últimos 3 días.",
                 "Solo se exportan celdas que pasan las exclusiones estáticas de hábitat "
-                "para al menos una especie; hospedadores no identificados se conservan.",
-                "El filtro común no elimina celdas por meteorología, que puede cambiar "
+                "para al menos una especie; hospedadores mixtos no identificados se conservan.",
+                "El filtro común no elimina celdas por meteorología, que cambia "
                 "en la actualización diaria.",
-                "Meteo de los últimos 14 días interpolada desde una malla regional.",
+                "Meteo de los últimos 14 días interpolada desde una malla regional con corrección altitudinal.",
                 "Relieve y suelo de 200/250 m; las celdas H3 son más pequeñas.",
                 "Los registros oportunistas de GBIF no corrigen el esfuerzo de observación.",
             ],
@@ -365,9 +395,10 @@ def export_relative_suitability(
             "path": out_path,
             "cells": len(cells),
             "favorability_50_plus": sum(cell["s"] >= 50 for cell in cells),
+            "combined_50_plus": sum(cell["cs"] >= 50 for cell in cells),
         }
     return {
-        "snapshot_date": snapshot_date.isoformat(),
+        "snapshot_date": snapshot_date_iso,
         "outputs": outputs,
     }
 
@@ -381,7 +412,8 @@ if __name__ == "__main__":
     for species_id, summary in result["outputs"].items():
         print(
             f"{species_id}: {summary['cells']} celdas; "
-            f"{summary['favorability_50_plus']} con indice >=50. "
+            f"{summary['favorability_50_plus']} con hábitat >=50; "
+            f"{summary['combined_50_plus']} con índice combinado >=50. "
             f"{summary['path']}"
         )
     print("El índice no es una probabilidad ni una predicción validada.")

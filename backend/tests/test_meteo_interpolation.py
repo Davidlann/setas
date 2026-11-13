@@ -110,6 +110,31 @@ class WeatherInterpolationTests(unittest.TestCase):
         self.assertEqual(result["thermal_shock_celsius"], -2.0)
         self.assertIsNone(result["wind_max_14d_kmh"])
 
+    def test_applies_altitudinal_lapse_rate_when_target_elevation_differs(self):
+        nodes = [
+            {
+                **weather_node(40.0, -4.0, 12.0),
+                "elevation": 1000.0,
+                "soil_temp_mean_14d_celsius": 11.0,
+                "temp_mean_recent_3d_celsius": 10.0,
+                "temp_min_recent_3d_celsius": 4.0,
+                "precip_last_3d_mm": 8.5,
+                "humidity_mean_7d_percent": 78.0,
+            }
+        ]
+
+        higher_cell = OpenMeteoClient.batch_interpolate_weather(
+            [(40.0, -4.0)], nodes, target_elevations=[1500.0]
+        )[0]
+
+        # +500m elevation -> -3.0 C air temperature, -2.25 C soil temperature
+        self.assertAlmostEqual(higher_cell["temp_mean_14d_celsius"], 9.0, places=2)
+        self.assertAlmostEqual(higher_cell["temp_mean_recent_3d_celsius"], 7.0, places=2)
+        self.assertAlmostEqual(higher_cell["temp_min_recent_3d_celsius"], 1.0, places=2)
+        self.assertAlmostEqual(higher_cell["soil_temp_mean_14d_celsius"], 8.75, places=2)
+        self.assertAlmostEqual(higher_cell["precip_last_3d_mm"], 8.5, places=2)
+        self.assertAlmostEqual(higher_cell["humidity_mean_7d_percent"], 78.0, places=2)
+
 
 if __name__ == "__main__":
     unittest.main()

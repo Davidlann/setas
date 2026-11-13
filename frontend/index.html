@@ -1257,6 +1257,221 @@
       font-size: 8.5px;
       line-height: 1.3;
     }
+    .map-refresh-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: 6px;
+      padding-top: 5px;
+      border-top: 1px solid #e8dfd0;
+    }
+    .map-refresh-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #5a4c3c;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .map-refresh-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      flex-shrink: 0;
+    }
+    .map-refresh-dot.stale {
+      background: #f59e0b;
+    }
+    .map-refresh-btn {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #50663a;
+      background: #eef3e8;
+      border: 1px solid #cedbc0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .map-refresh-btn:hover {
+      background: #e2ebd7;
+      border-color: #b5c8a1;
+    }
+    .map-refresh-btn:disabled {
+      opacity: .6;
+      cursor: wait;
+    }
+    .compare-action-btn {
+      width: 100%;
+      margin-top: 8px;
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #493b2d;
+      background: #f4ece0;
+      border: 1px solid #d4c3aa;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .16s;
+    }
+    .compare-action-btn:hover {
+      background: #eadcc8;
+      border-color: #b79c79;
+    }
+    .compare-action-btn.active {
+      color: #fffaf3;
+      background: #4e6638;
+      border-color: #4e6638;
+    }
+    .compare-banner {
+      position: absolute;
+      z-index: 32;
+      top: 76px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: min(560px, calc(100vw - 24px));
+      padding: 8px 12px;
+      background: rgba(45, 58, 34, .96);
+      color: #fffaf3;
+      border: 1px solid #6b8451;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(30, 38, 22, .28);
+      font-size: 12px;
+      font-weight: 600;
+      pointer-events: auto;
+    }
+    .compare-banner[hidden] { display: none; }
+    .compare-banner-cancel {
+      flex: 0 0 auto;
+      padding: 4px 9px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #2d3a22;
+      background: #f4efe5;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+    .compare-panel {
+      margin-top: 10px;
+      padding: 13px;
+      background: #fffdf8;
+      border: 1px solid #d9cbb6;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(61, 46, 31, .08);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .compare-panel[hidden] { display: none; }
+    .compare-panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #ece3d5;
+    }
+    .compare-panel-head h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 16px;
+      color: #493b2d;
+      margin: 0;
+    }
+    .compare-panel-sub {
+      font-size: 11px;
+      color: #7c7062;
+      margin-top: 2px;
+    }
+    .compare-panel-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .compare-mini-btn {
+      padding: 4px 8px;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #514334;
+      background: #f3ece0;
+      border: 1px solid #dbcdb8;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+    .compare-mini-btn:hover { background: #e8dcc9; }
+    .compare-verdict {
+      padding: 9px 11px;
+      background: #eef4e8;
+      border: 1px solid #cdddc0;
+      border-radius: 10px;
+      font-size: 11.5px;
+      line-height: 1.45;
+      color: #354726;
+    }
+    .compare-reasons {
+      margin: 0;
+      padding-left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #4f4336;
+    }
+    .compare-table-wrap {
+      overflow-x: auto;
+    }
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10.5px;
+      line-height: 1.35;
+    }
+    .compare-table th, .compare-table td {
+      padding: 6px 5px;
+      border-bottom: 1px solid #eee5d8;
+      text-align: left;
+      vertical-align: top;
+    }
+    .compare-table th {
+      font-size: 10px;
+      font-weight: 700;
+      color: #746759;
+      background: #f8f4ec;
+    }
+    .compare-tag {
+      display: inline-block;
+      min-width: 17px;
+      padding: 1px 5px;
+      border-radius: 5px;
+      font-size: 10px;
+      font-weight: 800;
+      text-align: center;
+      margin-right: 4px;
+    }
+    .compare-tag-a { background: #76563d; color: #fffaf3; }
+    .compare-tag-b { background: #0f766e; color: #fffaf3; }
+    .cmp-win { color: #166534; font-weight: 700; }
+    .cmp-lose { color: #9a3412; font-weight: 600; }
+    .cmp-tie { color: #6b6154; }
     .map-legend.categorical .map-legend-bar { display: grid; height: auto; grid-template-columns: 1fr 1fr; gap: 5px 8px; overflow: visible; }
     .map-legend-category { display: flex; align-items: center; gap: 5px; font-size: 9px; line-height: 1.2; }
     .map-legend-swatch { width: 10px; height: 10px; flex: 0 0 10px; border-radius: 3px; }
@@ -1476,6 +1691,16 @@
         <div id="map-legend-bar" class="map-legend-bar" aria-hidden="true"></div>
         <div id="map-legend-labels" class="map-legend-labels"></div>
         <p id="map-legend-note" class="map-legend-note"></p>
+        <div class="map-refresh-row">
+          <span class="map-refresh-badge">
+            <span id="map-refresh-dot" class="map-refresh-dot" aria-hidden="true"></span>
+            <span id="map-refresh-text">Cargando datos diarios…</span>
+          </span>
+          <button id="map-refresh-btn" class="map-refresh-btn" type="button" title="Comprobar y descargar la última actualización meteorológica diaria">
+            <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" aria-hidden="true"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+            <span>Actualizar</span>
+          </button>
+        </div>
       </div>
     </div>
     </section>
@@ -1540,7 +1765,7 @@
           <span>Boletus reticulatus</span>
         </label>
       </div>
-      <p class="species-comparison-note">La época cambia según la zona y la altitud; consulta las guías. Las mínimas recientes sí reducen el índice meteorológico, pero el mes aún no se usa como factor numérico.</p>
+      <p class="species-comparison-note">El índice pondera la fenología mensual, la altitud, las mínimas de los últimos 3 días y la humedad reciente de cada especie.</p>
       <details id="species-guides-section" class="menu-section">
         <summary>Guía de especies</summary>
         <div class="guide-buttons">
@@ -1658,11 +1883,14 @@
           <span id="c-weather-score">—</span>
         </div>
       </div>
+      <button id="btn-compare-cell" class="compare-action-btn" type="button">
+        <span>⚖️ Comparar esta celda con otra</span>
+      </button>
       <details class="menu-section cell-extra" open>
-        <summary>Más datos del lugar</summary>
+        <summary>Más datos del lugar (actualizados a diario)</summary>
         <div class="info-grid">
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M10 2v7.31L4.66 17.5A2 2 0 0 0 6.32 20.5h11.36a2 2 0 0 0 1.66-3L14 9.31V2"/></svg> pH del suelo: <button class="info-help-btn" type="button" aria-label="Información sobre pH del suelo" data-title="pH del suelo" data-info="Los Boletus edulis y pinófilos prefieren suelos ácidos (pH menor a 6,5). En suelos calizos o alcalinos con pH alto es muy raro encontrarlos.">i</button></span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M10 2v7.31L4.66 17.5A2 2 0 0 0 6.32 20.5h11.36a2 2 0 0 0 1.66-3L14 9.31V2"/></svg> pH del suelo (humus / mineral): <button class="info-help-btn" type="button" aria-label="Información sobre pH del suelo" data-title="pH del suelo (humus / mineral)" data-info="Combina el pH medio mineral de SoilGrids con el percentil ácido superficial (q05) del horizonte húmico forestal donde fructifica el micelio.">i</button></span>
           <span id="c-ph">—</span>
         </div>
         <div class="info-item">
@@ -1670,39 +1898,47 @@
           <span id="c-texture">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Lluvia últimos 14 días: <button class="info-help-btn" type="button" aria-label="Información sobre lluvia acumulada" data-title="Lluvia últimos 14 días" data-info="La lluvia acumulada en las dos últimas semanas empapa el suelo del bosque y es indispensable para que broten las setas.">i</button></span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Lluvia (brotada 5–14d / reciente): <button class="info-help-btn" type="button" aria-label="Información sobre lluvia y tiempo de incubación" data-title="Lluvia de incubación vs lluvia reciente" data-info="Para encontrar setas hoy cuenta sobre todo la lluvia caída hace 5–14 días (ventana de incubación miceliar). La lluvia de los últimos 3–4 días hidrata el monte pero aún necesita días para formar setas.">i</button></span>
           <span id="c-rain">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Temperatura media: <button class="info-help-btn" type="button" aria-label="Información sobre temperatura media" data-title="Temperatura media" data-info="Temperatura media de los últimos 14 días. Para Boletus edulis el rango ideal se sitúa entre 10 °C y 18 °C. Por debajo de 5 °C o con heladas la actividad se paraliza; con más de 22 °C el ambiente suele desecar el suelo.">i</button></span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Temp. aire (reciente 3d / 14d): <button class="info-help-btn" type="button" aria-label="Información sobre temperatura del aire" data-title="Temperatura del aire (3 días y 14 días)" data-info="Temperatura media de los últimos 3 días y de los últimos 14 días, corregida por gradiente altitudinal respecto a la cota real de la celda.">i</button></span>
           <span id="c-temp">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> Altitud / orientación: <button class="info-help-btn" type="button" aria-label="Información sobre altitud y orientación" data-title="Altitud y orientación" data-info="La altitud y exposición solar marcan el microclima. Las laderas norte/noreste preservan mejor la humedad en veranos tardíos y principios de otoño; las solanas templan antes en primavera y otoño avanzado.">i</button></span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Mínima reciente (3d / 14d): <button class="info-help-btn" type="button" aria-label="Información sobre temperatura mínima" data-title="Temperatura mínima y heladas" data-info="Temperatura mínima registrada en los últimos 3 días y en los últimos 14 días. Las heladas recientes frenan la fructificación de inmediato.">i</button></span>
+          <span id="c-temp-min">—</span>
+        </div>
+        <div class="info-item">
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> Altitud / orientación: <button class="info-help-btn" type="button" aria-label="Información sobre altitud y orientación" data-title="Altitud y orientación" data-info="La altitud y exposición solar marcan el microclima. Las laderas norte/noreste preservan mejor la humedad en verano y comienzos de otoño; las solanas templan más en otoño avanzado y primavera.">i</button></span>
           <span id="c-topo">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> Humedad estimada del suelo: <button class="info-help-btn" type="button" aria-label="Información sobre humedad del suelo" data-title="Humedad del suelo" data-info="Humedad estimada en la capa donde nacen los botones de las setas, evitando que se sequen antes de asomar a la superficie.">i</button></span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> Humedad suelo / aire (RH): <button class="info-help-btn" type="button" aria-label="Información sobre humedad del suelo y aire" data-title="Humedad del suelo y relativa del aire" data-info="Humedad edáfica ponderada hacia los últimos 3 días (0–28 cm) junto con la humedad relativa media del aire de los últimos 7 días.">i</button></span>
           <span id="c-moist">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Balance hídrico: <button class="info-help-btn" type="button" aria-label="Información sobre balance hídrico" data-title="Balance hídrico" data-info="Diferencia entre lluvia acumulada y evaporación natural del suelo. Si es negativo, el calor y el viento están secando el terreno más rápido de lo que llovió, frenando el micelio.">i</button></span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Balance hídrico (P − ET₀): <button class="info-help-btn" type="button" aria-label="Información sobre balance hídrico" data-title="Balance hídrico" data-info="Diferencia entre lluvia acumulada y evapotranspiración en 14 días. Si es negativo, el viento o el sol están secando el terreno.">i</button></span>
           <span id="c-water-balance">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Temp. suelo (0–7 cm): <button class="info-help-btn" type="button" aria-label="Información sobre temperatura del suelo" data-title="Temperatura del suelo" data-info="Temperatura en el estrato húmico superior, donde habita el micelio. Es más estable que la del aire y decisiva: el micelio necesita temperaturas de 8 °C a 16 °C para movilizar reservas y alimentar las setas.">i</button></span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Temp. suelo (0–7 cm): <button class="info-help-btn" type="button" aria-label="Información sobre temperatura del suelo" data-title="Temperatura del suelo" data-info="Temperatura en el estrato húmico superior ponderando los últimos 3 días. El micelio necesita entre 8 °C y 16 °C para fructificar activamente.">i</button></span>
           <span id="c-soil-temp">—</span>
         </div>
         <div class="info-item">
-          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Choque térmico reciente: <button class="info-help-btn" type="button" aria-label="Información sobre choque térmico" data-title="Choque térmico reciente" data-info="Descenso notable de temperatura (caída de 2 °C a 4 °C) tras un episodio de lluvia. En especies otoñales (como B. edulis y B. pinophilus) actúa como señal biológica que dispara el nacimiento masivo de setas.">i</button></span>
+          <span><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Choque térmico reciente: <button class="info-help-btn" type="button" aria-label="Información sobre choque térmico" data-title="Choque térmico reciente" data-info="Variación térmica de los últimos 4 días frente a los 10 anteriores. Un descenso suave tras lluvias estimula la fructificación otoñal.">i</button></span>
           <span id="c-thermal-shock">—</span>
         </div>
         <div class="info-item">
-          <span>Fuente meteorológica más cercana: <button class="info-help-btn" type="button" aria-label="Información sobre fuente meteorológica" data-title="Fuente meteorológica" data-info="Distancia en línea recta a la coordenada meteorológica más próxima de la que proceden los registros y predicciones de lluvia y temperatura.">i</button></span>
+          <span>Fenología estacional: <button class="info-help-btn" type="button" aria-label="Información sobre fenología" data-title="Fenología estacional" data-info="Adecuación de la fecha actual y la altitud al calendario biológico de fructificación de la especie seleccionada.">i</button></span>
+          <span id="c-season-status">—</span>
+        </div>
+        <div class="info-item">
+          <span>Fuente meteorológica más cercana: <button class="info-help-btn" type="button" aria-label="Información sobre fuente meteorológica" data-title="Fuente meteorológica" data-info="Distancia en línea recta al nodo meteorológico más próximo empleado en la interpolación diaria con corrección altitudinal.">i</button></span>
           <span id="c-weather-distance">—</span>
         </div>
         <div class="info-item info-wide">
-          <span>Lectura del índice: <button class="info-help-btn" type="button" aria-label="Información sobre lectura del índice" data-title="Lectura del índice" data-info="Síntesis que pondera el hábitat forestal (tipo de masa y suelo) junto a las condiciones de humedad y temperatura registradas recientemente.">i</button></span>
+          <span>Lectura del índice: <button class="info-help-btn" type="button" aria-label="Información sobre lectura del índice" data-title="Lectura del índice" data-info="Síntesis que pondera el hábitat forestal (especie arbórea, pH efectivo y relieve) junto a las condiciones meteorológicas diarias y la época del año.">i</button></span>
           <span id="c-reason">—</span>
         </div>
         </div>
@@ -1713,6 +1949,37 @@
         <p class="species-comparison-note">Este valor combina el hábitat forestal y las condiciones meteorológicas recientes de cada especie. Si eliges varias, se muestra el valor más favorable.</p>
       </details>
     </div>
+
+    <!-- Comparador de celdas A vs B -->
+    <section id="cell-comparison-panel" class="compare-panel" hidden aria-label="Comparación entre dos celdas">
+      <div class="compare-panel-head">
+        <div>
+          <h2>Comparación de celdas</h2>
+          <p id="compare-panel-sub" class="compare-panel-sub">Comparando Celda A frente a Celda B</p>
+        </div>
+        <button id="compare-close-btn" class="filters-panel-close" type="button" aria-label="Cerrar comparación">×</button>
+      </div>
+      <div class="compare-panel-actions">
+        <button id="compare-swap-btn" class="compare-mini-btn" type="button">⇄ Intercambiar A / B</button>
+        <button id="compare-focus-a" class="compare-mini-btn" type="button">Ir a A</button>
+        <button id="compare-focus-b" class="compare-mini-btn" type="button">Ir a B</button>
+      </div>
+      <div id="compare-verdict" class="compare-verdict"></div>
+      <ul id="compare-reasons" class="compare-reasons"></ul>
+      <div class="compare-table-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Factor</th>
+              <th><span class="compare-tag compare-tag-a">A</span><span id="cmp-head-a">Celda A</span></th>
+              <th><span class="compare-tag compare-tag-b">B</span><span id="cmp-head-b">Celda B</span></th>
+              <th>Δ (A−B)</th>
+            </tr>
+          </thead>
+          <tbody id="compare-table-body"></tbody>
+        </table>
+      </div>
+    </section>
   </div>
 
   <dialog id="info-dialog" class="species-dialog info-dialog" aria-labelledby="info-dialog-title">
@@ -1728,6 +1995,10 @@
 
   <div class="map-wrap">
     <div id="map"></div>
+    <div id="compare-banner" class="compare-banner" hidden>
+      <span id="compare-banner-text">Modo comparación: toca otra celda en el mapa para compararla con A.</span>
+      <button id="compare-banner-cancel" class="compare-banner-cancel" type="button">Cancelar</button>
+    </div>
     <div id="map-loading" class="map-loading" role="status" aria-live="polite">
       <div class="map-loading-card">
         <span class="map-loading-spinner" aria-hidden="true"></span>
@@ -2317,6 +2588,10 @@
   let currentProv    = 'all';
   let rawData        = null;   // dataset cargado de .json
   let selectedCellH  = null;   // H3 index de la celda actualmente seleccionada
+  let currentSelectedCellData = null;
+  let compareMode    = false;
+  let compareCellA   = null;
+  let compareCellB   = null;
   const speciesDatasets = new Map();
   const speciesCellMaps = new Map();
   const pendingSpeciesLoads = new Map();
@@ -2581,15 +2856,33 @@
   }
 
   // ================================================================
-  // CARGAR Y RENDERIZAR DATOS
+  // CARGAR Y RENDERIZAR DATOS (con refresco diario automático)
   // ================================================================
+  let lastDataFetchTimestamp = 0;
+  let forceBustCounter = 0;
+
+  function getSpainTodayIso() {
+    return new Date().toLocaleDateString('sv-SE', {
+      timeZone: 'Europe/Madrid',
+    });
+  }
+
+  function updateRefreshBadge(text, isStale = false) {
+    const refreshText = document.getElementById('map-refresh-text');
+    const refreshDot = document.getElementById('map-refresh-dot');
+    if (refreshText) refreshText.textContent = text;
+    if (refreshDot) refreshDot.classList.toggle('stale', Boolean(isStale));
+  }
+
   async function fetchSpeciesDataset(speciesId) {
     if (speciesDatasets.has(speciesId)) return speciesDatasets.get(speciesId);
     if (pendingSpeciesLoads.has(speciesId)) return pendingSpeciesLoads.get(speciesId);
 
     const request = (async () => {
-      const path = `./public/data/experimental/${speciesId}.json`;
-      const response = await fetch(path, { cache: 'no-cache' });
+      const todayInSpain = getSpainTodayIso();
+      const halfHourSlot = Math.floor(Date.now() / (30 * 60 * 1000));
+      const path = `./public/data/experimental/${speciesId}.json?v=${todayInSpain}-${halfHourSlot}-${forceBustCounter}`;
+      const response = await fetch(path, { cache: 'no-store' });
       if (!response.ok) {
         throw new Error(response.status === 404
           ? `Falta el fichero ${speciesId}.json (HTTP 404). Regenera los índices experimentales.`
@@ -2620,6 +2913,22 @@
       return await request;
     } finally {
       pendingSpeciesLoads.delete(speciesId);
+    }
+  }
+
+  async function refreshData(force = true) {
+    const btn = document.getElementById('map-refresh-btn');
+    if (btn) btn.disabled = true;
+    updateRefreshBadge('Actualizando datos diarios…', false);
+    if (force) {
+      forceBustCounter += 1;
+      speciesDatasets.clear();
+      speciesCellMaps.clear();
+    }
+    try {
+      await loadSpecies(selectedSpecies);
+    } finally {
+      if (btn) btn.disabled = false;
     }
   }
 
@@ -2654,14 +2963,18 @@
         throw new Error('Las especies seleccionadas tienen fechas de datos distintas; vuelve a intentarlo más tarde.');
       }
       rawData = datasets[0];
-      const todayInSpain = new Date().toLocaleDateString('sv-SE', {
-        timeZone: 'Europe/Madrid',
-      });
-      const staleDataNotice = rawData.date < todayInSpain
+      lastDataFetchTimestamp = Date.now();
+      const todayInSpain = getSpainTodayIso();
+      const isStale = rawData.date < todayInSpain;
+      const staleDataNotice = isStale
         ? ' La actualización diaria está pendiente.'
-        : '';
+        : ' Actualizado hoy.';
       status.textContent = `Datos del ${rawData.date}.${staleDataNotice}`;
       status.classList.remove('verified');
+      updateRefreshBadge(
+        isStale ? `Datos del ${rawData.date} (pendiente hoy)` : `Al día · ${rawData.date}`,
+        isStale
+      );
       render();
       if (previousSelectedH && rawData) {
         const cellData = rawData.cells.find(c => c.h === previousSelectedH);
@@ -2695,6 +3008,7 @@
         : '';
       status.textContent = `No se pudieron cargar los datos (${message}).${protocolHint}`;
       status.classList.remove('verified');
+      updateRefreshBadge('Error al cargar datos', true);
       clearDisplayedData();
     } finally {
       if (requestId === speciesLoadRequest) loading.classList.remove('active');
@@ -2717,11 +3031,15 @@
     document.getElementById('c-rain').textContent = '—';
     document.getElementById('c-weather-score').textContent = '—';
     document.getElementById('c-temp').textContent = '—';
+    const tempMinEl = document.getElementById('c-temp-min');
+    if (tempMinEl) tempMinEl.textContent = '—';
     document.getElementById('c-topo').textContent = '—';
     document.getElementById('c-moist').textContent = '—';
     document.getElementById('c-water-balance').textContent = '—';
     document.getElementById('c-soil-temp').textContent = '—';
     document.getElementById('c-thermal-shock').textContent = '—';
+    const seasonEl = document.getElementById('c-season-status');
+    if (seasonEl) seasonEl.textContent = '—';
     document.getElementById('c-weather-distance').textContent = '—';
     document.getElementById('species-comparison').hidden = true;
     document.getElementById('species-comparison-list').replaceChildren();
@@ -2776,7 +3094,7 @@
       let color;
       if (currentLayer === 'precip') color = colorPrecip(c.p14);
       else if (currentLayer === 'forest') color = colorForest(c.tree);
-      else if (currentLayer === 'ph') color = colorPh(c.ph);
+      else if (currentLayer === 'ph') color = colorPh(c.eph ?? c.ph);
       else if (currentLayer === 'weather') color = colorScore(c.ws);
       else if (currentLayer === 'search') color = colorScore(c.cs);
       else color = colorScore(c.hs);
@@ -2868,29 +3186,324 @@
   }
 
   let cellPopup = null;
+  function getCellDisplayName(cell) {
+    if (!cell) return 'Celda';
+    const zone = findNearestZone(Number(cell.lat), Number(cell.lon));
+    return zone ? zone.spot.n.split('(')[0].trim() : 'Zona forestal';
+  }
+
+  function resolveBestSpeciesCell(cell) {
+    if (!cell || !cell.h) return cell;
+    const candidates = selectedSpecies
+      .map(speciesId => speciesCellMaps.get(speciesId)?.get(cell.h))
+      .filter(Boolean);
+    if (!candidates.length) return cell;
+    candidates.sort((a, b) => (Number(b.cs) || 0) - (Number(a.cs) || 0));
+    return {
+      ...candidates[0],
+      hs: Math.max(...candidates.map(c => Number(c.hs) || 0)),
+      ws: Math.max(...candidates.map(c => Number(c.ws) || 0)),
+      cs: Math.max(...candidates.map(c => Number(c.cs) || 0)),
+    };
+  }
+
+  function renderCompareOverlay() {
+    if (!map || !map.getStyle()) return;
+    const features = [];
+    if (compareCellA && compareCellA.h) {
+      const boundary = h3.cellToBoundary(compareCellA.h);
+      const coords = boundary.map(([la, lo]) => [lo, la]);
+      coords.push(coords[0]);
+      features.push({
+        type: 'Feature',
+        properties: { tag: 'A', color: '#76563d' },
+        geometry: { type: 'Polygon', coordinates: [coords] }
+      });
+    }
+    if (compareCellB && compareCellB.h) {
+      const boundary = h3.cellToBoundary(compareCellB.h);
+      const coords = boundary.map(([la, lo]) => [lo, la]);
+      coords.push(coords[0]);
+      features.push({
+        type: 'Feature',
+        properties: { tag: 'B', color: '#0f766e' },
+        geometry: { type: 'Polygon', coordinates: [coords] }
+      });
+    }
+    const data = { type: 'FeatureCollection', features };
+    if (map.getSource('compare-cells')) {
+      map.getSource('compare-cells').setData(data);
+    } else {
+      map.addSource('compare-cells', { type: 'geojson', data });
+      map.addLayer({
+        id: 'compare-cells-line',
+        type: 'line',
+        source: 'compare-cells',
+        paint: {
+          'line-color': ['get', 'color'],
+          'line-width': 3.5,
+          'line-opacity': 0.95
+        }
+      });
+      map.addLayer({
+        id: 'compare-cells-label',
+        type: 'symbol',
+        source: 'compare-cells',
+        layout: {
+          'text-field': ['get', 'tag'],
+          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+          'text-size': 13,
+          'text-allow-overlap': true
+        },
+        paint: {
+          'text-color': '#ffffff',
+          'text-halo-color': ['get', 'color'],
+          'text-halo-width': 3
+        }
+      });
+    }
+  }
+
+  function buildComparisonReasons(a, b, nameA, nameB) {
+    const diffs = [];
+    const addDiff = (deltaPts, text) => {
+      if (Math.abs(deltaPts) >= 0.4) {
+        diffs.push({ abs: Math.abs(deltaPts), text });
+      }
+    };
+
+    const pPtsA = Number(a.p_pts), pPtsB = Number(b.p_pts);
+    if (Number.isFinite(pPtsA) && Number.isFinite(pPtsB)) {
+      const d = pPtsA - pPtsB;
+      if (Math.abs(d) >= 0.5) {
+        const winner = d > 0 ? nameA : nameB;
+        const pIncA = Number.isFinite(Number(a.pinc)) ? `${formatNumber(a.pinc)} mm (5–14d)` : `${formatNumber(a.p14)} mm (14d)`;
+        const pIncB = Number.isFinite(Number(b.pinc)) ? `${formatNumber(b.pinc)} mm (5–14d)` : `${formatNumber(b.p14)} mm (14d)`;
+        addDiff(d, `Lluvia de incubación: +${formatNumber(Math.abs(d))} pts meteo para ${winner} (${pIncA} en A frente a ${pIncB} en B).`);
+      }
+    }
+
+    const tPtsA = Number(a.t_pts), tPtsB = Number(b.t_pts);
+    if (Number.isFinite(tPtsA) && Number.isFinite(tPtsB)) {
+      const d = tPtsA - tPtsB;
+      if (Math.abs(d) >= 0.5) {
+        const winner = d > 0 ? nameA : nameB;
+        addDiff(d, `Temperatura y heladas: +${formatNumber(Math.abs(d))} pts meteo para ${winner} (suelo ${formatNumber(a.stemp)} °C / mín. 3d ${formatNumber(a.tmin3 ?? a.tmin)} °C en A vs ${formatNumber(b.stemp)} °C / ${formatNumber(b.tmin3 ?? b.tmin)} °C en B).`);
+      }
+    }
+
+    const phA = Number(a.soil_ph_score), phB = Number(b.soil_ph_score);
+    if (Number.isFinite(phA) && Number.isFinite(phB)) {
+      const d = phA - phB;
+      if (Math.abs(d) >= 0.5) {
+        const winner = d > 0 ? nameA : nameB;
+        addDiff(d, `Acidez del suelo (pH en humus): +${formatNumber(Math.abs(d))} pts edáficos para ${winner} (pH ${formatNumber(a.eph ?? a.ph)} en A vs ${formatNumber(b.eph ?? b.ph)} en B).`);
+      }
+    }
+
+    const aspA = Number(a.asp_pts), aspB = Number(b.asp_pts);
+    if (Number.isFinite(aspA) && Number.isFinite(aspB)) {
+      const d = aspA - aspB;
+      if (Math.abs(d) >= 0.5) {
+        const winner = d > 0 ? nameA : nameB;
+        addDiff(d, `Orientación estacional: +${formatNumber(Math.abs(d))} pts topográficos para ${winner} (${a.asp || 'N'} en A vs ${b.asp || 'N'} en B).`);
+      }
+    }
+
+    const phenA = Number(a.phen), phenB = Number(b.phen);
+    if (Number.isFinite(phenA) && Number.isFinite(phenB) && Math.abs(phenA - phenB) >= 0.05) {
+      const winner = phenA > phenB ? nameA : nameB;
+      addDiff(Math.abs(phenA - phenB) * 15, `Fenología por altitud/época: más favorable en ${winner} (${Math.round(phenA * 100)}% en A vs ${Math.round(phenB * 100)}% en B).`);
+    }
+
+    if (a.host !== b.host) {
+      const winner = a.host === 'compatible' ? nameA : nameB;
+      addDiff(15, `Hospedador forestal: ${winner} cuenta con masa arbórea compatible confirmada (${forestNameEs(a.tree)} vs ${forestNameEs(b.tree)}).`);
+    }
+
+    diffs.sort((x, y) => y.abs - x.abs);
+    return diffs.slice(0, 5).map(d => d.text);
+  }
+
+  function renderCellComparisonPanel() {
+    const panel = document.getElementById('cell-comparison-panel');
+    if (!panel || !compareCellA || !compareCellB) {
+      if (panel) panel.hidden = true;
+      return;
+    }
+
+    const a = compareCellA;
+    const b = compareCellB;
+    const nameA = getCellDisplayName(a);
+    const nameB = getCellDisplayName(b);
+
+    document.getElementById('compare-panel-sub').textContent =
+      `A: ${nameA} (${a.elev || 0} m) vs B: ${nameB} (${b.elev || 0} m)`;
+    document.getElementById('cmp-head-a').textContent = nameA;
+    document.getElementById('cmp-head-b').textContent = nameB;
+
+    const csA = Number(a.cs) || 0;
+    const csB = Number(b.cs) || 0;
+    const diffCs = csA - csB;
+    const verdictEl = document.getElementById('compare-verdict');
+    if (Math.abs(diffCs) < 1) {
+      verdictEl.innerHTML = `<strong>Empate técnico (${formatNumber(csA)} vs ${formatNumber(csB)}/100):</strong> ambas celdas ofrecen condiciones globales muy parecidas hoy.`;
+    } else if (diffCs > 0) {
+      verdictEl.innerHTML = `<strong>La Celda A (${escapeHtml(nameA)}) es mejor hoy (+${formatNumber(diffCs)} pts):</strong> obtiene <strong>${formatNumber(csA)}/100</strong> frente a <strong>${formatNumber(csB)}/100</strong> en ${escapeHtml(nameB)}.`;
+    } else {
+      verdictEl.innerHTML = `<strong>La Celda B (${escapeHtml(nameB)}) es mejor hoy (+${formatNumber(Math.abs(diffCs))} pts):</strong> obtiene <strong>${formatNumber(csB)}/100</strong> frente a <strong>${formatNumber(csA)}/100</strong> en ${escapeHtml(nameA)}.`;
+    }
+
+    const reasonsList = document.getElementById('compare-reasons');
+    reasonsList.replaceChildren();
+    const reasons = buildComparisonReasons(a, b, nameA, nameB);
+    if (!reasons.length) {
+      const li = document.createElement('li');
+      li.textContent = 'Ambas celdas tienen puntuaciones muy similares en todos los factores principales.';
+      reasonsList.append(li);
+    } else {
+      for (const reasonText of reasons) {
+        const li = document.createElement('li');
+        li.textContent = reasonText;
+        reasonsList.append(li);
+      }
+    }
+
+    const rows = [
+      { label: 'Índice global', valA: `${formatNumber(csA)}/100`, valB: `${formatNumber(csB)}/100`, numA: csA, numB: csB, unit: ' pts', higherBetter: true },
+      { label: 'Hábitat potencial', valA: `${formatNumber(a.hs)}/100`, valB: `${formatNumber(b.hs)}/100`, numA: Number(a.hs), numB: Number(b.hs), unit: ' pts', higherBetter: true },
+      { label: 'Tiempo reciente', valA: `${formatNumber(a.ws)}/100`, valB: `${formatNumber(b.ws)}/100`, numA: Number(a.ws), numB: Number(b.ws), unit: ' pts', higherBetter: true },
+      { label: 'Masa forestal', valA: `${forestNameEs(a.tree)} (${a.cc}%)`, valB: `${forestNameEs(b.tree)} (${b.cc}%)`, numA: a.host === 'compatible' ? 1 : 0, numB: b.host === 'compatible' ? 1 : 0, textOnly: true },
+      { label: 'pH en humus', valA: `${formatNumber(a.eph ?? a.ph)} (${formatNumber(a.soil_ph_score)} pts)`, valB: `${formatNumber(b.eph ?? b.ph)} (${formatNumber(b.soil_ph_score)} pts)`, numA: Number(a.soil_ph_score), numB: Number(b.soil_ph_score), unit: ' pts', higherBetter: true },
+      { label: 'Lluvia incubación (5–14d)', valA: `${formatNumber(a.pinc ?? a.p14)} mm`, valB: `${formatNumber(b.pinc ?? b.p14)} mm`, numA: Number(a.pinc ?? a.p14), numB: Number(b.pinc ?? b.p14), unit: ' mm', higherBetter: true },
+      { label: 'Lluvia reciente (3d)', valA: `${formatNumber(a.p3)} mm`, valB: `${formatNumber(b.p3)} mm`, numA: Number(a.p3), numB: Number(b.p3), unit: ' mm', neutral: true },
+      { label: 'Lluvia eficaz (brotada)', valA: `${formatNumber(a.pe)} mm (${formatNumber(a.p_pts)}/25)`, valB: `${formatNumber(b.pe)} mm (${formatNumber(b.p_pts)}/25)`, numA: Number(a.p_pts), numB: Number(b.p_pts), unit: ' pts', higherBetter: true },
+      { label: 'Temp. suelo / mín. 3d', valA: `${formatNumber(a.stemp)} °C / ${formatNumber(a.tmin3 ?? a.tmin)} °C`, valB: `${formatNumber(b.stemp)} °C / ${formatNumber(b.tmin3 ?? b.tmin)} °C`, numA: Number(a.t_pts), numB: Number(b.t_pts), unit: ' pts', higherBetter: true },
+      { label: 'Humedad suelo / aire', valA: `${formatNumber(a.moist)}% / ${formatNumber(a.rh)}%`, valB: `${formatNumber(b.moist)}% / ${formatNumber(b.rh)}%`, numA: Number(a.moist), numB: Number(b.moist), unit: '%', higherBetter: true },
+      { label: 'Altitud y orientación', valA: `${a.elev} m · ${a.asp || 'N'} (${formatNumber(a.topo)}/20)`, valB: `${b.elev} m · ${b.asp || 'N'} (${formatNumber(b.topo)}/20)`, numA: Number(a.topo), numB: Number(b.topo), unit: ' pts', higherBetter: true },
+    ];
+
+    const tbody = document.getElementById('compare-table-body');
+    tbody.replaceChildren();
+    for (const r of rows) {
+      const tr = document.createElement('tr');
+      const tdLabel = document.createElement('td');
+      tdLabel.textContent = r.label;
+      const tdA = document.createElement('td');
+      tdA.textContent = r.valA;
+      const tdB = document.createElement('td');
+      tdB.textContent = r.valB;
+      const tdDelta = document.createElement('td');
+
+      if (!r.textOnly && Number.isFinite(r.numA) && Number.isFinite(r.numB)) {
+        const delta = r.numA - r.numB;
+        const sign = delta > 0 ? '+' : '';
+        tdDelta.textContent = Math.abs(delta) < 0.05 ? '=' : `${sign}${formatNumber(delta)}${r.unit || ''}`;
+        if (!r.neutral && Math.abs(delta) >= 0.4) {
+          const aBetter = r.higherBetter ? delta > 0 : delta < 0;
+          tdDelta.className = aBetter ? 'cmp-win' : 'cmp-lose';
+          tdA.className = aBetter ? 'cmp-win' : '';
+          tdB.className = !aBetter ? 'cmp-win' : '';
+        } else {
+          tdDelta.className = 'cmp-tie';
+        }
+      } else {
+        tdDelta.textContent = r.numA === r.numB ? '=' : (r.numA > r.numB ? 'Mejor A' : 'Mejor B');
+        tdDelta.className = r.numA === r.numB ? 'cmp-tie' : (r.numA > r.numB ? 'cmp-win' : 'cmp-lose');
+      }
+
+      tr.append(tdLabel, tdA, tdB, tdDelta);
+      tbody.append(tr);
+    }
+
+    panel.hidden = false;
+  }
+
+  function startCompareMode() {
+    if (!currentSelectedCellData) return;
+    compareCellA = resolveBestSpeciesCell(currentSelectedCellData);
+    compareCellB = null;
+    compareMode = true;
+    const btn = document.getElementById('btn-compare-cell');
+    if (btn) btn.classList.add('active');
+    const banner = document.getElementById('compare-banner');
+    const bannerText = document.getElementById('compare-banner-text');
+    if (banner && bannerText) {
+      bannerText.textContent = `Comparando con ${getCellDisplayName(compareCellA)} (A): toca otra celda en el mapa o búscala arriba.`;
+      banner.hidden = false;
+    }
+    renderCompareOverlay();
+    closeMenu();
+  }
+
+  function cancelCompareMode(clearCells = false) {
+    compareMode = false;
+    const banner = document.getElementById('compare-banner');
+    if (banner) banner.hidden = true;
+    const btn = document.getElementById('btn-compare-cell');
+    if (btn) btn.classList.remove('active');
+    if (clearCells) {
+      compareCellA = null;
+      compareCellB = null;
+      const panel = document.getElementById('cell-comparison-panel');
+      if (panel) panel.hidden = true;
+      renderCompareOverlay();
+    }
+  }
+
+  function swapCompareCells() {
+    if (!compareCellA || !compareCellB) return;
+    const temp = compareCellA;
+    compareCellA = compareCellB;
+    compareCellB = temp;
+    renderCompareOverlay();
+    renderCellComparisonPanel();
+  }
+
   function selectCell(cell) {
-    selectedCellH = cell.h;
-    showSelectedSpeciesAtCell(cell);
+    const resolvedCell = resolveBestSpeciesCell(cell);
+    currentSelectedCellData = resolvedCell;
+    selectedCellH = resolvedCell.h;
+
+    if (compareMode && compareCellA && resolvedCell.h !== compareCellA.h) {
+      compareCellB = resolvedCell;
+      compareMode = false;
+      const banner = document.getElementById('compare-banner');
+      if (banner) banner.hidden = true;
+      const btn = document.getElementById('btn-compare-cell');
+      if (btn) btn.classList.remove('active');
+      showSelectedSpeciesAtCell(resolvedCell);
+      renderCompareOverlay();
+      renderCellComparisonPanel();
+      document.getElementById('map-hint').hidden = true;
+      openMenu();
+      requestAnimationFrame(() => {
+        document.getElementById('cell-comparison-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+      return;
+    }
+
+    showSelectedSpeciesAtCell(resolvedCell);
     document.getElementById('map-hint').hidden = true;
     openMenu();
     requestAnimationFrame(() => {
       document.getElementById('cell-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
 
-    if (cell.lat && cell.lon) {
+    if (resolvedCell.lat && resolvedCell.lon) {
       if (cellPopup) cellPopup.remove();
-      const zone = findNearestZone(Number(cell.lat), Number(cell.lon));
+      const zone = findNearestZone(Number(resolvedCell.lat), Number(resolvedCell.lon));
       const zoneTitle = zone ? zone.spot.n.split('(')[0].trim() : 'Zona forestal';
       const zoneDist = zone ? `a ${formatNumber(zone.distanceKm)} km` : '';
       const displayScore = currentLayer === 'search'
-        ? Number(cell.cs)
-        : currentLayer === 'weather' ? Number(cell.ws)
-          : currentLayer === 'precip' ? Number(cell.p14)
-            : Number(cell.hs);
+        ? Number(resolvedCell.cs)
+        : currentLayer === 'weather' ? Number(resolvedCell.ws)
+          : currentLayer === 'precip' ? Number(resolvedCell.p14)
+            : Number(resolvedCell.hs);
       const scoreLabel = currentLayer === 'precip' ? `${formatNumber(displayScore)} mm` : `${formatNumber(displayScore)}/100`;
 
       cellPopup = new maplibregl.Popup({ offset: 12, closeButton: false, className: 'map-cell-popup' })
-        .setLngLat([Number(cell.lon), Number(cell.lat)])
+        .setLngLat([Number(resolvedCell.lon), Number(resolvedCell.lat)])
         .setHTML(`<div style="font-size:12px; font-weight:700; color:#493b2d; line-height:1.35; padding:2px;">📍 ${zoneTitle}<div style="font-size:10px; font-weight:500; color:#71685b;">${zoneDist} · Índice: <strong>${scoreLabel}</strong></div></div>`)
         .addTo(map);
     }
@@ -2998,13 +3611,12 @@
 
     const ph05 = Number(cell.ph05);
     const ph95 = Number(cell.ph95);
+    const effPh = Number.isFinite(Number(cell.eph)) ? Number(cell.eph) : Number(cell.ph);
     const phHasInterval = Number.isFinite(ph05) && Number.isFinite(ph95);
-    const phWhollyInside = phHasInterval
-      ? ph05 >= phRange[0] && ph95 <= phRange[1]
-      : cell.ph >= phRange[0] && cell.ph <= phRange[1];
+    const phWhollyInside = effPh >= phRange[0] && effPh <= phRange[1];
     const phWhollyOutside = phHasInterval
-      ? ph95 < phRange[0] || ph05 > phRange[1]
-      : cell.ph < phRange[0] || cell.ph > phRange[1];
+      ? (ph95 < phRange[0] || (ph05 > phRange[1] && effPh > phRange[1]))
+      : (effPh < phRange[0] || effPh > phRange[1]);
     const phStatus = phWhollyInside ? 'good' : phWhollyOutside ? 'bad' : 'uncertain';
     const hasTexture = ['sand', 'silt', 'clay'].every(key =>
       cell[key] !== undefined && cell[key] !== null && Number.isFinite(Number(cell[key]))
@@ -3013,7 +3625,7 @@
     const phScoreText = Number.isFinite(cell.soil_ph_score)
       ? ` Aporta ${formatNumber(cell.soil_ph_score)}/${phMaxPts} puntos edáficos.`
       : '';
-    const phText = `Estimado ${cell.ph}${phHasInterval ? ` (rango ${ph05}–${ph95})` : ''}; referencia ${phRange[0]}–${phRange[1]}.${phScoreText}`;
+    const phText = `pH efectivo en humus ${formatNumber(effPh)} (mineral ${formatNumber(cell.ph)}${phHasInterval ? `, rango ${ph05}–${ph95}` : ''}); referencia ${phRange[0]}–${phRange[1]}.${phScoreText}`;
     const textureScore = cell.soil_texture_score;
     const textureMaxPoints = dataset.soil_texture_metadata &&
       dataset.soil_texture_metadata.scoring
@@ -3028,22 +3640,37 @@
       ? ` Fuente meteorológica más cercana: ${formatNumber(sourceDistance)} km.`
       : '';
     const minTempLimit = Number(profile.min_temp_limit_celsius);
+    const minTemp3d = Number.isFinite(Number(cell.tmin3)) ? Number(cell.tmin3) : Number(cell.tmin);
     const minTemp = Number(cell.tmin);
-    const weatherStatus = Number.isFinite(minTemp) &&
-      Number.isFinite(minTempLimit) && minTemp < minTempLimit
+    const seasonFactor = Number.isFinite(Number(cell.phen)) ? Number(cell.phen) : 1.0;
+    const weatherStatus = (Number.isFinite(minTemp3d) && Number.isFinite(minTempLimit) && minTemp3d < minTempLimit) || seasonFactor < 0.25
       ? 'bad'
-      : 'uncertain';
-    const frostText = Number.isFinite(minTemp)
+      : Number(cell.ws) >= 50 ? 'good' : 'uncertain';
+    const frostText = Number.isFinite(minTemp3d)
       ? Number.isFinite(minTempLimit)
-        ? minTemp < minTempLimit
-          ? ` Mínima ${formatNumber(minTemp)} °C, por debajo del umbral de ${formatNumber(minTempLimit)} °C; esto reduce el índice meteorológico.`
-          : ` Mínima ${formatNumber(minTemp)} °C; el umbral de esta especie es ${formatNumber(minTempLimit)} °C.`
-        : ` Mínima ${formatNumber(minTemp)} °C; el índice meteorológico ya aplica un umbral térmico para esta especie.`
+        ? minTemp3d < minTempLimit
+          ? ` Mínima reciente (3d) ${formatNumber(minTemp3d)} °C (14d: ${formatNumber(minTemp)} °C), por debajo del umbral de ${formatNumber(minTempLimit)} °C.`
+          : ` Mínima reciente (3d) ${formatNumber(minTemp3d)} °C (14d: ${formatNumber(minTemp)} °C); umbral ${formatNumber(minTempLimit)} °C.`
+        : ` Mínima reciente (3d) ${formatNumber(minTemp3d)} °C.`
       : '';
+    const phenologyNote = cell.sstat === 'off_season'
+      ? ` Fuera de época óptima para esta especie (factor fenológico ${Math.round(seasonFactor * 100)}%).`
+      : cell.sstat === 'shoulder_season'
+        ? ` Temporada de transición (factor fenológico ${Math.round(seasonFactor * 100)}%).`
+        : ` En plena temporada (factor fenológico ${Math.round(seasonFactor * 100)}%).`;
     const metScoreText = Number.isFinite(cell.met)
       ? ` (${formatNumber(cell.met)}/45 puntos meteorológicos)`
       : '';
-    const weatherText = `Índice orientativo: ${formatNumber(cell.ws)}/100${metScoreText}. Lluvia en 14 días: ${formatNumber(cell.p14)} mm; humedad estimada: ${formatNumber(cell.moist)}%; temperatura media: ${formatNumber(cell.t)} °C.${frostText}${distanceNote}`;
+    const p3Note = Number.isFinite(Number(cell.p3)) ? ` (últimos 3d: ${formatNumber(cell.p3)} mm)` : '';
+    const pincNote = Number.isFinite(Number(cell.pinc)) ? `; incubación 5–14d: ${formatNumber(cell.pinc)} mm` : '';
+    const peNote = Number.isFinite(Number(cell.pe)) ? ` · eficaz ${formatNumber(cell.pe)} mm` : '';
+    const timingNote = cell.rtstat === 'too_recent_for_flush'
+      ? ' Atención: lluvia caída hace menos de 4 días sobre suelo seco; el micelio aún está incubando.'
+      : cell.rtstat === 'optimal_incubation'
+        ? ' Lluvia en ventana óptima de brotada (5–14 días).'
+        : '';
+    const t3Note = Number.isFinite(Number(cell.t3)) ? `${formatNumber(cell.t3)} °C en 3d / ` : '';
+    const weatherText = `Índice orientativo: ${formatNumber(cell.ws)}/100${metScoreText}. Lluvia 14d: ${formatNumber(cell.p14)} mm${p3Note}${pincNote}${peNote}; humedad suelo: ${formatNumber(cell.moist)}%; temp. aire: ${t3Note}${formatNumber(cell.t)} °C (14d).${frostText}${timingNote}${phenologyNote}${distanceNote}`;
 
     return [
       { label: 'Índice de hábitat', status: habitatIndexStatus, text: habitatIndexText },
@@ -3177,15 +3804,32 @@
     const phPtsText = Number.isFinite(p.soil_ph_score)
       ? ` · ${formatNumber(p.soil_ph_score)}/${phMaxPts} puntos`
       : '';
+    const effPhText = Number.isFinite(Number(p.eph)) && Math.abs(Number(p.eph) - Number(p.ph)) >= 0.05
+      ? `${formatNumber(p.eph)} humus (${formatNumber(p.ph)} min.)`
+      : formatNumber(p.ph);
     document.getElementById('c-ph').textContent = p.ph !== undefined
-      ? `${formatNumber(p.ph)}${phPtsText}` : '—';
+      ? `${effPhText}${phPtsText}` : '—';
 
     document.getElementById('c-texture').textContent = hasTexture
       ? `Arena ${formatNumber(p.sand)}% · limo ${formatNumber(p.silt)}% · arcilla ${formatNumber(p.clay)}%${Number.isFinite(p.soil_texture_score) ? ` · ${formatNumber(p.soil_texture_score)}/${formatNumber(p.soil_texture_score_max || 7)} puntos` : ''}`
       : 'Sin dato';
-    document.getElementById('c-rain').textContent  = p.p14 !== undefined && p.p14 !== null
-      ? `${formatNumber(p.p14)} mm`
-      : '—';
+    const p3Val = p.p3 !== undefined && p.p3 !== null ? formatNumber(p.p3) : null;
+    const pincVal = p.pinc !== undefined && p.pinc !== null ? formatNumber(p.pinc) : null;
+    const peVal = p.pe !== undefined && p.pe !== null ? formatNumber(p.pe) : null;
+    const timingLabel = p.rtstat === 'too_recent_for_flush'
+      ? ' · Lluvia muy reciente (en incubación)'
+      : p.rtstat === 'optimal_incubation'
+        ? ' · En ventana de brotada'
+        : '';
+    if (pincVal !== null) {
+      document.getElementById('c-rain').textContent =
+        `${pincVal} mm (5–14d) · ${p3Val ?? '0'} mm (3d)${peVal !== null ? ` · Eficaz: ${peVal} mm` : ''}${timingLabel}`;
+    } else {
+      const p3Suffix = p3Val !== null ? ` (últ. 3d: ${p3Val} mm)` : '';
+      document.getElementById('c-rain').textContent = p.p14 !== undefined && p.p14 !== null
+        ? `${formatNumber(p.p14)} mm${p3Suffix}`
+        : '—';
+    }
 
     const metPtsText = Number.isFinite(p.met)
       ? ` · ${formatNumber(p.met)}/45 puntos`
@@ -3193,16 +3837,33 @@
     document.getElementById('c-weather-score').textContent =
       p.ws !== undefined ? `${formatNumber(p.ws)}/100${metPtsText}` : '—';
 
+    const t3Prefix = p.t3 !== undefined && p.t3 !== null
+      ? `${formatNumber(p.t3)} °C (3d) · `
+      : '';
     document.getElementById('c-temp').textContent  = p.t !== undefined && p.t !== null
-      ? `${formatNumber(p.t)} °C` : '—';
+      ? `${t3Prefix}${formatNumber(p.t)} °C (14d)` : '—';
+
+    const tempMinEl = document.getElementById('c-temp-min');
+    if (tempMinEl) {
+      if (p.tmin3 !== undefined && p.tmin3 !== null) {
+        tempMinEl.textContent = `${formatNumber(p.tmin3)} °C (3d) · ${formatNumber(p.tmin)} °C (14d)`;
+      } else if (p.tmin !== undefined && p.tmin !== null) {
+        tempMinEl.textContent = `${formatNumber(p.tmin)} °C (14d)`;
+      } else {
+        tempMinEl.textContent = '—';
+      }
+    }
 
     const topoPtsText = Number.isFinite(p.topo)
       ? ` · ${formatNumber(p.topo)}/20 puntos`
       : '';
     document.getElementById('c-topo').textContent  = `${p.elev || 0} m · Exp. ${p.asp || 'N'}${topoPtsText}`;
 
+    const rhSuffix = p.rh !== undefined && p.rh !== null
+      ? ` · Aire (7d): ${formatNumber(p.rh)}%`
+      : '';
     document.getElementById('c-moist').textContent = p.moist !== undefined && p.moist !== null
-      ? `${formatNumber(p.moist)}%` : '—';
+      ? `Suelo: ${formatNumber(p.moist)}%${rhSuffix}` : '—';
     document.getElementById('c-water-balance').textContent = p.wb !== undefined && p.wb !== null
       ? `${p.wb > 0 ? '+' : ''}${formatNumber(p.wb)} mm` : '—';
     document.getElementById('c-soil-temp').textContent = p.stemp !== undefined && p.stemp !== null
@@ -3218,6 +3879,18 @@
       shockText = `${sign}${formatNumber(p.tshock)} °C${desc}`;
     }
     document.getElementById('c-thermal-shock').textContent = shockText;
+    const seasonEl = document.getElementById('c-season-status');
+    if (seasonEl) {
+      if (p.phen !== undefined && p.phen !== null) {
+        const pct = Math.round(Number(p.phen) * 100);
+        const sLabel = p.sstat === 'in_season' ? 'Temporada óptima'
+          : p.sstat === 'shoulder_season' ? 'Temporada de transición'
+          : 'Fuera de temporada principal';
+        seasonEl.textContent = `${sLabel} (${pct}%)`;
+      } else {
+        seasonEl.textContent = '—';
+      }
+    }
     document.getElementById('c-weather-distance').textContent =
       Number.isFinite(parseFloat(p.weather_distance_km))
         ? `${formatNumber(p.weather_distance_km)} km`
@@ -3907,6 +4580,55 @@
 
   setLayer(currentLayer);
   map.on('load', () => loadSpecies(selectedSpecies));
+
+  const mapRefreshBtn = document.getElementById('map-refresh-btn');
+  if (mapRefreshBtn) {
+    mapRefreshBtn.addEventListener('click', () => refreshData(true));
+  }
+
+  const btnCompareCell = document.getElementById('btn-compare-cell');
+  if (btnCompareCell) {
+    btnCompareCell.addEventListener('click', startCompareMode);
+  }
+  const btnCompareBannerCancel = document.getElementById('compare-banner-cancel');
+  if (btnCompareBannerCancel) {
+    btnCompareBannerCancel.addEventListener('click', () => cancelCompareMode(false));
+  }
+  const btnCompareClose = document.getElementById('compare-close-btn');
+  if (btnCompareClose) {
+    btnCompareClose.addEventListener('click', () => cancelCompareMode(true));
+  }
+  const btnCompareSwap = document.getElementById('compare-swap-btn');
+  if (btnCompareSwap) {
+    btnCompareSwap.addEventListener('click', swapCompareCells);
+  }
+  const btnFocusA = document.getElementById('compare-focus-a');
+  if (btnFocusA) {
+    btnFocusA.addEventListener('click', () => {
+      if (compareCellA) {
+        map.flyTo({ center: [Number(compareCellA.lon), Number(compareCellA.lat)], zoom: 12.2, speed: 1.3 });
+      }
+    });
+  }
+  const btnFocusB = document.getElementById('compare-focus-b');
+  if (btnFocusB) {
+    btnFocusB.addEventListener('click', () => {
+      if (compareCellB) {
+        map.flyTo({ center: [Number(compareCellB.lon), Number(compareCellB.lat)], zoom: 12.2, speed: 1.3 });
+      }
+    });
+  }
+
+  function checkAutoDailyRefresh() {
+    if (document.visibilityState === 'hidden' || !baseMapLoaded) return;
+    const todayInSpain = getSpainTodayIso();
+    const elapsedMs = Date.now() - lastDataFetchTimestamp;
+    if (!rawData || rawData.date < todayInSpain || elapsedMs > 30 * 60 * 1000) {
+      refreshData(true);
+    }
+  }
+  document.addEventListener('visibilitychange', checkAutoDailyRefresh);
+  window.addEventListener('focus', checkAutoDailyRefresh);
 
   let deferredInstallPrompt = null;
   const installButton = document.getElementById('install-button');

@@ -4,11 +4,12 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '0 7 * * *'
+    - cron: '30 5 * * *'
+    - cron: '30 13 * * *'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -25,6 +26,8 @@ jobs:
     steps:
       - name: Descargar el proyecto y la base ambiental
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Comprobar la base de datos requerida
         run: |
@@ -108,6 +111,19 @@ jobs:
           if os.environ["DATA_REFRESH_OUTCOME"] == "failure":
               print(f"::warning::Se conserva el último snapshot válido ({next(iter(dataset_dates))}); revisa el fallo del ETL.")
           PY
+
+      - name: Guardar datos diarios actualizados en el repositorio
+        if: steps.update_data.outcome == 'success' && github.event_name != 'pull_request'
+        continue-on-error: true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/data/experimental/*.json backend/data/processed/mycologist_spatial.duckdb
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(data): actualizar predicción diaria $(date -u +%Y-%m-%d) [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main || true
+          fi
 
       - name: Preparar GitHub Pages
         uses: actions/configure-pages@v5

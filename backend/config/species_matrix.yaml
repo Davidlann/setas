@@ -25,34 +25,53 @@ species:
     scientific_name: "Boletus edulis"
     trophic_type: "mycorrhizal"
     edaphic:
-      ph_optimal: [4.5, 6.0]
-      ph_tolerated: [4.0, 6.5]
+      ph_optimal: [4.5, 6.2]
+      ph_tolerated: [4.0, 6.8]
       substrate_preference: "siliceous"
     habitat:
       preferred_forest_types:
         - "Pinus sylvestris"
+        - "Pinus pinaster"
         - "Pinus nigra"
+        - "Pinus uncinata"
         - "Fagus sylvatica"
         - "Quercus pyrenaica"
         - "Quercus petraea"
+        - "Quercus robur"
+        - "Quercus faginea"
         - "Betula alba"
         - "Castanea sativa"
-      minimum_canopy_cover_percent: 40
-      altitude_range_meters: [700, 1900]
+      minimum_canopy_cover_percent: 20
+      optimal_canopy_cover_percent: [40, 80]
+      altitude_range_meters: [650, 1950]
     topography:
       slope_max_deg: 40
       aspect_preference_early_season: ["N", "NE", "NW"] # umbrías
-      aspect_preference_late_season: ["S", "SE", "SW"]  # solanas
+      aspect_preference_late_season: ["S", "SE", "SW", "E"]  # solanas y laderas templadas
     meteorology:
-      accumulated_precip_14d_threshold_mm: 35.0
+      accumulated_precip_14d_threshold_mm: 30.0
       accumulated_precip_14d_optimal_mm: 60.0
-      mean_temp_optimal_celsius: [12.0, 18.0]
-      soil_temp_optimal_celsius: [10.0, 16.0]
-      min_temp_limit_celsius: 1.0 # Sensible a heladas directas
-      soil_moisture_min_percent: 25.0
+      precipitation_lag_profile: "autumn_cool"
+      mean_temp_optimal_celsius: [9.0, 17.0]
+      soil_temp_optimal_celsius: [8.0, 16.0]
+      min_temp_limit_celsius: 0.5 # Sensible a heladas directas
+      soil_moisture_min_percent: 22.0
       thermal_shock_trigger: true # Sensible a choque térmico otoñal tras lluvias
-      thermal_shock_optimal_drop_celsius: [-6.0, -2.5]
+      thermal_shock_optimal_drop_celsius: [-6.0, -2.0]
       wind_max_limit_kmh: 45.0
+      phenology_monthly_weights:
+        1: 0.15
+        2: 0.10
+        3: 0.15
+        4: 0.35
+        5: 0.65
+        6: 0.75
+        7: 0.45
+        8: 0.60
+        9: 0.95
+        10: 1.00
+        11: 1.00
+        12: 0.55
 
   boletus_aereus:
     common_name_es: "Hongo Negro / Boleto Bronceado"
@@ -60,7 +79,7 @@ species:
     trophic_type: "mycorrhizal"
     edaphic:
       ph_optimal: [5.2, 6.8]
-      ph_tolerated: [4.8, 7.2]
+      ph_tolerated: [4.5, 7.3]
       substrate_preference: "siliceous_to_neutral"
     habitat:
       preferred_forest_types:
@@ -69,30 +88,47 @@ species:
         - "Quercus faginea"
         - "Castanea sativa"
         - "Quercus pyrenaica"
-      minimum_canopy_cover_percent: 30
-      altitude_range_meters: [100, 1100]
+        - "Quercus robur"
+        - "Quercus petraea"
+      minimum_canopy_cover_percent: 20
+      optimal_canopy_cover_percent: [35, 75]
+      altitude_range_meters: [100, 1300]
     topography:
       slope_max_deg: 45
-      aspect_preference_early_season: ["E", "SE", "S"]
-      aspect_preference_late_season: ["S", "SW"]
+      aspect_preference_early_season: ["E", "SE", "S", "NE"]
+      aspect_preference_late_season: ["S", "SW", "SE"]
     meteorology:
-      accumulated_precip_14d_threshold_mm: 30.0
+      accumulated_precip_14d_threshold_mm: 28.0
       accumulated_precip_14d_optimal_mm: 50.0
-      mean_temp_optimal_celsius: [16.0, 24.0]
-      soil_temp_optimal_celsius: [15.0, 23.0]
+      precipitation_lag_profile: "warm_fast"
+      mean_temp_optimal_celsius: [15.0, 23.0]
+      soil_temp_optimal_celsius: [14.0, 22.0]
       min_temp_limit_celsius: 4.0 # Más termófilo, no tolera frío prematuro
       soil_moisture_min_percent: 20.0
       thermal_shock_trigger: false # Termófilo; el frío prematuro detiene la fructificación
       thermal_shock_optimal_drop_celsius: [-3.0, 0.0]
       wind_max_limit_kmh: 40.0
+      phenology_monthly_weights:
+        1: 0.10
+        2: 0.10
+        3: 0.20
+        4: 0.50
+        5: 0.85
+        6: 0.95
+        7: 0.65
+        8: 0.70
+        9: 1.00
+        10: 0.95
+        11: 0.55
+        12: 0.25
 
   boletus_pinophilus:
     common_name_es: "Hongo Pinícola / Boleto del Pino"
     scientific_name: "Boletus pinophilus"
     trophic_type: "mycorrhizal"
     edaphic:
-      ph_optimal: [4.0, 5.5]
-      ph_tolerated: [3.8, 6.0]
+      ph_optimal: [4.0, 5.8]
+      ph_tolerated: [3.8, 6.6]
       substrate_preference: "strictly_siliceous"
     habitat:
       preferred_forest_types:
@@ -101,22 +137,39 @@ species:
         - "Pinus nigra"
         - "Pinus pinaster"
         - "Fagus sylvatica"
-      minimum_canopy_cover_percent: 35
-      altitude_range_meters: [900, 2100]
+        - "Quercus pyrenaica"
+        - "Castanea sativa"
+      minimum_canopy_cover_percent: 20
+      optimal_canopy_cover_percent: [40, 80]
+      altitude_range_meters: [800, 2150]
     topography:
       slope_max_deg: 40
-      aspect_preference_early_season: ["N", "NE"]
-      aspect_preference_late_season: ["E", "SE", "S"]
+      aspect_preference_early_season: ["N", "NE", "NW"]
+      aspect_preference_late_season: ["E", "SE", "S", "SW"]
     meteorology:
-      accumulated_precip_14d_threshold_mm: 40.0
-      accumulated_precip_14d_optimal_mm: 70.0
-      mean_temp_optimal_celsius: [10.0, 16.0]
-      soil_temp_optimal_celsius: [8.0, 15.0]
-      min_temp_limit_celsius: -2.0 # Gran resistencia al frío de montaña
-      soil_moisture_min_percent: 25.0
+      accumulated_precip_14d_threshold_mm: 32.0
+      accumulated_precip_14d_optimal_mm: 65.0
+      precipitation_lag_profile: "autumn_cool"
+      mean_temp_optimal_celsius: [7.0, 16.0]
+      soil_temp_optimal_celsius: [7.0, 15.0]
+      min_temp_limit_celsius: -2.5 # Gran resistencia al frío de montaña
+      soil_moisture_min_percent: 22.0
       thermal_shock_trigger: true # Fuerte inducción por choque térmico en montaña
       thermal_shock_optimal_drop_celsius: [-6.0, -2.0]
       wind_max_limit_kmh: 50.0
+      phenology_monthly_weights:
+        1: 0.15
+        2: 0.15
+        3: 0.35
+        4: 0.80
+        5: 0.95
+        6: 0.90
+        7: 0.50
+        8: 0.65
+        9: 0.95
+        10: 1.00
+        11: 1.00
+        12: 0.60
 
   boletus_reticulatus:
     common_name_es: "Boleto Reticulado / Boleto de Verano"
@@ -124,28 +177,45 @@ species:
     trophic_type: "mycorrhizal"
     edaphic:
       ph_optimal: [5.0, 6.5]
-      ph_tolerated: [4.5, 7.0]
+      ph_tolerated: [4.5, 7.2]
       substrate_preference: "siliceous_to_decalcified"
     habitat:
       preferred_forest_types:
         - "Quercus robur"
         - "Quercus petraea"
         - "Quercus pyrenaica"
+        - "Quercus faginea"
         - "Castanea sativa"
         - "Fagus sylvatica"
-      minimum_canopy_cover_percent: 35
-      altitude_range_meters: [300, 1400]
+        - "Pinus sylvestris"
+      minimum_canopy_cover_percent: 20
+      optimal_canopy_cover_percent: [35, 75]
+      altitude_range_meters: [300, 1600]
     topography:
       slope_max_deg: 35
-      aspect_preference_early_season: ["E", "SE", "S"]
-      aspect_preference_late_season: ["S", "SW"]
+      aspect_preference_early_season: ["E", "SE", "S", "NE"]
+      aspect_preference_late_season: ["S", "SW", "SE"]
     meteorology:
-      accumulated_precip_14d_threshold_mm: 30.0
+      accumulated_precip_14d_threshold_mm: 28.0
       accumulated_precip_14d_optimal_mm: 50.0
-      mean_temp_optimal_celsius: [17.0, 25.0]
-      soil_temp_optimal_celsius: [16.0, 24.0]
+      precipitation_lag_profile: "warm_fast"
+      mean_temp_optimal_celsius: [15.0, 24.0]
+      soil_temp_optimal_celsius: [14.0, 23.0]
       min_temp_limit_celsius: 6.0 # Estival puro, requiere calor para romper dormancia
       soil_moisture_min_percent: 20.0
       thermal_shock_trigger: false # Estival, sensible a caídas bruscas
       thermal_shock_optimal_drop_celsius: [-3.0, 0.0]
       wind_max_limit_kmh: 40.0
+      phenology_monthly_weights:
+        1: 0.05
+        2: 0.05
+        3: 0.15
+        4: 0.55
+        5: 0.95
+        6: 1.00
+        7: 0.90
+        8: 0.75
+        9: 0.85
+        10: 0.50
+        11: 0.25
+        12: 0.10

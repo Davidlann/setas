@@ -44,7 +44,7 @@ class OpenMeteoClient:
 
         print(f"[Meteo Grid] Descargando {len(grid_coords)} estaciones de la malla regional ({grid_step_deg}°)...")
         results_by_location = {}
-        batch_size = 20 # Lotes pequeños para no saturar burst limit
+        batch_size = 40 # Lotes equilibrados para minimizar peticiones sin saturar Open-Meteo
 
         for i in range(0, len(grid_coords), batch_size):
             chunk = grid_coords[i:i + batch_size]
@@ -59,9 +59,11 @@ class OpenMeteoClient:
                     "temperature_2m_mean",
                     "temperature_2m_min",
                     "soil_moisture_0_to_7cm_mean",
+                    "soil_moisture_7_to_28cm_mean",
                     "soil_temperature_0_to_7cm_mean",
                     "et0_fao_evapotranspiration",
                     "wind_speed_10m_max",
+                    "relative_humidity_2m_mean",
                 ],
                 "past_days": past_days,
                 "forecast_days": 1,
@@ -98,16 +100,23 @@ class OpenMeteoClient:
                 temperatures = daily.get("temperature_2m_mean", [])
                 minimum_temperatures = daily.get("temperature_2m_min", [])
                 soil_moisture = daily.get("soil_moisture_0_to_7cm_mean", [])
+                soil_moisture_deep = daily.get("soil_moisture_7_to_28cm_mean", [])
                 soil_temperatures = daily.get("soil_temperature_0_to_7cm_mean", [])
                 evapotranspiration = daily.get("et0_fao_evapotranspiration", [])
                 wind_speeds = daily.get("wind_speed_10m_max", [])
+                rel_humidity = daily.get("relative_humidity_2m_mean", [])
 
                 today = datetime.now(ZoneInfo("Europe/Madrid")).date()
-                completed_days = [
+                candidate_days = [
                     i for i, day in enumerate(dates)
                     if today - timedelta(days=past_days)
-                    <= datetime.strptime(day, "%Y-%m-%d").date() < today
+                    <= datetime.strptime(day, "%Y-%m-%d").date() <= today
+                    and i < len(precipitation) and precipitation[i] is not None
+                    and i < len(temperatures) and temperatures[i] is not None
+                    and i < len(minimum_temperatures) and minimum_temperatures[i] is not None
+                    and i < len(soil_moisture) and soil_moisture[i] is not None
                 ]
+                completed_days = candidate_days[-past_days:]
                 if len(completed_days) != past_days:
                     raise RuntimeError(
                         f"Open-Meteo devolvió {len(completed_days)} días completos; "
@@ -124,9 +133,11 @@ class OpenMeteoClient:
                 temp_mean = values_for(completed_days, temperatures)
                 temp_min = values_for(completed_days, minimum_temperatures)
                 soil_m = values_for(completed_days, soil_moisture)
+                soil_m_deep = values_for(completed_days, soil_moisture_deep)
                 soil_t = values_for(completed_days, soil_temperatures)
                 et0_vals = values_for(completed_days, evapotranspiration)
                 wind_vals = values_for(completed_days, wind_speeds)
+                rh_vals = values_for(completed_days, rel_humidity)
 
                 if any(len(values) != past_days for values in (
                     precip, temp_mean, temp_min, soil_m
@@ -136,8 +147,27 @@ class OpenMeteoClient:
                         f"({loc.get('latitude')}, {loc.get('longitude')})."
                     )
 
+                # Combinar humedad superficial (0-7cm) y radicular (7-28cm) ponderando los últimos 3 días (65%) + 14d (35%)
+                if len(soil_m_deep) == past_days:
+                    combined_soil_m = [
+                        s0 * 0.65 + s1 * 0.35
+                        for s0, s1 in zip(soil_m, soil_m_deep)
+                    ]
+                else:
+                    combined_soil_m = soil_m
+                soil_m_recent_3d = sum(combined_soil_m[-3:]) / 3.0
+                soil_m_mean_14d = sum(combined_soil_m) / len(combined_soil_m)
+                effective_soil_moisture_pct = round(
+                    (soil_m_recent_3d * 0.65 + soil_m_mean_14d * 0.35) * 100.0, 2
+                )
+
+                # Temperatura del suelo ponderando estado actual (últimos 3 días 65% + ventana 14d 35%)
                 soil_temp_mean_14d = (
-                    round(sum(soil_t) / len(soil_t), 2)
+                    round(
+                        (sum(soil_t[-3:]) / 3.0) * 0.65
+                        + (sum(soil_t) / len(soil_t)) * 0.35,
+                        2,
+                    )
                     if len(soil_t) == past_days else None
                 )
                 et0_accum_14d = (
@@ -148,14 +178,22 @@ class OpenMeteoClient:
                     round(sum(precip) - sum(et0_vals), 2)
                     if len(et0_vals) == past_days else None
                 )
-                # Choque térmico: diferencia entre los últimos 5 días y los 5 primeros de la ventana
+                # Choque térmico: diferencia entre los últimos 4 días y los días previos de la ventana
                 thermal_shock = (
-                    round(sum(temp_mean[-5:]) / 5.0 - sum(temp_mean[:5]) / 5.0, 2)
+                    round(sum(temp_mean[-4:]) / 4.0 - sum(temp_mean[:6]) / 6.0, 2)
                     if len(temp_mean) >= 10 else None
                 )
                 wind_max_14d = (
-                    round(max(wind_vals), 2)
+                    round(max(wind_vals[-7:]), 2)
                     if len(wind_vals) == past_days else None
+                )
+                humidity_mean_7d = (
+                    round(
+                        (sum(rh_vals[-3:]) / 3.0) * 0.60
+                        + (sum(rh_vals[-7:]) / 7.0) * 0.40,
+                        2,
+                    )
+                    if len(rh_vals) >= 7 else None
                 )
 
                 result = {
@@ -163,17 +201,21 @@ class OpenMeteoClient:
                     "longitude": loc.get("longitude"),
                     "elevation": loc.get("elevation"),
                     "precip_daily_mm": [round(value, 2) for value in precip],
+                    "precip_last_3d_mm": round(sum(precip[-3:]), 2),
                     "precip_accum_7d_mm": round(sum(precip[-7:]), 2),
                     "precip_accum_10d_mm": round(sum(precip[-10:]), 2),
                     "precip_accum_14d_mm": round(sum(precip), 2),
                     "temp_mean_14d_celsius": round(sum(temp_mean) / len(temp_mean), 2),
+                    "temp_mean_recent_3d_celsius": round(sum(temp_mean[-3:]) / 3.0, 2),
                     "temp_min_14d_celsius": round(min(temp_min), 2),
-                    "soil_moisture_percent": round((sum(soil_m) / len(soil_m)) * 100.0, 2),
+                    "temp_min_recent_3d_celsius": round(min(temp_min[-3:]), 2),
+                    "soil_moisture_percent": effective_soil_moisture_pct,
                     "soil_temp_mean_14d_celsius": soil_temp_mean_14d,
                     "et0_accum_14d_mm": et0_accum_14d,
                     "water_balance_14d_mm": water_balance_14d,
                     "thermal_shock_celsius": thermal_shock,
                     "wind_max_14d_kmh": wind_max_14d,
+                    "humidity_mean_7d_percent": humidity_mean_7d,
                 }
                 location_key = (
                     round(result["latitude"], 4),
@@ -190,11 +232,12 @@ class OpenMeteoClient:
         target_coords: List[Tuple[float, float]],
         meteo_grid: List[Dict[str, Any]],
         grid_step_deg: float = WEATHER_GRID_STEP_DEG,
+        target_elevations: List[ float | None ] | None = None,
     ) -> List[Dict[str, Any]]:
         """Interpola campos continuos con los cuatro nodos más cercanos.
 
         La interpolación suaviza los saltos de la asignación al nodo más cercano,
-        pero no aumenta la resolución ni la precisión del modelo meteorológico.
+        y aplica corrección por gradiente térmico altitudinal cuando se conoce la cota.
         """
         if not target_coords:
             return []
@@ -238,11 +281,16 @@ class OpenMeteoClient:
             "water_balance_14d_mm",
             "thermal_shock_celsius",
             "wind_max_14d_kmh",
+            "precip_last_3d_mm",
+            "temp_mean_recent_3d_celsius",
+            "temp_min_recent_3d_celsius",
+            "humidity_mean_7d_percent",
+            "elevation",
         )
         interpolated = []
-        for target, node_distances, node_indices in zip(
+        for idx_cell, (target, node_distances, node_indices) in enumerate(zip(
             targets, distances, indices
-        ):
+        )):
             exact_matches = np.flatnonzero(node_distances <= 1e-12)
             if len(exact_matches):
                 selected = [int(node_indices[exact_matches[0]])]
@@ -292,6 +340,35 @@ class OpenMeteoClient:
                 else:
                     values[field] = None
 
+            # Ajuste térmico microclimático por diferencia de altitud entre la celda y la malla
+            cell_elev = (
+                target_elevations[idx_cell]
+                if target_elevations is not None and idx_cell < len(target_elevations)
+                else None
+            )
+            model_elev = values.pop("elevation", None)
+            if (
+                isinstance(cell_elev, (int, float))
+                and math.isfinite(cell_elev)
+                and isinstance(model_elev, (int, float))
+                and math.isfinite(model_elev)
+            ):
+                elev_diff = max(-600.0, min(600.0, float(cell_elev) - float(model_elev)))
+                temp_lapse_adj = -0.006 * elev_diff
+                soil_lapse_adj = -0.0045 * elev_diff
+                for t_field in (
+                    "temp_mean_14d_celsius",
+                    "temp_min_14d_celsius",
+                    "temp_mean_recent_3d_celsius",
+                    "temp_min_recent_3d_celsius",
+                ):
+                    if values.get(t_field) is not None:
+                        values[t_field] = round(values[t_field] + temp_lapse_adj, 2)
+                if values.get("soil_temp_mean_14d_celsius") is not None:
+                    values["soil_temp_mean_14d_celsius"] = round(
+                        values["soil_temp_mean_14d_celsius"] + soil_lapse_adj, 2
+                    )
+
             daily_series = [
                 node.get("precip_daily_mm") for node in (
                     meteo_grid[index] for index in selected
@@ -322,6 +399,8 @@ class OpenMeteoClient:
                 )
                 for day in range(14)
             ]
+            if values.get("precip_last_3d_mm") is None:
+                values["precip_last_3d_mm"] = round(sum(values["precip_daily_mm"][-3:]), 2)
 
             nearest_node = meteo_grid[int(node_indices[0])]
             nearest_distance_km = math.hypot(

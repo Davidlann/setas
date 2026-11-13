@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mapa-setero-v9';
+const CACHE_NAME = 'mapa-setero-v10';
 const DATA_PATH = /\/public\/data\/experimental\/boletus_[a-z]+\.json$/;
 const STATIC_ASSET_PATH = /\.(?:webmanifest|svg|png)$/;
 
@@ -23,16 +23,17 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
 
   if (DATA_PATH.test(url.pathname)) {
+    const canonicalKey = url.origin + url.pathname;
     event.respondWith((async () => {
       try {
-        const response = await fetch(request);
+        const response = await fetch(request, { cache: 'no-store' });
         if (response.ok) {
           const cache = await caches.open(CACHE_NAME);
-          await cache.put(request, response.clone());
+          await cache.put(canonicalKey, response.clone());
         }
         return response;
       } catch (error) {
-        const cached = await caches.match(request);
+        const cached = await caches.match(canonicalKey) || await caches.match(request);
         if (cached) return cached;
         return new Response(JSON.stringify({
           error: 'No hay datos guardados para esta especie y no se puede conectar.',
@@ -48,7 +49,7 @@ self.addEventListener('fetch', event => {
   if (request.mode === 'navigate') {
     event.respondWith((async () => {
       try {
-        const response = await fetch(request);
+        const response = await fetch(request, { cache: 'no-store' });
         if (response.ok) {
           const cache = await caches.open(CACHE_NAME);
           await cache.put(request, response.clone());

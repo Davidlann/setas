@@ -18,7 +18,7 @@ def refresh_weather_snapshots(db=None, meteo_client=None):
 
     with db.get_connection() as con:
         rows = con.execute("""
-            SELECT h3_index, latitude, longitude
+            SELECT h3_index, latitude, longitude, elevation_m
             FROM cells_static
             WHERE is_forest = TRUE
               AND latitude BETWEEN ? AND ?
@@ -34,7 +34,12 @@ def refresh_weather_snapshots(db=None, meteo_client=None):
         )
 
     cells = [
-        {"h3_index": row[0], "latitude": row[1], "longitude": row[2]}
+        {
+            "h3_index": row[0],
+            "latitude": row[1],
+            "longitude": row[2],
+            "elevation_m": row[3],
+        }
         for row in rows
     ]
     lats = [cell["latitude"] for cell in cells]
@@ -49,10 +54,12 @@ def refresh_weather_snapshots(db=None, meteo_client=None):
         past_days=14,
     )
     coordinates = [(cell["latitude"], cell["longitude"]) for cell in cells]
+    elevations = [cell["elevation_m"] for cell in cells]
     interpolated = meteo_client.batch_interpolate_weather(
         coordinates,
         meteo_grid,
         grid_step_deg=WEATHER_GRID_STEP_DEG,
+        target_elevations=elevations,
     )
     snapshot_date = datetime.now(ZoneInfo("Europe/Madrid")).date().isoformat()
 
@@ -61,12 +68,16 @@ def refresh_weather_snapshots(db=None, meteo_client=None):
         records.append({
             "h3_index": cell["h3_index"],
             "precip_daily_mm": weather["precip_daily_mm"],
+            "precip_last_3d_mm": weather.get("precip_last_3d_mm"),
             "precip_accum_7d_mm": weather["precip_accum_7d_mm"],
             "precip_accum_10d_mm": weather["precip_accum_10d_mm"],
             "precip_accum_14d_mm": weather["precip_accum_14d_mm"],
             "temp_mean_14d_celsius": weather["temp_mean_14d_celsius"],
+            "temp_mean_recent_3d_celsius": weather.get("temp_mean_recent_3d_celsius"),
             "temp_min_14d_celsius": weather["temp_min_14d_celsius"],
+            "temp_min_recent_3d_celsius": weather.get("temp_min_recent_3d_celsius"),
             "soil_moisture_percent": weather["soil_moisture_percent"],
+            "humidity_mean_7d_percent": weather.get("humidity_mean_7d_percent"),
             "soil_temp_mean_14d_celsius": weather.get("soil_temp_mean_14d_celsius"),
             "et0_accum_14d_mm": weather.get("et0_accum_14d_mm"),
             "water_balance_14d_mm": weather.get("water_balance_14d_mm"),
@@ -95,7 +106,7 @@ if __name__ == "__main__":
     print(
         f"Snapshot Open-Meteo para {result['snapshot_date']}: "
         f"{result['cells_count']} celdas, {result['grid_nodes_count']} nodos, "
-        f"interpolación IDW-4; distancia máxima al nodo: "
+        f"interpolación IDW-4 con ajuste altitudinal; distancia máxima al nodo: "
         f"{result['max_nearest_source_distance_km']:.1f} km."
     )
     print(

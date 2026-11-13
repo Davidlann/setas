@@ -72,11 +72,15 @@ class DuckDBManager:
             """)
             for column, column_type in (
                 ("precip_daily_mm_json", "VARCHAR"),
+                ("precip_last_3d_mm", "DOUBLE"),
                 ("weather_source", "VARCHAR"),
                 ("weather_sampling_step_deg", "DOUBLE"),
                 ("weather_interpolation", "VARCHAR"),
                 ("weather_nearest_distance_km", "DOUBLE"),
                 ("soil_temp_mean_14d_celsius", "DOUBLE"),
+                ("temp_mean_recent_3d_celsius", "DOUBLE"),
+                ("temp_min_recent_3d_celsius", "DOUBLE"),
+                ("humidity_mean_7d_percent", "DOUBLE"),
                 ("et0_accum_14d_mm", "DOUBLE"),
                 ("water_balance_14d_mm", "DOUBLE"),
                 ("thermal_shock_celsius", "DOUBLE"),
@@ -135,22 +139,24 @@ class DuckDBManager:
             con.executemany("""
                 INSERT OR REPLACE INTO meteo_snapshots (
                     h3_index, snapshot_date, precip_accum_7d_mm, precip_accum_10d_mm,
-                    precip_accum_14d_mm, precip_daily_mm_json,
-                    temp_mean_14d_celsius, temp_min_14d_celsius,
-                    soil_moisture_percent, weather_source,
+                    precip_accum_14d_mm, precip_last_3d_mm, precip_daily_mm_json,
+                    temp_mean_14d_celsius, temp_mean_recent_3d_celsius,
+                    temp_min_14d_celsius, temp_min_recent_3d_celsius,
+                    soil_moisture_percent, humidity_mean_7d_percent, weather_source,
                     weather_sampling_step_deg, weather_interpolation,
                     weather_nearest_distance_km,
                     soil_temp_mean_14d_celsius, et0_accum_14d_mm,
                     water_balance_14d_mm, thermal_shock_celsius,
                     wind_max_14d_kmh
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, [
                 (
                     r["h3_index"], snapshot_date, r["precip_accum_7d_mm"], r["precip_accum_10d_mm"],
-                    r["precip_accum_14d_mm"],
+                    r["precip_accum_14d_mm"], r.get("precip_last_3d_mm"),
                     json.dumps(r["precip_daily_mm"], separators=(",", ":")),
-                    r["temp_mean_14d_celsius"], r["temp_min_14d_celsius"],
-                    r["soil_moisture_percent"], r.get("weather_source"),
+                    r["temp_mean_14d_celsius"], r.get("temp_mean_recent_3d_celsius"),
+                    r["temp_min_14d_celsius"], r.get("temp_min_recent_3d_celsius"),
+                    r["soil_moisture_percent"], r.get("humidity_mean_7d_percent"), r.get("weather_source"),
                     r.get("weather_sampling_step_deg"), r.get("weather_interpolation"),
                     r.get("weather_nearest_distance_km"),
                     r.get("soil_temp_mean_14d_celsius"),

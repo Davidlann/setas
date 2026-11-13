@@ -379,12 +379,12 @@ class RelativeSuitabilityTests(unittest.TestCase):
         deficit_weather = {
             **self.weather,
             "precip_accum_14d_mm": 40.0,
-            "water_balance_14d_mm": -30.0, # Evaporación mayor que lluvia
+            "water_balance_14d_mm": -30.0,  # Evaporación mayor que lluvia
         }
         surplus_weather = {
             **self.weather,
             "precip_accum_14d_mm": 40.0,
-            "water_balance_14d_mm": 20.0, # Superávit hídrico
+            "water_balance_14d_mm": 20.0,  # Superávit hídrico
         }
 
         deficit_res = self.engine.calculate_relative_suitability(
@@ -405,7 +405,7 @@ class RelativeSuitabilityTests(unittest.TestCase):
         }
         gale_weather = {
             **self.weather,
-            "wind_max_14d_kmh": 65.0, # Viento desecante fuerte
+            "wind_max_14d_kmh": 65.0,  # Viento desecante fuerte
         }
 
         calm_res = self.engine.calculate_relative_suitability(
@@ -417,6 +417,99 @@ class RelativeSuitabilityTests(unittest.TestCase):
 
         self.assertGreater(
             calm_res["weather_score"], gale_res["weather_score"]
+        )
+
+    def test_effective_ph_rescues_acidic_humus_over_higher_mean_soilgrids(self):
+        siliceous_pine_with_q05 = {
+            **self.static,
+            "soil_ph": 6.8,
+            "soil_ph_q05": 4.9,
+        }
+        result = self.engine.calculate_relative_suitability(
+            "boletus_edulis", siliceous_pine_with_q05, self.weather
+        )
+        self.assertGreater(result["score"], 50.0)
+        self.assertAlmostEqual(result["breakdown"]["effective_soil_ph"], 6.04, places=2)
+
+    def test_phenology_differentiates_summer_vs_late_autumn_species(self):
+        june_weather = {**self.weather, "snapshot_date": "2026-06-20"}
+        nov_weather = {**self.weather, "snapshot_date": "2026-11-15"}
+
+        reticulatus_june = self.engine.calculate_relative_suitability(
+            "boletus_reticulatus",
+            {**self.static, "dominant_species": "Melojares", "elevation_m": 1100.0},
+            june_weather,
+        )
+        reticulatus_nov = self.engine.calculate_relative_suitability(
+            "boletus_reticulatus",
+            {**self.static, "dominant_species": "Melojares", "elevation_m": 1100.0},
+            nov_weather,
+        )
+        edulis_nov = self.engine.calculate_relative_suitability(
+            "boletus_edulis",
+            self.static,
+            nov_weather,
+        )
+
+        self.assertGreater(reticulatus_june["weather_score"], reticulatus_nov["weather_score"])
+        self.assertGreater(edulis_nov["weather_score"], reticulatus_nov["weather_score"])
+        self.assertEqual(self.engine.resolve_season_phase("2026-06-20"), "early")
+        self.assertEqual(self.engine.resolve_season_phase("2026-11-15"), "late")
+
+    def test_non_mycorrhizal_formations_are_excluded_and_native_mixtures_accepted(self):
+        for non_host in ("Bosques ribereños", "Sabinares albares", "Choperas y plataneras de producción"):
+            with self.subTest(non_host=non_host):
+                cell = {**self.static, "dominant_species": non_host}
+                self.assertFalse(self.engine.has_potential_habitat(cell))
+
+        native_conifer_mix = {
+            **self.static,
+            "dominant_species": "Mezclas de coníferas autóctonas en la región biogeográfica mediterránea",
+        }
+        res = self.engine.calculate_relative_suitability(
+            "boletus_edulis", native_conifer_mix, self.weather
+        )
+        self.assertEqual(res["breakdown"]["host_assessment"], "compatible")
+        self.assertGreater(res["score"], 50.0)
+
+    def test_rain_10_days_ago_beats_double_rain_yesterday(self):
+        # X=25 mm hace 10 días (índice 3 en lista antiguo->reciente) frente a 2X=50 mm ayer (índice 12)
+        rain_10d_ago = [0.0] * 14
+        rain_10d_ago[3] = 25.0
+        rain_double_yesterday = [0.0] * 14
+        rain_double_yesterday[12] = 50.0
+
+        ten_days = self.engine.calculate_relative_suitability(
+            "boletus_edulis",
+            self.static,
+            {**self.weather, "precip_daily_mm": rain_10d_ago, "precip_accum_14d_mm": 25.0},
+        )
+        yesterday_double = self.engine.calculate_relative_suitability(
+            "boletus_edulis",
+            self.static,
+            {**self.weather, "precip_daily_mm": rain_double_yesterday, "precip_accum_14d_mm": 50.0},
+        )
+
+        self.assertGreater(
+            ten_days["breakdown"]["effective_precip_14d_mm"],
+            yesterday_double["breakdown"]["effective_precip_14d_mm"],
+        )
+        self.assertGreater(ten_days["weather_score"], yesterday_double["weather_score"])
+        self.assertEqual(ten_days["breakdown"]["rain_timing_status"], "optimal_incubation")
+        self.assertEqual(yesterday_double["breakdown"]["rain_timing_status"], "too_recent_for_flush")
+
+    def test_breakdown_exports_component_subscores_for_comparison(self):
+        res = self.engine.calculate_relative_suitability(
+            "boletus_edulis", self.static, self.weather
+        )
+        bd = res["breakdown"]
+        for key in ("precip_score", "temp_score", "soil_moisture_score", "slope_score", "aspect_score"):
+            self.assertIn(key, bd)
+            self.assertIsNotNone(bd[key])
+        self.assertAlmostEqual(
+            bd["topography"],
+            round(bd["slope_score"] + bd["aspect_score"], 1),
+            places=1,
         )
 
 
