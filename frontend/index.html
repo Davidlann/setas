@@ -3098,11 +3098,191 @@
   });
   map.addControl(new maplibregl.NavigationControl({showCompass:true}), 'top-right');
   let isSatelliteMode = false;
+  let basemapFirstSymbolId = undefined;
+  let basemapFirstRoadId = undefined;
+
+  const EXTRA_REFERENCE_CITIES = [
+    { name: 'Soria', lat: 41.7636, lon: -2.4649, tier: 1, kind: 'capital' },
+    { name: 'Segovia', lat: 40.9429, lon: -4.1088, tier: 1, kind: 'capital' },
+    { name: 'Guadalajara', lat: 40.6337, lon: -3.1674, tier: 1, kind: 'capital' },
+    { name: 'Madrid', lat: 40.4168, lon: -3.7038, tier: 1, kind: 'capital' },
+    { name: 'Burgos', lat: 42.3440, lon: -3.6969, tier: 1, kind: 'capital' },
+    { name: 'Ávila', lat: 40.6566, lon: -4.6818, tier: 1, kind: 'capital' },
+    { name: 'Aranda de Duero', lat: 41.6702, lon: -3.6892, tier: 1, kind: 'town' },
+    { name: 'Collado Villalba', lat: 40.6350, lon: -4.0050, tier: 1, kind: 'town' },
+    { name: 'Colmenar Viejo', lat: 40.6590, lon: -3.7676, tier: 1, kind: 'town' },
+    { name: 'Brihuega', lat: 40.7608, lon: -2.8694, tier: 2, kind: 'town' }
+  ];
+
+  const TIER1_TOWN_NAMES = new Set([
+    'Vinuesa', 'Almazán', 'El Burgo de Osma', 'San Leonardo de Yagüe', 'Ólvega', 'Ágreda', 'Medinaceli',
+    'Rascafría', 'Buitrago del Lozoya', 'Cercedilla', 'San Lorenzo de El Escorial', 'Guadarrama', 'San Martín de Valdeiglesias',
+    'La Granja de San Ildefonso', 'El Espinar', 'Riaza', 'Sepúlveda', 'Cantalejo', 'Cuéllar', 'Coca',
+    'Cantalojas', 'Sigüenza', 'Molina de Aragón', 'Cifuentes', 'Checa',
+    'Quintanar de la Sierra', 'Salas de los Infantes', 'Las Navas del Marqués'
+  ]);
+
+  const TIER2_TOWN_NAMES = new Set([
+    'Covaleda', 'Navaleno', 'Duruelo de la Sierra', 'Abejar', 'Cabrejas del Pinar', 'Ucero', 'Almarza', 'El Royo',
+    'San Pedro Manrique', 'Berlanga de Duero', 'Arcos de Jalón', 'San Esteban de Gormaz',
+    'Lozoya', 'Canencia', 'Somosierra', 'Montejo de la Sierra', 'Navacerrada', 'Manzanares el Real',
+    'Miraflores de la Sierra', 'Soto del Real', 'Torrelaguna', 'Robledo de Chavela', 'Puerto de Navacerrada', 'Puerto de Cotos',
+    'Valsaín', 'San Rafael', 'Navafría', 'Pedraza', 'Prádena', 'Ayllón', 'Turégano', 'Carbonero el Mayor',
+    'Majaelrayo', 'Valverde de los Arroyos', 'Galve de Sorbe', 'Tamajón', 'Cogolludo', 'Atienza', 'Jadraque',
+    'Orea', 'Peralejos de las Truchas', 'Zaorejas', 'Trillo',
+    'Neila', 'Canicosa de la Sierra', 'Palacios de la Sierra', 'Hontoria del Pinar', 'Pineda de la Sierra',
+    'Pradoluengo', 'Santo Domingo de Silos', 'Covarrubias', 'Peguerinos', 'Cebreros'
+  ]);
+
+  function buildReferencePlacesGeoJSON() {
+    const features = [];
+    const seen = new Set();
+
+    for (const city of EXTRA_REFERENCE_CITIES) {
+      seen.add(normStr(city.name));
+      features.push({
+        type: 'Feature',
+        properties: {
+          name: city.name,
+          fullName: city.name,
+          lat: city.lat,
+          lon: city.lon,
+          tier: city.tier,
+          kind: city.kind
+        },
+        geometry: { type: 'Point', coordinates: [city.lon, city.lat] }
+      });
+    }
+
+    for (const spot of KNOWN_SPOTS) {
+      const cleanName = spot.n.split(/[—(]/)[0].trim();
+      const key = normStr(cleanName);
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const isPassOrLandmark = /^(puerto|laguna|punto de nieve|valonsadero|el paular|la pinilla)/i.test(cleanName);
+      const tier = TIER1_TOWN_NAMES.has(cleanName)
+        ? 1
+        : (TIER2_TOWN_NAMES.has(cleanName) ? 2 : 3);
+
+      features.push({
+        type: 'Feature',
+        properties: {
+          name: cleanName,
+          fullName: spot.n,
+          lat: spot.lat,
+          lon: spot.lon,
+          tier,
+          kind: isPassOrLandmark ? 'pass' : 'town'
+        },
+        geometry: { type: 'Point', coordinates: [spot.lon, spot.lat] }
+      });
+    }
+
+    return { type: 'FeatureCollection', features };
+  }
+
+  function styleBasemapAndReferenceLabels(satMode) {
+    if (!map || !map.getStyle()) return;
+    const layers = map.getStyle().layers || [];
+
+    const placeTextColor = satMode ? '#ffffff' : '#1c140d';
+    const placeHaloColor = satMode ? 'rgba(15, 23, 42, 0.94)' : 'rgba(255, 253, 248, 0.96)';
+    const roadTextColor  = satMode ? '#f1f5f9' : '#33281e';
+    const roadHaloColor  = satMode ? 'rgba(15, 23, 42, 0.90)' : 'rgba(255, 253, 248, 0.92)';
+
+    for (const layer of layers) {
+      const id = layer.id || '';
+      const srcLayer = layer['source-layer'] || '';
+
+      if (layer.type === 'symbol') {
+        const isPlace = srcLayer === 'place' || id.includes('place');
+        const isRoadName = srcLayer === 'transportation_name' || id.includes('road') || id.includes('highway');
+        const isWaterOrPoi = srcLayer === 'water_name' || srcLayer === 'poi' || srcLayer === 'mountain_peak';
+
+        if (isPlace) {
+          try {
+            map.setLayoutProperty(id, 'text-font', ['Open Sans Bold', 'Arial Unicode MS Bold']);
+            map.setLayoutProperty(id, 'text-padding', 3);
+            if (id.includes('city') || id.includes('capital')) {
+              map.setLayoutProperty(id, 'text-size', ['interpolate', ['linear'], ['zoom'], 5, 13, 8, 16, 11, 19.5, 14, 22]);
+            } else if (id.includes('town')) {
+              map.setLayoutProperty(id, 'text-size', ['interpolate', ['linear'], ['zoom'], 6, 11.5, 9, 13.8, 12, 16.5, 15, 18.5]);
+            } else {
+              map.setLayoutProperty(id, 'text-size', ['interpolate', ['linear'], ['zoom'], 7, 11, 10, 12.8, 13, 15, 16, 17]);
+            }
+          } catch {}
+          try {
+            map.setPaintProperty(id, 'text-color', placeTextColor);
+            map.setPaintProperty(id, 'text-halo-color', placeHaloColor);
+            map.setPaintProperty(id, 'text-halo-width', 2.6);
+            map.setPaintProperty(id, 'text-halo-blur', 0.2);
+          } catch {}
+        } else if (isRoadName) {
+          try {
+            map.setLayoutProperty(id, 'text-font', ['Open Sans Bold', 'Arial Unicode MS Bold']);
+            map.setPaintProperty(id, 'text-color', roadTextColor);
+            map.setPaintProperty(id, 'text-halo-color', roadHaloColor);
+            map.setPaintProperty(id, 'text-halo-width', 2.2);
+          } catch {}
+        } else if (isWaterOrPoi) {
+          try {
+            map.setPaintProperty(id, 'text-halo-color', placeHaloColor);
+            map.setPaintProperty(id, 'text-halo-width', 2.0);
+          } catch {}
+        }
+      }
+    }
+
+    if (map.getLayer('reference-places-label')) {
+      map.setPaintProperty('reference-places-label', 'text-color', [
+        'case',
+        ['==', ['get', 'kind'], 'capital'], satMode ? '#fef08a' : '#18100a',
+        ['==', ['get', 'kind'], 'pass'], satMode ? '#bbf7d0' : '#26462e',
+        satMode ? '#ffffff' : '#23180f'
+      ]);
+      map.setPaintProperty('reference-places-label', 'text-halo-color', satMode ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 253, 248, 0.97)');
+    }
+    if (map.getLayer('reference-places-dot')) {
+      map.setPaintProperty('reference-places-dot', 'circle-color', [
+        'case',
+        ['==', ['get', 'kind'], 'capital'], satMode ? '#facc15' : '#5c3d28',
+        ['==', ['get', 'kind'], 'pass'], satMode ? '#4ade80' : '#3b6e4c',
+        satMode ? '#ffffff' : '#6e4e35'
+      ]);
+      map.setPaintProperty('reference-places-dot', 'circle-stroke-color', satMode ? '#0f172a' : '#fffdf8');
+    }
+    if (map.getLayer('province-labels')) {
+      map.setPaintProperty('province-labels', 'text-color', satMode ? '#f8fafc' : '#493b2d');
+      map.setPaintProperty('province-labels', 'text-halo-color', satMode ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.94)');
+    }
+  }
+
   map.on('load', () => {
     baseMapLoaded = true;
     document.getElementById('map-loading').hidden = true;
 
-    // Capa de ortofoto aérea / satélite ESRI World Imagery
+    const styleLayers = map.getStyle().layers || [];
+    for (const layer of styleLayers) {
+      const id = layer.id || '';
+      const srcLayer = layer['source-layer'] || '';
+      if (!basemapFirstRoadId && (srcLayer === 'transportation' || srcLayer === 'boundary' || id.includes('road') || id.includes('highway') || layer.type === 'symbol')) {
+        basemapFirstRoadId = id;
+      }
+      if (!basemapFirstSymbolId && layer.type === 'symbol') {
+        basemapFirstSymbolId = id;
+      }
+      // Adelantar la aparición de pueblos y aldeas en el mapa base
+      if (layer.type === 'symbol' && (srcLayer === 'place' || id.includes('place'))) {
+        if (typeof layer.minzoom === 'number' && layer.minzoom > 5) {
+          try {
+            map.setLayerZoomRange(id, Math.max(5, layer.minzoom - 1.8), layer.maxzoom || 24);
+          } catch {}
+        }
+      }
+    }
+
+    // Capa de ortofoto aérea / satélite ESRI World Imagery (debajo de carreteras y etiquetas)
     map.addSource('satellite-tiles', {
       type: 'raster',
       tiles: [
@@ -3117,7 +3297,7 @@
       type: 'raster',
       source: 'satellite-tiles',
       layout: { visibility: 'none' }
-    });
+    }, basemapFirstRoadId);
 
     for (const nativeBoundaryId of ['boundary_state', 'boundary_county']) {
       if (map.getLayer(nativeBoundaryId)) {
@@ -3134,13 +3314,13 @@
       type: 'line',
       source: 'provinces-borders',
       minzoom: 5,
-      maxzoom: 10,
+      maxzoom: 10.5,
       paint: {
         'line-color': ['case', ['get', 'target'], '#5a4634', '#8c7a68'],
-        'line-width': ['interpolate', ['linear'], ['zoom'], 5, 1.8, 7.5, 1.9, 9.8, 1.0],
-        'line-opacity': ['interpolate', ['linear'], ['zoom'], 5, 0.85, 8.2, 0.65, 9.8, 0]
+        'line-width': ['interpolate', ['linear'], ['zoom'], 5, 1.8, 7.5, 2.0, 10.2, 1.1],
+        'line-opacity': ['interpolate', ['linear'], ['zoom'], 5, 0.85, 8.5, 0.65, 10.5, 0]
       }
-    });
+    }, basemapFirstSymbolId);
 
     map.addSource('province-labels', {
       type: 'geojson',
@@ -3161,23 +3341,130 @@
       id: 'province-labels',
       type: 'symbol',
       source: 'province-labels',
-      maxzoom: 10,
+      maxzoom: 9.2,
       layout: {
         'text-field': ['get', 'name'],
         'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-        'text-size': ['interpolate', ['linear'], ['zoom'], 5, 13, 8, 17, 10, 15],
-        'text-letter-spacing': 0.08,
+        'text-size': ['interpolate', ['linear'], ['zoom'], 5, 13, 7.8, 16.5, 9.2, 14],
+        'text-letter-spacing': 0.1,
+        'text-transform': 'uppercase',
         'text-anchor': 'center',
-        'text-allow-overlap': true,
-        'text-ignore-placement': true
+        'text-allow-overlap': false,
+        'text-padding': 6
       },
       paint: {
         'text-color': '#493b2d',
         'text-halo-color': 'rgba(255, 255, 255, 0.94)',
         'text-halo-width': 2.5,
-        'text-halo-blur': 0.3
+        'text-halo-blur': 0.3,
+        'text-opacity': ['interpolate', ['linear'], ['zoom'], 5, 0.95, 8.4, 0.85, 9.1, 0]
       }
     });
+
+    // Capa destacada de pueblos, ciudades y puertos de referencia
+    map.addSource('reference-places', {
+      type: 'geojson',
+      data: buildReferencePlacesGeoJSON()
+    });
+
+    map.addLayer({
+      id: 'reference-places-dot',
+      type: 'circle',
+      source: 'reference-places',
+      minzoom: 6.5,
+      maxzoom: 13.5,
+      filter: [
+        'step', ['zoom'],
+        ['==', ['get', 'tier'], 1],
+        8.4, ['<=', ['get', 'tier'], 2],
+        9.7, true
+      ],
+      paint: {
+        'circle-radius': [
+          'interpolate', ['linear'], ['zoom'],
+          6.5, ['case', ['==', ['get', 'kind'], 'capital'], 3.6, 2.5],
+          10,  ['case', ['==', ['get', 'kind'], 'capital'], 5.0, ['==', ['get', 'tier'], 1], 3.8, 3.0],
+          13,  ['case', ['==', ['get', 'kind'], 'capital'], 5.5, 3.5]
+        ],
+        'circle-color': [
+          'case',
+          ['==', ['get', 'kind'], 'capital'], '#5c3d28',
+          ['==', ['get', 'kind'], 'pass'], '#3b6e4c',
+          '#6e4e35'
+        ],
+        'circle-stroke-color': '#fffdf8',
+        'circle-stroke-width': 1.6,
+        'circle-opacity': ['interpolate', ['linear'], ['zoom'], 6.5, 0.9, 12.2, 0.9, 13.4, 0]
+      }
+    });
+
+    map.addLayer({
+      id: 'reference-places-label',
+      type: 'symbol',
+      source: 'reference-places',
+      minzoom: 6.5,
+      filter: [
+        'all',
+        [
+          'step', ['zoom'],
+          ['==', ['get', 'tier'], 1],
+          8.4, ['<=', ['get', 'tier'], 2],
+          9.7, true
+        ],
+        [
+          'case',
+          ['==', ['get', 'kind'], 'pass'], true,
+          ['<', ['zoom'], 12.6]
+        ]
+      ],
+      layout: {
+        'symbol-sort-key': ['get', 'tier'],
+        'text-field': ['get', 'name'],
+        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+        'text-size': [
+          'interpolate', ['linear'], ['zoom'],
+          6.5, ['case', ['==', ['get', 'kind'], 'capital'], 13, 11],
+          8.5, ['case', ['==', ['get', 'kind'], 'capital'], 15, ['==', ['get', 'tier'], 1], 12.8, 11.5],
+          11,  ['case', ['==', ['get', 'kind'], 'capital'], 17, ['==', ['get', 'tier'], 1], 14.5, 13],
+          13,  14.5
+        ],
+        'text-variable-anchor': ['left', 'right', 'top', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right'],
+        'text-radial-offset': 0.55,
+        'text-justify': 'auto',
+        'text-allow-overlap': false,
+        'text-padding': 8,
+        'text-max-width': 9
+      },
+      paint: {
+        'text-color': [
+          'case',
+          ['==', ['get', 'kind'], 'capital'], '#18100a',
+          ['==', ['get', 'kind'], 'pass'], '#26462e',
+          '#23180f'
+        ],
+        'text-halo-color': 'rgba(255, 253, 248, 0.97)',
+        'text-halo-width': 2.8,
+        'text-halo-blur': 0.2
+      }
+    });
+
+    const handleReferencePlaceClick = event => {
+      if (map.getLayer('h3-fill')) {
+        const hitHex = map.queryRenderedFeatures(event.point, { layers: ['h3-fill'] });
+        if (hitHex && hitHex.length > 0 && map.getZoom() >= 9.5) return;
+      }
+      const feat = event.features && event.features[0];
+      if (!feat || !feat.properties) return;
+      const p = feat.properties;
+      selectSpot(Number(p.lat), Number(p.lon), p.name);
+    };
+    map.on('click', 'reference-places-label', handleReferencePlaceClick);
+    map.on('click', 'reference-places-dot', handleReferencePlaceClick);
+    map.on('mouseenter', 'reference-places-label', () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'reference-places-label', () => { map.getCanvas().style.cursor = ''; });
+    map.on('mouseenter', 'reference-places-dot', () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'reference-places-dot', () => { map.getCanvas().style.cursor = ''; });
+
     map.on('click', 'province-labels', event => {
       const province = event.features && event.features[0] && event.features[0].properties;
       if (!province) return;
@@ -3189,6 +3476,8 @@
     });
     map.on('mouseenter', 'province-labels', () => { map.getCanvas().style.cursor = 'pointer'; });
     map.on('mouseleave', 'province-labels', () => { map.getCanvas().style.cursor = ''; });
+
+    styleBasemapAndReferenceLabels(isSatelliteMode);
   });
 
   function setSatelliteMode(enable) {
@@ -3208,8 +3497,9 @@
       if (label) label.textContent = labelText;
     }
     if (map.getLayer('h3-fill')) {
-      map.setPaintProperty('h3-fill', 'fill-opacity', enable ? 0.65 : ['/', ['get','_a'], 255]);
+      map.setPaintProperty('h3-fill', 'fill-opacity', enable ? 0.62 : ['*', ['/', ['get','_a'], 255], 0.86]);
     }
+    styleBasemapAndReferenceLabels(enable);
   }
 
   const satBtn = document.getElementById('satellite-toggle');
@@ -3705,14 +3995,16 @@
     } else {
       map.addSource('h3', { type:'geojson', data: geojson });
 
-      const beforeLabelLayer = map.getLayer('province-labels') ? 'province-labels' : undefined;
+      const beforeLabelLayer = (basemapFirstSymbolId && map.getLayer(basemapFirstSymbolId))
+        ? basemapFirstSymbolId
+        : (map.getLayer('province-labels') ? 'province-labels' : undefined);
       map.addLayer({
         id: 'h3-fill',
         type: 'fill',
         source: 'h3',
         paint: {
           'fill-color': ['rgb', ['get','_r'], ['get','_g'], ['get','_b']],
-          'fill-opacity': ['/', ['get','_a'], 255]
+          'fill-opacity': isSatelliteMode ? 0.62 : ['*', ['/', ['get','_a'], 255], 0.86]
         }
       }, beforeLabelLayer);
 
@@ -3727,21 +4019,22 @@
         id: 'h3-score-label',
         type: 'symbol',
         source: 'h3',
-        minzoom: 11,
+        minzoom: 11.4,
         filter: ['!=', ['get', '_scoreLabel'], ''],
         layout: {
           'text-field': ['get', '_scoreLabel'],
           'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-          'text-size': 11,
+          'text-size': 10.5,
           'text-anchor': 'center',
-          'text-allow-overlap': false
+          'text-allow-overlap': false,
+          'text-padding': 4
         },
         paint: {
           'text-color': '#30261d',
           'text-halo-color': 'rgba(255, 255, 255, 0.92)',
           'text-halo-width': 1.5
         }
-      });
+      }, beforeLabelLayer);
 
       // Click para inspección
       map.on('click', 'h3-fill', e => {
@@ -3783,6 +4076,7 @@
     if (map.getSource('selected-cell-outline')) {
       map.getSource('selected-cell-outline').setData(data);
     } else if (features.length) {
+      const beforeTopLabels = map.getLayer('reference-places-dot') ? 'reference-places-dot' : undefined;
       map.addSource('selected-cell-outline', { type: 'geojson', data });
       map.addLayer({
         id: 'selected-cell-halo',
@@ -3793,7 +4087,7 @@
           'line-width': 4.5,
           'line-opacity': 0.92
         }
-      });
+      }, beforeTopLabels);
       map.addLayer({
         id: 'selected-cell-ring',
         type: 'line',
@@ -3803,7 +4097,7 @@
           'line-width': 2.5,
           'line-opacity': 1
         }
-      });
+      }, beforeTopLabels);
     }
   }
 
