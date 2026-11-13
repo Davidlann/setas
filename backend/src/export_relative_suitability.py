@@ -254,7 +254,10 @@ def export_relative_suitability(
                 "lon": source["longitude"],
                 "elev": source["elevation_m"],
                 "slope": source["slope_deg"],
-                "asp": source["aspect_cardinal"],
+                "asp": {"SW": "SO", "W": "O", "NW": "NO"}.get(
+                    str(source["aspect_cardinal"]).upper(),
+                    source["aspect_cardinal"],
+                ) if source["aspect_cardinal"] else None,
                 "ph": source["soil_ph"],
                 "eph": breakdown.get("effective_soil_ph", source["soil_ph"]),
                 "ph05": source["soil_ph_q05"],

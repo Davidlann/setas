@@ -512,6 +512,60 @@ class RelativeSuitabilityTests(unittest.TestCase):
             places=1,
         )
 
+    def test_moderate_incubation_rain_caps_recent_downpour_inflation(self):
+        # 15 mm hace 4 días (índice 9) + 100 mm en los últimos 3 días (índices 10..13)
+        daily_series = [0.0] * 9 + [15.0, 35.0, 50.0, 10.0, 5.0]
+        res = self.engine.calculate_relative_suitability(
+            "boletus_edulis",
+            self.static,
+            {
+                **self.weather,
+                "precip_daily_mm": daily_series,
+                "precip_accum_14d_mm": sum(daily_series),
+            },
+        )
+        self.assertEqual(res["breakdown"]["rain_timing_status"], "moderate")
+        # No debe alcanzar el óptimo (60 mm) ni los 25 puntos máximos de lluvia sin incubación previa suficiente
+        self.assertLessEqual(res["breakdown"]["effective_precip_14d_mm"], 35.0)
+        self.assertLess(res["breakdown"]["precip_score"], 15.0)
+
+    def test_severe_14d_frost_moderately_reduces_temp_score_even_when_last_3d_mild(self):
+        no_frost = self.engine.calculate_relative_suitability(
+            "boletus_edulis",
+            self.static,
+            {
+                **self.weather,
+                "temp_min_14d_celsius": 3.0,
+                "temp_min_recent_3d_celsius": 6.0,
+            },
+        )
+        severe_14d_frost = self.engine.calculate_relative_suitability(
+            "boletus_edulis",
+            self.static,
+            {
+                **self.weather,
+                "temp_min_14d_celsius": -6.0,
+                "temp_min_recent_3d_celsius": 6.0,
+            },
+        )
+        recent_frost = self.engine.calculate_relative_suitability(
+            "boletus_edulis",
+            self.static,
+            {
+                **self.weather,
+                "temp_min_14d_celsius": -6.0,
+                "temp_min_recent_3d_celsius": -1.5,
+            },
+        )
+        self.assertGreater(
+            no_frost["breakdown"]["temp_score"],
+            severe_14d_frost["breakdown"]["temp_score"],
+        )
+        self.assertGreater(
+            severe_14d_frost["breakdown"]["temp_score"],
+            recent_frost["breakdown"]["temp_score"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

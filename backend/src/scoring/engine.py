@@ -93,9 +93,9 @@ class MushroomScoringEngine:
 
         # Ajuste bioclimático por altitud en otoño tardío / primavera
         if isinstance(elevation_m, (int, float)) and math.isfinite(elevation_m):
-            if month == 11 and elevation_m > 1650:
-                # En alta montaña (>1650 m) a mediados/finales de noviembre la parada invernal llega antes
-                alt_penalty = min(0.25, (elevation_m - 1650.0) / 1600.0)
+            if month in (11, 12) and elevation_m >= 1300:
+                # En montaña (>=1300 m) en noviembre y diciembre la parada invernal llega antes
+                alt_penalty = min(0.45, (elevation_m - 1300.0) / 1400.0)
                 base_factor = max(0.15, base_factor - alt_penalty)
             elif month in (8, 9) and elevation_m >= 1400:
                 # En alta montaña la campaña otoñal arranca antes (finales de agosto/septiembre)
@@ -240,12 +240,15 @@ class MushroomScoringEngine:
         aspect = cell_static_data.get("aspect_cardinal")
         if aspect is None and not allow_missing_aspect:
             raise ValueError("La orientación es obligatoria para el índice validado.")
-        if aspect is not None and (
-            not isinstance(aspect, str) or aspect.upper() not in {
-            "N", "NE", "E", "SE", "S", "SW", "W", "NW"
-            }
-        ):
-            raise ValueError("La orientación debe ser una dirección cardinal válida.")
+        aspect_es_to_en = {"SO": "SW", "O": "W", "NO": "NW"}
+        if aspect is not None:
+            if not isinstance(aspect, str):
+                raise ValueError("La orientación debe ser una dirección cardinal válida.")
+            aspect_norm = aspect_es_to_en.get(aspect.strip().upper(), aspect.strip().upper())
+            if aspect_norm not in {"N", "NE", "E", "SE", "S", "SW", "W", "NW"}:
+                raise ValueError("La orientación debe ser una dirección cardinal válida.")
+        else:
+            aspect_norm = None
         if not 0 <= cell_static_data["canopy_cover"] <= 100:
             raise ValueError("La cobertura de copa debe estar entre 0 y 100.")
         if not 0 <= cell_static_data["soil_ph"] <= 14:
@@ -335,17 +338,26 @@ class MushroomScoringEngine:
             precip_incubation_mm = round(sum(daily_precipitation[:10]), 2)
             precip_recent_4d_mm = round(sum(daily_precipitation[10:]), 2)
             if precip_incubation_mm < thresh_precip * 0.25:
-                # Freno por dormancia: si apenas llovió hace 5–14 días, la tormenta de ayer/hoy aún no ha incubado
+                # Freno por dormancia: si apenas llovió hace 4–13 días, la tormenta de ayer/hoy aún no ha incubado
                 effective_precip = min(effective_precip, thresh_precip * 0.55)
                 rain_timing_status = (
                     "too_recent_for_flush"
                     if precip_recent_4d_mm >= thresh_precip * 0.35
                     else "dry"
                 )
-            elif precip_incubation_mm >= thresh_precip * 0.60:
-                rain_timing_status = "optimal_incubation"
+            elif precip_incubation_mm < thresh_precip * 0.75:
+                # Si la lluvia en ventana de incubación (hace 4–13 días) no alcanza el 75% del umbral,
+                # limitamos cuánto puede inflar la lluvia de los últimos 3–4 días para que no alcance el óptimo prematuramente
+                max_allowed = min(opt_precip * 0.85, precip_incubation_mm * 2.2)
+                if effective_precip > max_allowed:
+                    effective_precip = max_allowed
+                rain_timing_status = (
+                    "optimal_incubation"
+                    if precip_incubation_mm >= thresh_precip * 0.60
+                    else "moderate"
+                )
             else:
-                rain_timing_status = "moderate"
+                rain_timing_status = "optimal_incubation"
         else:
             if precip_14d < thresh_precip * 0.35:
                 rain_timing_status = "dry"
@@ -422,16 +434,24 @@ class MushroomScoringEngine:
                 else:
                     thermal_shock_status = "stable"
 
-        # Penalización por heladas destructivas del carpóforo (priorizando últimos 3 días si existe)
+        # Penalización por heladas destructivas del carpóforo (priorizando últimos 3 días si existe,
+        # pero manteniendo penalización parcial si hubo heladas fuertes durante la ventana de incubación de 14d)
         min_limit = meteo_rules.get("min_temp_limit_celsius", 0.0)
         temp_min_recent = cell_meteo_data.get("temp_min_recent_3d_celsius")
-        effective_min_temp = (
-            min(temp_min, float(temp_min_recent))
-            if isinstance(temp_min_recent, (int, float)) and math.isfinite(temp_min_recent)
-            else temp_min
+        has_recent_min = (
+            isinstance(temp_min_recent, (int, float))
+            and math.isfinite(temp_min_recent)
         )
-        if effective_min_temp < min_limit:
-            temp_pts *= 0.3 # Caída drástica por congelación
+        if has_recent_min:
+            if float(temp_min_recent) < min_limit:
+                temp_pts *= 0.3  # Helada reciente en los últimos 3 días: daño directo al carpóforo
+            elif temp_min < min_limit - 3.0:
+                temp_pts *= 0.65  # Helada severa durante la incubación (14d)
+            elif temp_min < min_limit:
+                temp_pts *= 0.85  # Helada moderada previa en la ventana de 14d
+        else:
+            if temp_min < min_limit:
+                temp_pts *= 0.3  # Sin desglose de 3 días: penalización estándar por helada en 14d
 
         # Factor Humedad del suelo (0 a 5 pts)
         min_soil_m = meteo_rules.get("soil_moisture_min_percent", 20.0)
@@ -502,7 +522,7 @@ class MushroomScoringEngine:
         # ==============================================================
         topo_rules = rules["topography"]
         slope = cell_static_data["slope_deg"]
-        aspect = aspect.upper() if aspect else None
+        aspect = aspect_norm
 
         # Penalización por pendiente excesiva (lavado de esporas / erosión hídrica)
         max_slope = topo_rules.get("slope_max_deg", 45)

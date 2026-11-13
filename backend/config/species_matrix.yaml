@@ -70,8 +70,8 @@ species:
         8: 0.60
         9: 0.95
         10: 1.00
-        11: 1.00
-        12: 0.55
+        11: 0.85
+        12: 0.35
 
   boletus_aereus:
     common_name_es: "Hongo Negro / Boleto Bronceado"
@@ -168,8 +168,8 @@ species:
         8: 0.65
         9: 0.95
         10: 1.00
-        11: 1.00
-        12: 0.60
+        11: 0.90
+        12: 0.45
 
   boletus_reticulatus:
     common_name_es: "Boleto Reticulado / Boleto de Verano"
