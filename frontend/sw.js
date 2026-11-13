@@ -1,6 +1,6 @@
-const CACHE_NAME = 'mapa-setero-v10';
+const CACHE_NAME = 'mapa-setero-v11';
 const DATA_PATH = /\/public\/data\/experimental\/boletus_[a-z]+\.json$/;
-const STATIC_ASSET_PATH = /\.(?:webmanifest|svg|png)$/;
+const STATIC_ASSET_PATH = /\.(?:webmanifest|svg|png|geojson)$/;
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
