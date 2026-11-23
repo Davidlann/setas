@@ -42,7 +42,7 @@ jobs:
           python-version: '3.12'
 
       - name: Instalar dependencias del actualizador
-        run: python -m pip install duckdb h3 pyyaml requests numpy scipy
+        run: python -m pip install duckdb h3 pyyaml requests numpy scipy python-dotenv
 
       - name: Guardar los últimos datos publicados
         run: |
@@ -52,6 +52,8 @@ jobs:
       - name: Actualizar meteorología y exportar índices experimentales
         id: update_data
         continue-on-error: true
+        env:
+          AEMET_API_KEY: ${{ secrets.AEMET_API_KEY }}
         run: |
           python -m backend.src.ingestion.dynamic.meteo_snapshots
           python -m backend.src.export_relative_suitability
@@ -83,7 +85,22 @@ jobs:
           directory = Path("frontend/public/data/experimental")
           today = datetime.now(ZoneInfo("Europe/Madrid")).date()
           today_iso = today.isoformat()
-          dataset_dates = set()
+          base_path = directory / "cells_base.json"
+          with base_path.open(encoding="utf-8") as file:
+              base_dataset = json.load(file)
+          base_date = base_dataset.get("date")
+          try:
+              parsed_base_date = date.fromisoformat(base_date)
+          except (TypeError, ValueError):
+              raise SystemExit(f"Fecha base ausente o inválida: {base_path}")
+          if (
+              base_dataset.get("schema_version") != 2
+              or base_dataset.get("data_quality") != "sourced_unvalidated"
+              or not base_dataset.get("cells")
+              or parsed_base_date > today
+          ):
+              raise SystemExit(f"Base común ausente o inválida: {base_path}")
+          dataset_dates = {base_date}
           for species_id in species:
               path = directory / f"{species_id}.json"
               with path.open(encoding="utf-8") as file:
@@ -95,6 +112,8 @@ jobs:
                   raise SystemExit(f"Fecha ausente o inválida: {path}")
               if (
                   dataset.get("species_id") != species_id
+                  or dataset.get("schema_version") != 2
+                  or dataset.get("base_file") != "cells_base.json"
                   or not isinstance(dataset_date, str)
                   or parsed_date.isoformat() != dataset_date
                   or parsed_date > today
@@ -108,7 +127,7 @@ jobs:
                   raise SystemExit(f"El conjunto no contiene datos de hoy: {path}")
               print(f"{species_id}: {len(dataset['cells'])} celdas, {dataset_date}")
           if len(dataset_dates) != 1:
-              raise SystemExit("Los conjuntos de especies no comparten la misma fecha.")
+              raise SystemExit("La base y los conjuntos de especies no comparten la misma fecha.")
           if os.environ["DATA_REFRESH_OUTCOME"] == "failure":
               print(f"::warning::Se conserva el último snapshot válido ({next(iter(dataset_dates))}); revisa el fallo del ETL.")
           PY

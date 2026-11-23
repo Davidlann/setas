@@ -155,6 +155,8 @@ class OpenMeteoClient:
                     "et0_fao_evapotranspiration",
                     "wind_speed_10m_max",
                     "relative_humidity_2m_mean",
+                    "snowfall_sum",
+                    "shortwave_radiation_sum",
                 ],
                 "past_days": past_days,
                 "forecast_days": forecast_days,
@@ -218,6 +220,8 @@ class OpenMeteoClient:
                 evapotranspiration = daily.get("et0_fao_evapotranspiration", [])
                 wind_speeds = daily.get("wind_speed_10m_max", [])
                 rel_humidity = daily.get("relative_humidity_2m_mean", [])
+                snowfalls = daily.get("snowfall_sum", [])
+                radiations = daily.get("shortwave_radiation_sum", [])
 
                 parsed_dates = [datetime.strptime(day, "%Y-%m-%d").date() for day in dates]
                 candidate_days = [
@@ -256,6 +260,8 @@ class OpenMeteoClient:
                 et0_vals = values_for(completed_days, evapotranspiration)
                 wind_vals = values_for(completed_days, wind_speeds)
                 rh_vals = values_for(completed_days, rel_humidity)
+                snow_vals = values_for(completed_days, snowfalls)
+                rad_vals = values_for(completed_days, radiations)
 
                 if any(len(values) != past_days for values in (
                     precip, temp_mean, temp_min, soil_m
@@ -335,6 +341,7 @@ class OpenMeteoClient:
                 fc_precip_vals = values_for(future_days, precipitation)
                 fc_tmin_vals = values_for(future_days, minimum_temperatures)
                 fc_tmean_vals = values_for(future_days, temperatures)
+                fc_snow_vals = values_for(future_days, snowfalls)
 
                 result = {
                     "latitude": loc.get("latitude"),
@@ -376,6 +383,21 @@ class OpenMeteoClient:
                     "thermal_shock_celsius": thermal_shock,
                     "wind_max_14d_kmh": wind_max_14d,
                     "humidity_mean_7d_percent": humidity_mean_7d,
+                    "snowfall_7d_cm": (
+                        round(sum(snow_vals[-7:]), 2) if len(snow_vals) >= 7 else None
+                    ),
+                    "snowfall_3d_fc_cm": (
+                        round(sum(fc_snow_vals), 2) if fc_snow_vals else None
+                    ),
+                    "radiation_mean_7d_mj": (
+                        round(sum(rad_vals[-7:]) / 7.0, 2) if len(rad_vals) >= 7 else None
+                    ),
+                    "forecast_3d_precip_daily": (
+                        [round(float(v), 1) for v in fc_precip_vals] if fc_precip_vals else None
+                    ),
+                    "forecast_3d_temp_min_daily": (
+                        [round(float(v), 1) for v in fc_tmin_vals] if fc_tmin_vals else None
+                    ),
                     "forecast_3d_precip_mm": (
                         round(sum(fc_precip_vals), 2) if fc_precip_vals else None
                     ),
@@ -460,6 +482,9 @@ class OpenMeteoClient:
             "temp_mean_recent_3d_celsius",
             "temp_min_recent_3d_celsius",
             "humidity_mean_7d_percent",
+            "snowfall_7d_cm",
+            "snowfall_3d_fc_cm",
+            "radiation_mean_7d_mj",
             "forecast_3d_precip_mm",
             "forecast_3d_temp_min_celsius",
             "forecast_3d_temp_mean_celsius",
@@ -587,11 +612,18 @@ class OpenMeteoClient:
             if values.get("precip_last_3d_mm") is None:
                 values["precip_last_3d_mm"] = round(sum(values["precip_daily_mm"][-3:]), 2)
 
-            def interpolate_series_28d(field_name: str, offset: float = 0.0, non_negative: bool = False):
+            def interpolate_series(
+                field_name: str,
+                exact_len: int | None = None,
+                offset: float = 0.0,
+                non_negative: bool = False,
+                digits: int = 2,
+            ):
                 series_list = [meteo_grid[index].get(field_name) for index in selected]
                 if any(
                     not isinstance(s, list)
-                    or len(s) != 28
+                    or not s
+                    or (exact_len is not None and len(s) != exact_len)
                     or any(
                         not isinstance(v, (int, float))
                         or not math.isfinite(v)
@@ -601,26 +633,31 @@ class OpenMeteoClient:
                     for s in series_list
                 ):
                     return None
+                target_len = exact_len if exact_len is not None else min(len(s) for s in series_list)
                 w_sum = float(weights.sum())
                 return [
                     round(
                         float(
                             sum(s[day] * float(weights[pos]) for pos, s in enumerate(series_list)) / w_sum + offset
                         ),
-                        2,
+                        digits,
                     )
-                    for day in range(28)
+                    for day in range(target_len)
                 ]
 
-            p28_series = interpolate_series_28d("precip_daily_28d_mm", non_negative=True)
-            st28_series = interpolate_series_28d("soil_temp_daily_28d_c", offset=soil_lapse_adj)
-            tmin28_series = interpolate_series_28d("temp_min_daily_28d_c", offset=temp_lapse_adj)
-            sm28_series = interpolate_series_28d("soil_moisture_daily_28d_pct", non_negative=True)
+            p28_series = interpolate_series("precip_daily_28d_mm", exact_len=28, non_negative=True)
+            st28_series = interpolate_series("soil_temp_daily_28d_c", exact_len=28, offset=soil_lapse_adj)
+            tmin28_series = interpolate_series("temp_min_daily_28d_c", exact_len=28, offset=temp_lapse_adj)
+            sm28_series = interpolate_series("soil_moisture_daily_28d_pct", exact_len=28, non_negative=True)
+            fcr3d_series = interpolate_series("forecast_3d_precip_daily", non_negative=True, digits=1)
+            fctn3d_series = interpolate_series("forecast_3d_temp_min_daily", offset=temp_lapse_adj, digits=1)
 
             values["precip_daily_28d_mm"] = p28_series
             values["soil_temp_daily_28d_c"] = st28_series
             values["temp_min_daily_28d_c"] = tmin28_series
             values["soil_moisture_daily_28d_pct"] = sm28_series
+            values["forecast_3d_precip_daily"] = fcr3d_series
+            values["forecast_3d_temp_min_daily"] = fctn3d_series
 
             if tmin28_series is not None:
                 values["frost_days_7d"] = int(sum(1 for t in tmin28_series[-7:] if t < 0.5))

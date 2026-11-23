@@ -109,9 +109,10 @@ class MushroomScoringEngine:
 
     @classmethod
     def _effective_soil_ph(cls, cell_static_data: Dict[str, Any]) -> float:
-        """Calcula el pH efectivo en humus amortiguado por carbonatos y tipo de hojarasca."""
+        """Calcula el pH efectivo en humus amortiguado por litología, carbonatos y hojarasca."""
         soil_ph = float(cell_static_data["soil_ph"])
         ph_q05 = cell_static_data.get("soil_ph_q05")
+        litho = str(cell_static_data.get("lithology_class") or "").strip().lower()
         if (
             isinstance(ph_q05, (int, float))
             and math.isfinite(ph_q05)
@@ -127,12 +128,65 @@ class MushroomScoringEngine:
                 or "hayedo" in norm_tree
                 or "castan" in norm_tree
             )
-            if soil_ph >= 6.8:
+            if litho == "siliceous" and soil_ph >= 6.5:
+                q_weight = 0.32
+            elif soil_ph >= 6.8:
                 q_weight = 0.22 if leaf_habit == "evergreen_conifer" else 0.15
             else:
                 q_weight = 0.30 if is_acid_litter else 0.22
-            return round(soil_ph * (1.0 - q_weight) + float(ph_q05) * q_weight, 2)
+            eff_ph = round(soil_ph * (1.0 - q_weight) + float(ph_q05) * q_weight, 2)
+            if litho == "calcareous" and soil_ph >= 6.8:
+                eff_ph = max(eff_ph, round(max(6.4, soil_ph - 0.35), 2))
+            return eff_ph
         return soil_ph
+
+    @staticmethod
+    def _topographic_solar_factor(
+        latitude: Optional[float],
+        slope_deg: Optional[float],
+        aspect_cardinal: Optional[str],
+        snapshot_date: Optional[str] = None,
+    ) -> float:
+        """Calcula la razón de insolación al mediodía sobre la ladera frente al plano horizontal."""
+        if (
+            not isinstance(slope_deg, (int, float))
+            or not math.isfinite(slope_deg)
+            or float(slope_deg) < 1.0
+            or not aspect_cardinal
+        ):
+            return 1.0
+        az_map = {
+            "N": 0.0, "NE": 45.0, "E": 90.0, "SE": 135.0,
+            "S": 180.0, "SW": 225.0, "SO": 225.0, "W": 270.0, "O": 270.0,
+            "NW": 315.0, "NO": 315.0,
+        }
+        az_deg = az_map.get(str(aspect_cardinal).strip().upper())
+        if az_deg is None:
+            return 1.0
+        lat_deg = (
+            float(latitude)
+            if isinstance(latitude, (int, float)) and math.isfinite(latitude)
+            else 40.9
+        )
+        doy = 285
+        if snapshot_date:
+            try:
+                doy = date.fromisoformat(str(snapshot_date)[:10]).timetuple().tm_yday
+            except ValueError:
+                pass
+        decl_deg = 23.44 * math.sin(2.0 * math.pi * (doy - 81) / 365.0)
+        zenith_rad = math.radians(max(3.0, min(85.0, abs(lat_deg - decl_deg))))
+        slope_rad = math.radians(max(0.0, min(60.0, float(slope_deg))))
+        az_rad = math.radians(az_deg)
+        cos_z = math.cos(zenith_rad)
+        cos_i = (
+            math.cos(slope_rad) * cos_z
+            - math.sin(slope_rad) * math.cos(az_rad) * math.sin(zenith_rad)
+        )
+        direct_ratio = max(0.05, cos_i) / max(0.15, cos_z)
+        # 25% componente difusa del cielo + 75% radiación directa geométrica
+        eff_ratio = 0.25 + 0.75 * direct_ratio
+        return round(max(0.55, min(1.35, eff_ratio)), 2)
 
     @staticmethod
     def _compute_phenology_factor(
@@ -706,6 +760,49 @@ class MushroomScoringEngine:
             hard_frost_28d=hard_frost_28d,
         )
 
+        # Factor nieve reciente en suelo frío
+        snowfall_7d = cell_meteo_data.get("snowfall_7d_cm")
+        snowfall_3d_fc = cell_meteo_data.get("snowfall_3d_fc_cm")
+        snow_factor = 1.0
+        if (
+            isinstance(snowfall_7d, (int, float))
+            and math.isfinite(snowfall_7d)
+            and float(snowfall_7d) >= 3.0
+            and air_temp_ref < 5.5
+        ):
+            snow_factor = round(max(0.35, 1.0 - (float(snowfall_7d) - 2.0) * 0.06), 2)
+
+        # Factor radiación solar topográfica
+        rad_7d = cell_meteo_data.get("radiation_mean_7d_mj")
+        solar_factor = self._topographic_solar_factor(
+            cell_static_data.get("latitude"),
+            cell_static_data.get("slope_deg"),
+            aspect_norm,
+            snapshot_date=snapshot_date,
+        )
+        solar_weather_mult = 1.0
+        rad_topo_adj = 0.0
+        if aspect_norm is not None:
+            has_sun_energy = (rad_7d is None) or (
+                isinstance(rad_7d, (int, float)) and math.isfinite(rad_7d) and float(rad_7d) >= 5.0
+            )
+            if eval_temp < t_opt_min and has_sun_energy:
+                if solar_factor > 1.0:
+                    rad_topo_adj = min(2.5, (solar_factor - 1.0) * 9.0)
+                    solar_weather_mult = min(1.06, 1.0 + (solar_factor - 1.0) * 0.22)
+                elif solar_factor < 1.0:
+                    rad_topo_adj = max(-2.5, (solar_factor - 1.0) * 8.0)
+                    solar_weather_mult = max(0.92, 1.0 + (solar_factor - 1.0) * 0.25)
+            elif eval_temp > (t_opt_max - 1.5) or (
+                water_balance is not None and water_balance < -10.0
+            ):
+                if solar_factor < 1.0:
+                    rad_topo_adj = min(2.5, (1.0 - solar_factor) * 8.0)
+                    solar_weather_mult = min(1.05, 1.0 + (1.0 - solar_factor) * 0.18)
+                elif solar_factor > 1.05:
+                    rad_topo_adj = max(-2.5, -(solar_factor - 1.0) * 8.0)
+                    solar_weather_mult = max(0.93, 1.0 - (solar_factor - 1.0) * 0.22)
+
         # Acoplamiento multiplicativo (Ley del Mínimo)
         raw_meteo = (moisture_index ** 0.52) * (thermal_index ** 0.48)
         coupled_meteo = min(
@@ -715,7 +812,13 @@ class MushroomScoringEngine:
             0.0,
             min(
                 1.0,
-                coupled_meteo * shock_mult * rh_mult * wind_mult * phenology_factor,
+                coupled_meteo
+                * shock_mult
+                * rh_mult
+                * wind_mult
+                * snow_factor
+                * solar_weather_mult
+                * phenology_factor,
             ),
         )
         weather_score = min(100.0, round(weather_unit * 100.0, 1))
@@ -731,6 +834,12 @@ class MushroomScoringEngine:
 
         tmin_eval = float(temp_min_recent) if has_recent_min else float(temp_min)
         recent_4d_val = float(precip_recent_4d_mm or 0.0)
+        heavy_snow_cold = (
+            isinstance(snowfall_7d, (int, float))
+            and math.isfinite(snowfall_7d)
+            and float(snowfall_7d) >= 8.0
+            and air_temp_ref < 3.5
+        )
         if exclusion_reason is not None:
             flush_phase = "excluded"
         elif phenology_factor < 0.30:
@@ -749,6 +858,7 @@ class MushroomScoringEngine:
             tmin_eval < min_limit
             or (st07_recent is not None and float(st07_recent) < t_lo)
             or thermal_index < 0.25
+            or heavy_snow_cold
         ):
             flush_phase = "cold_stalled"
         elif (
@@ -781,8 +891,10 @@ class MushroomScoringEngine:
         fc_tmin = cell_meteo_data.get("forecast_3d_temp_min_celsius")
         fc_tmean = cell_meteo_data.get("forecast_3d_temp_mean_celsius")
         forecast_outlook = None
-        if any(v is not None for v in (fc_precip, fc_tmin, fc_tmean)):
-            if fc_tmin is not None and float(fc_tmin) < min_limit:
+        if any(v is not None for v in (fc_precip, fc_tmin, fc_tmean, snowfall_3d_fc)):
+            if snowfall_3d_fc is not None and math.isfinite(snowfall_3d_fc) and float(snowfall_3d_fc) >= 3.0:
+                forecast_outlook = "snow_risk"
+            elif fc_tmin is not None and float(fc_tmin) < min_limit:
                 forecast_outlook = "frost_risk"
             elif fc_precip is not None and float(fc_precip) >= 12.0:
                 forecast_outlook = "rain_incoming"
@@ -834,6 +946,20 @@ class MushroomScoringEngine:
         else:
             score_edaphic = score_ph
 
+        lithology_class = str(cell_static_data.get("lithology_class") or "").strip().lower()
+        lithology_desc = cell_static_data.get("lithology_desc")
+        substrate_pref = str(edaphic.get("substrate_preference") or "").casefold()
+        litho_adj = 0.0
+        if "indifferent" in substrate_pref:
+            if lithology_class in ("siliceous", "calcareous"):
+                litho_adj = 0.5
+        elif "siliceous" in substrate_pref:
+            if lithology_class == "siliceous":
+                litho_adj = 2.0
+            elif lithology_class == "calcareous":
+                litho_adj = -3.5
+        score_edaphic = max(0.0, min(35.0, score_edaphic + litho_adj))
+
         # ==============================================================
         # 4. PONDERACIÓN TOPOGRÁFICA (Máximo 20 puntos)
         # ==============================================================
@@ -874,6 +1000,7 @@ class MushroomScoringEngine:
             slope_pts = slope_raw * 10.0
             aspect_pts = aspect_raw * 10.0
             score_topo = slope_pts + aspect_pts
+        score_topo = max(0.0, min(20.0, score_topo + rad_topo_adj))
 
         # ==============================================================
         # TOTAL SCORE (0 a 100)
@@ -1000,6 +1127,14 @@ class MushroomScoringEngine:
                 "season_status": season_status,
                 "soil_ph": soil_ph,
                 "effective_soil_ph": effective_soil_ph,
+                "lithology_class": lithology_class or None,
+                "lithology_desc": lithology_desc,
+                "lithology_adj": round(litho_adj, 1),
+                "snowfall_7d_cm": snowfall_7d,
+                "snowfall_3d_fc_cm": snowfall_3d_fc,
+                "snow_factor": round(snow_factor, 2),
+                "radiation_mean_7d_mj": rad_7d,
+                "solar_factor": solar_factor,
                 "host_tree": dominant_tree
             }
         )

@@ -1,6 +1,6 @@
-const CACHE_NAME = 'mapa-setero-v15';
-const DATA_PATH = /\/public\/data\/experimental\/[a-z]+_[a-z]+\.json$/;
-const STATIC_ASSET_PATH = /\.(?:webmanifest|svg|png|geojson)$/;
+const CACHE_NAME = 'mapa-setero-v16';
+const DATA_PATH = /\/public\/data\/experimental\/(?:cells_base|[a-z]+_[a-z]+)\.json$/;
+const STATIC_ASSET_PATH = /\.(?:webmanifest|svg|png|geojson|js)$|\/public\/data\/micro\/[a-z0-9]+\.json$/;
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());

@@ -48,15 +48,20 @@ class DuckDBManager:
                 ADD COLUMN IF NOT EXISTS environmental_data_quality
                 VARCHAR DEFAULT 'unverified'
             """)
-            for column in (
-                "soil_sand_percent",
-                "soil_silt_percent",
-                "soil_clay_percent",
-                "tpi_m",
-                "soil_soc_g_kg",
+            for column, column_type in (
+                ("soil_sand_percent", "DOUBLE"),
+                ("soil_silt_percent", "DOUBLE"),
+                ("soil_clay_percent", "DOUBLE"),
+                ("tpi_m", "DOUBLE"),
+                ("soil_soc_g_kg", "DOUBLE"),
+                ("lithology_class", "VARCHAR"),
+                ("lithology_desc", "VARCHAR"),
+                ("legal_zone_type", "VARCHAR"),
+                ("legal_zone_name", "VARCHAR"),
+                ("legal_zone_code", "VARCHAR"),
             ):
                 con.execute(
-                    f"ALTER TABLE cells_static ADD COLUMN IF NOT EXISTS {column} DOUBLE"
+                    f"ALTER TABLE cells_static ADD COLUMN IF NOT EXISTS {column} {column_type}"
                 )
 
             # 2. Histórico y snapshots de meteorología real diaria
@@ -105,6 +110,13 @@ class DuckDBManager:
                 ("forecast_3d_precip_mm", "DOUBLE"),
                 ("forecast_3d_temp_min_celsius", "DOUBLE"),
                 ("forecast_3d_temp_mean_celsius", "DOUBLE"),
+                ("snowfall_7d_cm", "DOUBLE"),
+                ("snowfall_3d_fc_cm", "DOUBLE"),
+                ("radiation_mean_7d_mj", "DOUBLE"),
+                ("forecast_3d_precip_daily_json", "VARCHAR"),
+                ("forecast_3d_temp_min_daily_json", "VARCHAR"),
+                ("aemet_calibrated", "BOOLEAN"),
+                ("aemet_stations_used", "INTEGER"),
             ):
                 con.execute(
                     f"ALTER TABLE meteo_snapshots ADD COLUMN IF NOT EXISTS "
@@ -180,8 +192,11 @@ class DuckDBManager:
                     frost_days_7d, frost_days_14d, hard_frost_28d,
                     pre_rain_dry_streak_days, pre_rain_min_soil_moisture_pct,
                     forecast_3d_precip_mm, forecast_3d_temp_min_celsius,
-                    forecast_3d_temp_mean_celsius
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    forecast_3d_temp_mean_celsius,
+                    snowfall_7d_cm, snowfall_3d_fc_cm, radiation_mean_7d_mj,
+                    forecast_3d_precip_daily_json, forecast_3d_temp_min_daily_json,
+                    aemet_calibrated, aemet_stations_used
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, [
                 (
                     r["h3_index"], snapshot_date, r["precip_accum_7d_mm"], r["precip_accum_10d_mm"],
@@ -213,6 +228,13 @@ class DuckDBManager:
                     r.get("forecast_3d_precip_mm"),
                     r.get("forecast_3d_temp_min_celsius"),
                     r.get("forecast_3d_temp_mean_celsius"),
+                    r.get("snowfall_7d_cm"),
+                    r.get("snowfall_3d_fc_cm"),
+                    r.get("radiation_mean_7d_mj"),
+                    dump_json_opt(r.get("forecast_3d_precip_daily")),
+                    dump_json_opt(r.get("forecast_3d_temp_min_daily")),
+                    bool(r["aemet_calibrated"]) if r.get("aemet_calibrated") is not None else None,
+                    int(r["aemet_stations_used"]) if r.get("aemet_stations_used") is not None else None,
                 )
                 for r in records
             ])

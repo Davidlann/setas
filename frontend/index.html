@@ -1956,6 +1956,414 @@
     @media (prefers-reduced-motion: reduce) {
       .sidebar, .menu-backdrop { transition: none; }
     }
+
+    /* ============================================================
+       CAPA LEGAL, TENDENCIA, GRÁFICA 28D, FAVORITOS, DIARIO Y MICRO-DETALLE
+       ============================================================ */
+    .cell-legal-banner {
+      margin: 6px 0 8px;
+      padding: 8px 10px;
+      border-radius: 9px;
+      font-size: 11.5px;
+      line-height: 1.4;
+      border: 1px solid #d7cfc2;
+      background: #f5f0e6;
+      color: #493b2d;
+    }
+    .cell-legal-banner.legal-ban {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+    .cell-legal-banner.legal-coto {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #92400e;
+    }
+    .cell-legal-banner a {
+      color: inherit;
+      font-weight: 700;
+      text-decoration: underline;
+    }
+    .trend-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      margin-left: 5px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      vertical-align: middle;
+    }
+    .trend-badge.trend-up { background: #dcfce7; color: #166534; }
+    .trend-badge.trend-down { background: #fee2e2; color: #991b1b; }
+    .trend-badge.trend-flat { background: #f1ede4; color: #71685b; }
+
+    .meteo-chart-box {
+      margin: 8px 0 10px;
+      padding: 9px 10px;
+      border: 1px solid #e2dacb;
+      border-radius: 10px;
+      background: #fbf8f3;
+    }
+    .meteo-chart-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #493b2d;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .meteo-chart-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .meteo-chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 10px;
+      margin-top: 5px;
+      font-size: 10px;
+      color: #5d5347;
+    }
+    .meteo-chart-leg-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .meteo-chart-leg-item i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .cell-quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin: 8px 0 6px;
+    }
+    .quick-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 7px 6px;
+      border-radius: 8px;
+      border: 1px solid #d5cab9;
+      background: #f8f5ef;
+      color: #493b2d;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .quick-action-btn:hover { background: #efe9dc; }
+    .quick-action-btn.is-fav {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      color: #92400e;
+    }
+    .micro-action-btn {
+      width: 100%;
+      margin: 4px 0 8px;
+      padding: 9px 10px;
+      border-radius: 9px;
+      border: 1px solid #2d3a22;
+      background: #2d3a22;
+      color: #fffdf8;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s ease;
+    }
+    .micro-action-btn:hover { background: #3b4c2d; }
+    .micro-action-btn.active {
+      background: #b45309;
+      border-color: #92400e;
+    }
+
+    .overlay-toggle-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .overlay-toggle-btn {
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #d5cab9;
+      background: #faf7f1;
+      color: #5d5347;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+    }
+    .overlay-toggle-btn.active {
+      background: #e9efe3;
+      border-color: #4f6b3a;
+      color: #2d3a22;
+    }
+
+    .phase-filter-select, .top-zones-select {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 7px;
+      border: 1px solid #d5cab9;
+      background: #fffdf9;
+      color: #3c3024;
+      font-size: 11.5px;
+      margin-top: 4px;
+    }
+    .top-zones-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .top-zones-select { margin-top: 0; font-size: 11px; }
+
+    .fav-zones-list, .outings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .fav-zone-row, .outing-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 7px 8px;
+      border: 1px solid #e2dacb;
+      border-radius: 8px;
+      background: #fdfbf7;
+    }
+    .fav-zone-main {
+      flex: 1;
+      min-width: 0;
+      background: none;
+      border: none;
+      padding: 0;
+      text-align: left;
+      cursor: pointer;
+      color: inherit;
+    }
+    .fav-zone-name {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #3c3024;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .fav-zone-meta {
+      display: block;
+      font-size: 10.5px;
+      color: #71685b;
+    }
+    .fav-zone-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .icon-mini-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid #dfd7c8;
+      background: #f8f5ef;
+      color: #5d5347;
+      font-size: 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-mini-btn:hover { background: #ece4d6; }
+    .outings-toolbar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .outings-toolbar button {
+      flex: 1;
+      padding: 6px 8px;
+      border-radius: 7px;
+      border: 1px solid #d5cab9;
+      background: #f8f5ef;
+      color: #493b2d;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .outings-privacy-note {
+      font-size: 10.5px;
+      color: #71685b;
+      margin: 0 0 7px;
+      line-height: 1.35;
+    }
+    .outing-item {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .outing-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .outing-note {
+      font-size: 11px;
+      color: #5d5347;
+      margin-top: 2px;
+    }
+
+    /* HUD flotante de micro-detalle */
+    .micro-hud {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 44px;
+      z-index: 9;
+      max-width: 560px;
+      margin: 0 auto;
+      background: rgba(252, 249, 244, 0.96);
+      backdrop-filter: blur(8px);
+      border: 1px solid #cfc4b2;
+      border-radius: 12px;
+      box-shadow: 0 10px 26px rgba(32, 24, 16, 0.22);
+      padding: 10px 12px;
+      color: #3c3024;
+      font-size: 12px;
+    }
+    .micro-hud-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .micro-hud-title {
+      font-weight: 800;
+      font-size: 12.5px;
+      color: #2d3a22;
+    }
+    .micro-hud-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+    }
+    .micro-pill-btn {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid #cfc4b2;
+      background: #f4efe6;
+      color: #493b2d;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .micro-pill-btn.active {
+      background: #2d3a22;
+      border-color: #2d3a22;
+      color: #fffdf8;
+    }
+    .micro-pill-close {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #991b1b;
+    }
+    .micro-hud-body {
+      font-size: 11.5px;
+      line-height: 1.4;
+      color: #493b2d;
+      margin-bottom: 7px;
+    }
+    .micro-hud-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .micro-hud-actions a, .micro-hud-actions button {
+      padding: 5px 9px;
+      border-radius: 7px;
+      border: 1px solid #d5cab9;
+      background: #f8f5ef;
+      color: #2d3a22;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .micro-hud {
+        bottom: 10px;
+        left: 8px;
+        right: 8px;
+        padding: 9px 10px;
+      }
+    }
+
+    .outing-form {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-top: 8px;
+    }
+    .outing-form label {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #493b2d;
+    }
+    .outing-form input, .outing-form select, .outing-form textarea {
+      padding: 7px 9px;
+      border-radius: 8px;
+      border: 1px solid #cfc4b2;
+      background: #fffdf9;
+      color: #3c3024;
+      font-size: 12.5px;
+      font-family: inherit;
+    }
+    .outing-form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .outing-btn-primary {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      background: #2d3a22;
+      color: #fffdf8;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .outing-btn-cancel {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #cfc4b2;
+      background: #f8f5ef;
+      color: #493b2d;
+      font-weight: 600;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -1998,9 +2406,9 @@
       </section>
     </div>
     <div class="toolbar-actions">
-      <button id="satellite-toggle" class="satellite-toggle" type="button" aria-pressed="false" aria-label="Cambiar a vista satélite" title="Cambiar a vista satélite">
+      <button id="satellite-toggle" class="satellite-toggle" type="button" aria-pressed="false" aria-label="Cambiar mapa base (Mapa, Topo IGN, Satélite PNOA)" title="Cambiar fondo: Mapa · Topo IGN · Satélite PNOA">
         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-        <span id="satellite-toggle-text">Satélite</span>
+        <span id="satellite-toggle-text">Fondo: Mapa</span>
       </button>
       <button id="menu-toggle" class="menu-toggle" type="button" aria-controls="sidebar" aria-expanded="false" aria-label="Abrir panel de información" title="Panel de zona y mejores sitios">
         <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -2219,6 +2627,10 @@
           pH del suelo (acidez)
         </button>
       </div>
+      <div class="overlay-toggle-row" aria-label="Capas superpuestas">
+        <button id="btn-legal-layer" class="overlay-toggle-btn active" type="button" aria-pressed="true" title="Mostrar parques nacionales y cotos regulados Micocyl">🏛️ PN y Cotos</button>
+        <button id="btn-outings-layer" class="overlay-toggle-btn active" type="button" aria-pressed="true" title="Mostrar tus setales guardados en local">📌 Mis setales</button>
+      </div>
     </details>
 
     <!-- Slider -->
@@ -2240,6 +2652,17 @@
           <input type="range" id="rain-filter" min="0" max="100" step="5" value="0"
             aria-label="Filtrar por lluvia mínima acumulada en los últimos 14 días"/>
           <p class="species-comparison-note">Filtra por lluvia acumulada en los últimos 14 días.</p>
+        </div>
+        <div class="slider-card">
+          <div class="slider-head">
+            <span>Fase de brotada</span>
+          </div>
+          <select id="flush-phase-filter" class="phase-filter-select" aria-label="Filtrar por fase de brotada">
+            <option value="all">Todas las fases</option>
+            <option value="active">Solo florada activa / botones</option>
+            <option value="active_inc">Activas + incubando</option>
+            <option value="hide_blocked">Ocultar heladas, secas y reposo</option>
+          </select>
         </div>
         <div class="stats">
           <span>Celdas visibles: <strong id="stat-total">—</strong></span>
@@ -2294,10 +2717,11 @@
         </div>
         <span class="score-badge b-ok" id="score-pill">—</span>
       </div>
+      <div id="cell-legal-banner" class="cell-legal-banner" hidden></div>
       <div class="cell-kpi-strip" aria-label="Desglose del índice de la celda">
         <div class="cell-kpi-pill">
           <span class="cell-kpi-label">Índice hoy</span>
-          <strong class="cell-kpi-val" id="c-kpi-combined">—</strong>
+          <strong class="cell-kpi-val"><span id="c-kpi-combined">—</span><span id="c-kpi-trend" class="trend-badge trend-flat" hidden></span></strong>
         </div>
         <div class="cell-kpi-pill">
           <span class="cell-kpi-label">Bosque</span>
@@ -2334,6 +2758,20 @@
           <li>Toca una celda para ver qué tiene a favor y qué le falta hoy.</li>
         </ul>
       </div>
+      <div id="cell-meteo-chart-wrap" class="meteo-chart-box">
+        <div class="meteo-chart-title">
+          <span>📈 Evolución 28 días + previsión 72 h</span>
+        </div>
+        <div id="cell-meteo-chart"></div>
+      </div>
+      <div class="cell-quick-actions" aria-label="Acciones rápidas de celda">
+        <button id="btn-fav-zone" class="quick-action-btn" type="button" title="Guardar en Mis zonas habituales">⭐ Guardar zona</button>
+        <button id="btn-add-outing" class="quick-action-btn" type="button" title="Registrar setal en diario privado local">📌 Setal aquí</button>
+        <button id="btn-export-gpx" class="quick-action-btn" type="button" title="Descargar punto GPS en formato GPX">⬇️ GPX</button>
+      </div>
+      <button id="btn-micro-detail" class="micro-action-btn" type="button">
+        <span>🔍 Ver micro-detalle: vertientes y árboles (7 o 49 zonas)</span>
+      </button>
       <div class="info-item info-wide status-neutral" id="card-location" hidden>
         <span class="info-item-val" id="c-location">—</span>
       </div>
@@ -2465,11 +2903,43 @@
       </details>
     </div>
 
+    <details id="fav-zones-section" class="menu-section" open>
+      <summary>⭐ Mis zonas habituales</summary>
+      <div class="menu-section-content">
+        <p class="outings-privacy-note">Tus zonas guardadas permanecen solo en este navegador. Toca cualquiera para consultar su índice hoy:</p>
+        <div id="fav-zones-list" class="fav-zones-list"></div>
+      </div>
+    </details>
+
     <details id="top-zones-section" class="menu-section" open>
       <summary>🏆 Zonas más favorables hoy</summary>
       <div class="menu-section-content">
+        <div class="top-zones-controls">
+          <select id="top-zones-sort" class="top-zones-select" aria-label="Ordenar mejores zonas">
+            <option value="score">Orden: mayor índice</option>
+            <option value="nearest">Orden: más cercanas (GPS)</option>
+          </select>
+          <select id="top-zones-radius" class="top-zones-select" aria-label="Filtrar por distancia máxima">
+            <option value="0">Distancia: todas</option>
+            <option value="60">Radio &lt; 60 km</option>
+            <option value="110">Radio &lt; 110 km</option>
+          </select>
+        </div>
         <p id="top-zones-subtitle" class="top-zones-sub">Mejores zonas distintas según la especie y provincia activas. Toca una para ir a ella:</p>
         <div id="top-zones-list" class="top-zones-list"></div>
+      </div>
+    </details>
+
+    <details id="outings-section" class="menu-section">
+      <summary>📔 Mis setales y diario local</summary>
+      <div class="menu-section-content">
+        <p class="outings-privacy-note">Privado en este navegador (no se sube a servidores). Haz copia de seguridad en JSON si cambias de dispositivo.</p>
+        <div class="outings-toolbar">
+          <button id="btn-outings-export" type="button">⬇️ Exportar JSON</button>
+          <button id="btn-outings-import" type="button">⬆️ Importar JSON</button>
+          <input id="outings-import-input" type="file" accept=".json,application/json" hidden />
+        </div>
+        <div id="outings-list" class="outings-list"></div>
       </div>
     </details>
 
@@ -2498,11 +2968,75 @@
     <p id="info-dialog-body"></p>
   </dialog>
 
+  <dialog id="outing-dialog" class="species-dialog" aria-labelledby="outing-dialog-title">
+    <div class="species-dialog-head">
+      <div>
+        <h2 id="outing-dialog-title">Registrar setal o salida</h2>
+        <p id="outing-dialog-subtitle">Se guarda exclusivamente en tu dispositivo</p>
+      </div>
+      <button id="outing-dialog-close" class="species-dialog-close" type="button" aria-label="Cerrar">×</button>
+    </div>
+    <form id="outing-form" class="outing-form">
+      <input type="hidden" id="outing-lat" />
+      <input type="hidden" id="outing-lon" />
+      <input type="hidden" id="outing-h" />
+      <input type="hidden" id="outing-subh" />
+      <label>Fecha de salida
+        <input type="date" id="outing-date" required />
+      </label>
+      <label>Nombre del setal / paraje
+        <input type="text" id="outing-name" maxlength="72" placeholder="Ej. Pinar umbrío Morcuera" required />
+      </label>
+      <label>Especie principal
+        <select id="outing-species">
+          <option value="boletus_edulis">Boletus edulis</option>
+          <option value="boletus_pinophilus">Boletus pinophilus</option>
+          <option value="boletus_aereus">Boletus aereus</option>
+          <option value="boletus_reticulatus">Boletus reticulatus</option>
+          <option value="lactarius_deliciosus">Lactarius deliciosus (Níscalo)</option>
+        </select>
+      </label>
+      <label>Resultado observado
+        <select id="outing-outcome">
+          <option value="abundant">Cesta buena / Abundantes</option>
+          <option value="buttons">Botones jóvenes</option>
+          <option value="mature">Crecidos / Cola</option>
+          <option value="none">Nada (0 ejemplares)</option>
+        </select>
+      </label>
+      <label>Notas (vertiente, árbol, altura…)
+        <textarea id="outing-note" rows="2" maxlength="260" placeholder="Ej. Vaguada con pino albar a 1.480 m…"></textarea>
+      </label>
+      <div class="outing-form-actions">
+        <button id="outing-cancel-btn" class="outing-btn-cancel" type="button">Cancelar</button>
+        <button class="outing-btn-primary" type="submit">Guardar en mi dispositivo</button>
+      </div>
+    </form>
+  </dialog>
+
   <div class="map-wrap">
     <div id="map"></div>
     <div id="compare-banner" class="compare-banner" hidden>
       <span id="compare-banner-text">Modo comparación: toca otra celda en el mapa para compararla con A.</span>
       <button id="compare-banner-cancel" class="compare-banner-cancel" type="button">Cancelar</button>
+    </div>
+    <div id="micro-detail-hud" class="micro-hud" hidden aria-live="polite">
+      <div class="micro-hud-head">
+        <span id="micro-hud-title" class="micro-hud-title">🔍 Micro-detalle</span>
+        <div class="micro-hud-pills">
+          <button id="micro-res-9" class="micro-pill-btn active" type="button">7 sub-zonas</button>
+          <button id="micro-res-10" class="micro-pill-btn" type="button">49 micro-zonas</button>
+          <button id="micro-bg-topo" class="micro-pill-btn" type="button" title="Cambiar fondo a Topo IGN">Topo IGN</button>
+          <button id="micro-bg-pnoa" class="micro-pill-btn" type="button" title="Cambiar fondo a Satélite PNOA">PNOA</button>
+          <button id="micro-hud-close" class="micro-pill-btn micro-pill-close" type="button" title="Salir del micro-detalle (Esc)">✕</button>
+        </div>
+      </div>
+      <div id="micro-hud-body" class="micro-hud-body">Calculando vertientes, árboles MFE50 y suelo…</div>
+      <div class="micro-hud-actions">
+        <a id="micro-sub-gmaps" href="#" target="_blank" rel="noopener noreferrer">🗺️ Cómo llegar al rodal</a>
+        <button id="micro-sub-gpx" type="button">⬇️ GPX del rodal</button>
+        <button id="micro-sub-outing" type="button">📌 Setal aquí</button>
+      </div>
     </div>
     <div id="map-loading" class="map-loading" role="status" aria-live="polite">
       <div class="map-loading-card">
@@ -2525,6 +3059,8 @@
     <p class="species-guide-warning">No recolectes ni consumas una seta basándote en esta guía, una foto o el mapa. Hay especies tóxicas parecidas y la identificación requiere revisar todos los rasgos con una persona experta. Respeta también las normas locales de recolección.</p>
   </dialog>
 
+  <script src="./user_journal.js"></script>
+  <script src="./micro_detail.js"></script>
   <script>
   const filtersPanelContent = document.getElementById('filters-panel-content');
   ['prov-row', 'species-control', 'layer-section', 'filters-section', 'loading']
@@ -3166,12 +3702,21 @@
   let compareMode    = false;
   let compareCellA   = null;
   let compareCellB   = null;
+  let baseDataset    = null;
+  const baseCellMap  = new Map();
+  let pendingBaseLoad = null;
   const speciesDatasets = new Map();
   const speciesCellMaps = new Map();
   const pendingSpeciesLoads = new Map();
   let speciesLoadRequest = 0;
   let marker         = null;
   let debounce       = null;
+  let currentFlushFilter = 'all';
+  let topZonesSort   = 'score';
+  let topZonesRadiusKm = 0;
+  let showLegalZones = true;
+  let showOutingsLayer = true;
+  let legalGeoJsonLoaded = false;
 
   // ================================================================
   // MAPA
@@ -3183,11 +3728,11 @@
     style: BASEMAP_STYLE_URL,
     center: [-3.42, 41.25],
     zoom: 7.8,
-    maxZoom: 16,
+    maxZoom: 17,
     minZoom: 5
   });
   map.addControl(new maplibregl.NavigationControl({showCompass:true}), 'top-right');
-  let isSatelliteMode = false;
+  let basemapMode = 'map';
   let basemapFirstSymbolId = undefined;
   let basemapFirstRoadId = undefined;
 
@@ -3372,20 +3917,36 @@
       }
     }
 
-    // Capa de ortofoto aérea / satélite ESRI World Imagery (debajo de carreteras y etiquetas)
-    map.addSource('satellite-tiles', {
+    // Capas IGN oficiales (Mapa Topográfico Nacional MTN y Ortofoto PNOA) debajo de carreteras y etiquetas
+    map.addSource('ign-topo-tiles', {
       type: 'raster',
       tiles: [
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+        'https://www.ign.es/wmts/mapa-raster?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=MTN&STYLE=default&TILEMATRIXSET=GoogleMapsCompatible&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg'
       ],
       tileSize: 256,
-      attribution: 'Tiles &copy; Esri World Imagery'
+      attribution: '&copy; Instituto Geográfico Nacional (IGN)'
     });
 
     map.addLayer({
-      id: 'satellite-layer',
+      id: 'ign-topo-layer',
       type: 'raster',
-      source: 'satellite-tiles',
+      source: 'ign-topo-tiles',
+      layout: { visibility: 'none' }
+    }, basemapFirstRoadId);
+
+    map.addSource('ign-pnoa-tiles', {
+      type: 'raster',
+      tiles: [
+        'https://www.ign.es/wmts/pnoa-ma?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=OI.OrthoimageCoverage&STYLE=default&TILEMATRIXSET=GoogleMapsCompatible&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg'
+      ],
+      tileSize: 256,
+      attribution: 'Ortofoto PNOA &copy; IGN España'
+    });
+
+    map.addLayer({
+      id: 'ign-pnoa-layer',
+      type: 'raster',
+      source: 'ign-pnoa-tiles',
       layout: { visibility: 'none' }
     }, basemapFirstRoadId);
 
@@ -3567,34 +4128,171 @@
     map.on('mouseenter', 'province-labels', () => { map.getCanvas().style.cursor = 'pointer'; });
     map.on('mouseleave', 'province-labels', () => { map.getCanvas().style.cursor = ''; });
 
-    styleBasemapAndReferenceLabels(isSatelliteMode);
+    styleBasemapAndReferenceLabels(basemapMode === 'pnoa');
+    loadLegalZonesLayer();
+    refreshOutingsMapLayer();
   });
 
-  function setSatelliteMode(enable) {
-    isSatelliteMode = enable;
-    if (map.getLayer('satellite-layer')) {
-      map.setLayoutProperty('satellite-layer', 'visibility', enable ? 'visible' : 'none');
+  function applyH3FillOpacity() {
+    if (!map.getLayer('h3-fill')) return;
+    const microActive = Boolean(window.MapaSeteroMicro && window.MapaSeteroMicro.getState().active);
+    if (microActive) {
+      map.setPaintProperty('h3-fill', 'fill-opacity', 0.20);
+      return;
     }
+    if (basemapMode === 'pnoa') {
+      map.setPaintProperty('h3-fill', 'fill-opacity', 0.62);
+    } else if (basemapMode === 'topo') {
+      map.setPaintProperty('h3-fill', 'fill-opacity', 0.56);
+    } else {
+      map.setPaintProperty('h3-fill', 'fill-opacity', ['*', ['/', ['get', '_a'], 255], 0.86]);
+    }
+  }
+
+  function setBasemapMode(mode) {
+    const valid = ['map', 'topo', 'pnoa'].includes(mode) ? mode : 'map';
+    basemapMode = valid;
+    if (map.getLayer('ign-topo-layer')) {
+      map.setLayoutProperty('ign-topo-layer', 'visibility', valid === 'topo' ? 'visible' : 'none');
+    }
+    if (map.getLayer('ign-pnoa-layer')) {
+      map.setLayoutProperty('ign-pnoa-layer', 'visibility', valid === 'pnoa' ? 'visible' : 'none');
+    }
+    const labels = { map: 'Fondo: Mapa', topo: 'Topo IGN', pnoa: 'Satélite PNOA' };
+    const nextAction = valid === 'map' ? 'Cambiar a Topo IGN'
+      : valid === 'topo' ? 'Cambiar a Satélite PNOA'
+        : 'Volver a Mapa base';
     const btn = document.getElementById('satellite-toggle');
     if (btn) {
-      btn.classList.toggle('active', enable);
-      btn.setAttribute('aria-pressed', enable ? 'true' : 'false');
-      const labelText = enable ? 'Mapa normal' : 'Satélite';
-      const actionLabel = enable ? 'Cambiar a mapa normal' : 'Cambiar a vista satélite';
-      btn.setAttribute('aria-label', actionLabel);
-      btn.title = actionLabel;
+      btn.classList.toggle('active', valid !== 'map');
+      btn.setAttribute('aria-pressed', valid !== 'map' ? 'true' : 'false');
+      btn.setAttribute('aria-label', nextAction);
+      btn.title = nextAction;
       const label = document.getElementById('satellite-toggle-text');
-      if (label) label.textContent = labelText;
+      if (label) label.textContent = labels[valid];
     }
-    if (map.getLayer('h3-fill')) {
-      map.setPaintProperty('h3-fill', 'fill-opacity', enable ? 0.62 : ['*', ['/', ['get','_a'], 255], 0.86]);
-    }
-    styleBasemapAndReferenceLabels(enable);
+    const hudTopo = document.getElementById('micro-bg-topo');
+    const hudPnoa = document.getElementById('micro-bg-pnoa');
+    if (hudTopo) hudTopo.classList.toggle('active', valid === 'topo');
+    if (hudPnoa) hudPnoa.classList.toggle('active', valid === 'pnoa');
+
+    applyH3FillOpacity();
+    styleBasemapAndReferenceLabels(valid === 'pnoa');
   }
 
   const satBtn = document.getElementById('satellite-toggle');
   if (satBtn) {
-    satBtn.addEventListener('click', () => setSatelliteMode(!isSatelliteMode));
+    satBtn.addEventListener('click', () => {
+      const nextMode = basemapMode === 'map' ? 'topo' : basemapMode === 'topo' ? 'pnoa' : 'map';
+      setBasemapMode(nextMode);
+    });
+  }
+
+  async function loadLegalZonesLayer() {
+    if (legalGeoJsonLoaded || !map || !map.getStyle()) return;
+    legalGeoJsonLoaded = true;
+    try {
+      const res = await fetch('./public/data/legal_zones.geojson');
+      if (!res.ok) return;
+      const gj = await res.json();
+      if (!gj || !Array.isArray(gj.features)) return;
+      const beforeTop = map.getLayer('selected-cell-halo')
+        ? 'selected-cell-halo'
+        : (map.getLayer('reference-places-dot') ? 'reference-places-dot' : undefined);
+      map.addSource('legal-zones', { type: 'geojson', data: gj });
+      map.addLayer({
+        id: 'legal-zones-fill',
+        type: 'fill',
+        source: 'legal-zones',
+        layout: { visibility: showLegalZones ? 'visible' : 'none' },
+        paint: {
+          'fill-color': ['case', ['==', ['get', 'type'], 'national_park'], '#dc2626', '#d97706'],
+          'fill-opacity': ['case', ['==', ['get', 'type'], 'national_park'], 0.14, 0.08]
+        }
+      }, beforeTop);
+      map.addLayer({
+        id: 'legal-zones-line',
+        type: 'line',
+        source: 'legal-zones',
+        layout: { visibility: showLegalZones ? 'visible' : 'none' },
+        paint: {
+          'line-color': ['case', ['==', ['get', 'type'], 'national_park'], '#b91c1c', '#b45309'],
+          'line-width': 1.5,
+          'line-dasharray': [3, 2],
+          'line-opacity': 0.72
+        }
+      }, beforeTop);
+    } catch {}
+  }
+
+  function refreshOutingsMapLayer() {
+    if (!map || !map.getStyle() || !window.MapaSeteroJournal) return;
+    const gj = window.MapaSeteroJournal.buildOutingsGeoJSON();
+    if (map.getSource('user-outings')) {
+      map.getSource('user-outings').setData(gj);
+    } else {
+      map.addSource('user-outings', { type: 'geojson', data: gj });
+      map.addLayer({
+        id: 'user-outings-circle',
+        type: 'circle',
+        source: 'user-outings',
+        layout: { visibility: showOutingsLayer ? 'visible' : 'none' },
+        paint: {
+          'circle-radius': 6.5,
+          'circle-color': [
+            'match', ['get', 'outcome'],
+            'abundant', '#16a34a',
+            'buttons', '#0ea5e9',
+            'mature', '#d97706',
+            '#78716c'
+          ],
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 2
+        }
+      });
+      map.on('click', 'user-outings-circle', e => {
+        if (!e.features || !e.features.length) return;
+        const p = e.features[0].properties;
+        const lat = Number(p.lat);
+        const lon = Number(p.lon);
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+          map.flyTo({ center: [lon, lat], zoom: Math.max(map.getZoom(), 12.5), speed: 1.2 });
+          const nearest = findNearestDataCell(lat, lon, 35);
+          if (nearest) selectCell(getEnrichedCell(nearest.cell));
+        }
+      });
+      map.on('mouseenter', 'user-outings-circle', () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', 'user-outings-circle', () => { map.getCanvas().style.cursor = ''; });
+    }
+    if (map.getLayer('user-outings-circle')) {
+      map.setLayoutProperty('user-outings-circle', 'visibility', showOutingsLayer ? 'visible' : 'none');
+    }
+  }
+
+  const btnLegalLayer = document.getElementById('btn-legal-layer');
+  if (btnLegalLayer) {
+    btnLegalLayer.addEventListener('click', () => {
+      showLegalZones = !showLegalZones;
+      btnLegalLayer.classList.toggle('active', showLegalZones);
+      btnLegalLayer.setAttribute('aria-pressed', showLegalZones ? 'true' : 'false');
+      ['legal-zones-fill', 'legal-zones-line'].forEach(id => {
+        if (map.getLayer(id)) {
+          map.setLayoutProperty(id, 'visibility', showLegalZones ? 'visible' : 'none');
+        }
+      });
+    });
+  }
+
+  const btnOutingsLayer = document.getElementById('btn-outings-layer');
+  if (btnOutingsLayer) {
+    btnOutingsLayer.addEventListener('click', () => {
+      showOutingsLayer = !showOutingsLayer;
+      btnOutingsLayer.classList.toggle('active', showOutingsLayer);
+      btnOutingsLayer.setAttribute('aria-pressed', showOutingsLayer ? 'true' : 'false');
+      if (map.getLayer('user-outings-circle')) {
+        map.setLayoutProperty('user-outings-circle', 'visibility', showOutingsLayer ? 'visible' : 'none');
+      }
+    });
   }
 
   // Botón flotante en el mapa: "Mi ubicación"
@@ -3819,6 +4517,37 @@
     if (refreshDot) refreshDot.classList.toggle('stale', Boolean(isStale));
   }
 
+  async function fetchBaseDataset() {
+    if (baseDataset) return baseDataset;
+    if (pendingBaseLoad) return pendingBaseLoad;
+
+    pendingBaseLoad = (async () => {
+      const todayInSpain = getSpainTodayIso();
+      const halfHourSlot = Math.floor(Date.now() / (30 * 60 * 1000));
+      const path = `./public/data/experimental/cells_base.json?v=${todayInSpain}-${halfHourSlot}-${forceBustCounter}`;
+      const response = await fetch(path, { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error(`Falta cells_base.json (HTTP ${response.status}).`);
+      }
+      const parsed = await response.json();
+      if (!parsed || !Array.isArray(parsed.cells)) {
+        throw new Error('El fichero cells_base.json no tiene el formato esperado.');
+      }
+      baseDataset = parsed;
+      baseCellMap.clear();
+      for (const cell of parsed.cells) {
+        if (cell && cell.h) baseCellMap.set(cell.h, cell);
+      }
+      return baseDataset;
+    })();
+
+    try {
+      return await pendingBaseLoad;
+    } finally {
+      pendingBaseLoad = null;
+    }
+  }
+
   async function fetchSpeciesDataset(speciesId) {
     if (speciesDatasets.has(speciesId)) return speciesDatasets.get(speciesId);
     if (pendingSpeciesLoads.has(speciesId)) return pendingSpeciesLoads.get(speciesId);
@@ -3827,14 +4556,17 @@
       const todayInSpain = getSpainTodayIso();
       const halfHourSlot = Math.floor(Date.now() / (30 * 60 * 1000));
       const path = `./public/data/experimental/${speciesId}.json?v=${todayInSpain}-${halfHourSlot}-${forceBustCounter}`;
-      const response = await fetch(path, { cache: 'no-store' });
-      if (!response.ok) {
-        throw new Error(response.status === 404
+      const [spRes, baseMeta] = await Promise.all([
+        fetch(path, { cache: 'no-store' }),
+        fetchBaseDataset().catch(() => null)
+      ]);
+      if (!spRes.ok) {
+        throw new Error(spRes.status === 404
           ? `Falta el fichero ${speciesId}.json (HTTP 404). Regenera los índices experimentales.`
-          : `El fichero ${speciesId}.json respondió HTTP ${response.status}.`);
+          : `El fichero ${speciesId}.json respondió HTTP ${spRes.status}.`);
       }
 
-      const dataset = await response.json();
+      const dataset = await spRes.json();
       if (
         !dataset ||
         typeof dataset !== 'object' ||
@@ -3848,9 +4580,40 @@
         throw new Error(`El fichero ${speciesId}.json no tiene el formato experimental esperado.`);
       }
 
-      speciesDatasets.set(speciesId, dataset);
-      speciesCellMaps.set(speciesId, new Map(dataset.cells.map(cell => [cell.h, cell])));
-      return dataset;
+      if ((dataset.schema_version === 2 || !dataset.cells[0]?.lat) && !baseMeta) {
+        throw new Error('No se pudo cargar cells_base.json requerido para el esquema v2.');
+      }
+
+      const reasonsTable = Array.isArray(dataset.reasons) ? dataset.reasons : [];
+      const soilTextureMeta = dataset.soil_texture_metadata || (baseMeta && baseMeta.soil_texture_metadata) || null;
+      const weatherMeta = dataset.weather_metadata || (baseMeta && baseMeta.weather_metadata) || null;
+      const texMaxPts = soilTextureMeta && soilTextureMeta.scoring ? soilTextureMeta.scoring.max_points : 7;
+
+      const mergedCells = dataset.cells.map(spCell => {
+        const baseCell = baseCellMap.get(spCell.h) || {};
+        const resolvedReason = (Number.isInteger(spCell.ri) && reasonsTable[spCell.ri])
+          ? reasonsTable[spCell.ri]
+          : (spCell.reason || null);
+        return {
+          ...baseCell,
+          ...spCell,
+          s: spCell.hs,
+          reason: resolvedReason,
+          soil_texture_score_max: texMaxPts,
+          _speciesId: speciesId
+        };
+      });
+
+      const hydrated = {
+        ...dataset,
+        soil_texture_metadata: soilTextureMeta,
+        weather_metadata: weatherMeta,
+        cells: mergedCells
+      };
+
+      speciesDatasets.set(speciesId, hydrated);
+      speciesCellMaps.set(speciesId, new Map(mergedCells.map(cell => [cell.h, cell])));
+      return hydrated;
     })();
 
     pendingSpeciesLoads.set(speciesId, request);
@@ -3867,6 +4630,9 @@
     updateRefreshBadge('Actualizando datos diarios…', false);
     if (force) {
       forceBustCounter += 1;
+      baseDataset = null;
+      baseCellMap.clear();
+      pendingBaseLoad = null;
       speciesDatasets.clear();
       speciesCellMaps.clear();
     }
@@ -3914,13 +4680,18 @@
       const staleDataNotice = isStale
         ? ' La actualización diaria está pendiente.'
         : ' Actualizado hoy.';
-      status.textContent = `Datos del ${rawData.date}.${staleDataNotice}`;
+      const aemetMeta = rawData.weather_metadata;
+      const aemetNote = (aemetMeta && aemetMeta.aemet_calibrated)
+        ? ` · Calibrado AEMET (${aemetMeta.aemet_stations_used || '?'} est.)`
+        : '';
+      status.textContent = `Datos del ${rawData.date}.${staleDataNotice}${aemetNote}`;
       status.classList.remove('verified');
       updateRefreshBadge(
         isStale ? `Datos del ${rawData.date} (pendiente hoy)` : `Al día · ${rawData.date}`,
         isStale
       );
       render();
+      renderFavoriteZones();
       if (previousSelectedH && rawData) {
         const cellData = rawData.cells.find(c => c.h === previousSelectedH);
         if (cellData) {
@@ -3943,7 +4714,13 @@
             )),
           };
           selectCell(mergedCell);
+          if (window.MapaSeteroMicro && window.MapaSeteroMicro.getState().active) {
+            openMicroDetailUi(window.MapaSeteroMicro.getState().resolution);
+          }
         } else {
+          if (window.MapaSeteroMicro && window.MapaSeteroMicro.getState().active) {
+            closeMicroDetailUi();
+          }
           document.getElementById('cell-card').hidden = true;
           selectedCellH = null;
           document.body.classList.remove('cell-selected');
@@ -4034,10 +4811,23 @@
     const activeScore = currentLayer === 'search'
       ? 'cs'
       : currentLayer === 'weather' ? 'ws' : 'hs';
+    const matchesFlushFilter = c => {
+      if (currentFlushFilter === 'active') {
+        return c.fp === 'peak_flush' || c.fp === 'emerging_buttons';
+      }
+      if (currentFlushFilter === 'active_inc') {
+        return ['peak_flush', 'emerging_buttons', 'moderate_active', 'incubating'].includes(c.fp);
+      }
+      if (currentFlushFilter === 'hide_blocked') {
+        return !['cold_stalled', 'dormant_host', 'dry', 'off_season', 'excluded'].includes(c.fp);
+      }
+      return true;
+    };
     const cells = mapCells.filter(c =>
       (currentLayer !== 'habitat' || c.hs > 0) &&
       (currentLayer === 'precip' || c[activeScore] >= currentMinScore) &&
       c.p14 >= currentRainFilter &&
+      matchesFlushFilter(c) &&
       inProvBounds(c)
     );
 
@@ -4094,21 +4884,25 @@
     // Actualizar fuente o crearla
     if (map.getSource('h3')) {
       map.getSource('h3').setData(geojson);
+      applyH3FillOpacity();
     } else {
       map.addSource('h3', { type:'geojson', data: geojson });
 
-      const beforeLabelLayer = (basemapFirstSymbolId && map.getLayer(basemapFirstSymbolId))
-        ? basemapFirstSymbolId
-        : (map.getLayer('province-labels') ? 'province-labels' : undefined);
+      const beforeLabelLayer = map.getLayer('legal-zones-fill')
+        ? 'legal-zones-fill'
+        : (basemapFirstSymbolId && map.getLayer(basemapFirstSymbolId))
+          ? basemapFirstSymbolId
+          : (map.getLayer('province-labels') ? 'province-labels' : undefined);
       map.addLayer({
         id: 'h3-fill',
         type: 'fill',
         source: 'h3',
         paint: {
           'fill-color': ['rgb', ['get','_r'], ['get','_g'], ['get','_b']],
-          'fill-opacity': isSatelliteMode ? 0.62 : ['*', ['/', ['get','_a'], 255], 0.86]
+          'fill-opacity': ['*', ['/', ['get','_a'], 255], 0.86]
         }
       }, beforeLabelLayer);
+      applyH3FillOpacity();
 
       map.addLayer({
         id: 'h3-line',
@@ -4138,9 +4932,23 @@
         }
       }, beforeLabelLayer);
 
-      // Click para inspección
+      // Click para inspección (sin chocar con micro-detalle o setales)
       map.on('click', 'h3-fill', e => {
-        if (e.features && e.features[0]) selectCell(e.features[0].properties);
+        const blockingLayers = ['micro-h3-fill', 'user-outings-circle'].filter(id => map.getLayer(id));
+        if (blockingLayers.length) {
+          const upperHits = map.queryRenderedFeatures(e.point, { layers: blockingLayers });
+          if (upperHits && upperHits.length) return;
+        }
+        if (e.features && e.features[0]) {
+          const props = e.features[0].properties;
+          if (window.MapaSeteroMicro && window.MapaSeteroMicro.getState().active) {
+            const pState = window.MapaSeteroMicro.getState();
+            if (!pState.parentCell || pState.parentCell.h !== props.h) {
+              closeMicroDetailUi();
+            }
+          }
+          selectCell(props);
+        }
       });
       map.on('mouseenter','h3-fill', () => { map.getCanvas().style.cursor = 'pointer'; });
       map.on('mouseleave','h3-fill', () => { map.getCanvas().style.cursor = ''; });
@@ -4203,6 +5011,18 @@
     }
   }
 
+  function formatTrendBadge(dcs) {
+    const val = Number(dcs);
+    if (!Number.isFinite(val)) return null;
+    if (val >= 1.5) {
+      return { cls: 'trend-up', text: `↑ +${formatNumber(val)}` };
+    }
+    if (val <= -1.5) {
+      return { cls: 'trend-down', text: `↓ ${formatNumber(val)}` };
+    }
+    return { cls: 'trend-flat', text: '→ =' };
+  }
+
   function renderTopZones(cells, activeScore) {
     const listEl = document.getElementById('top-zones-list');
     const subEl = document.getElementById('top-zones-subtitle');
@@ -4210,9 +5030,23 @@
     listEl.replaceChildren();
 
     const scoreKey = currentLayer === 'precip' ? 'p14' : (activeScore || 'cs');
-    const sorted = [...cells]
-      .filter(c => Number(c.hs) > 0 && Number.isFinite(Number(c[scoreKey])))
-      .sort((a, b) => Number(b[scoreKey]) - Number(a[scoreKey]));
+    let filtered = [...cells].filter(c => Number(c.hs) > 0 && Number.isFinite(Number(c[scoreKey])));
+    if (topZonesRadiusKm > 0 && userCoords) {
+      filtered = filtered.filter(c => getDistanceKm(userCoords.lat, userCoords.lon, c.lat, c.lon) <= topZonesRadiusKm);
+    }
+
+    let sorted;
+    if (topZonesSort === 'nearest' && userCoords) {
+      const viable = filtered.filter(c => currentLayer === 'precip' || Number(c[scoreKey]) >= 35);
+      const pool = viable.length >= 5 ? viable : filtered;
+      sorted = [...pool].sort((a, b) => {
+        const da = getDistanceKm(userCoords.lat, userCoords.lon, a.lat, a.lon);
+        const db = getDistanceKm(userCoords.lat, userCoords.lon, b.lat, b.lon);
+        return da !== db ? da - db : (Number(b[scoreKey]) - Number(a[scoreKey]));
+      });
+    } else {
+      sorted = [...filtered].sort((a, b) => Number(b[scoreKey]) - Number(a[scoreKey]));
+    }
 
     const picked = [];
     const seenZones = new Set();
@@ -4227,7 +5061,10 @@
     if (subEl) {
       const provNames = { all: 'todas las provincias', soria: 'Soria', madrid: 'Madrid', segovia: 'Segovia', guadalajara: 'Guadalajara' };
       const provText = provNames[currentProv] || 'la zona';
-      subEl.textContent = `Mejores zonas hoy en ${provText}. Toca una para ir a ella:`;
+      const distText = topZonesRadiusKm > 0
+        ? (userCoords ? ` (radio < ${topZonesRadiusKm} km)` : ' (activa GPS para filtrar por distancia)')
+        : '';
+      subEl.textContent = `Mejores zonas hoy en ${provText}${distText}. Toca una para ir a ella:`;
     }
 
     if (!picked.length) {
@@ -4260,10 +5097,16 @@
       const meta = document.createElement('span');
       meta.className = 'top-zone-meta';
       const treeShort = forestNameEs(cell.tree);
-      meta.textContent = `${treeShort} · ${cell.elev || 0} m · ${formatNumber(cell.p14)} l/m² (14d)`;
+      const kmSuffix = userCoords
+        ? ` · ${Math.round(getDistanceKm(userCoords.lat, userCoords.lon, cell.lat, cell.lon))} km`
+        : '';
+      meta.textContent = `${treeShort} · ${cell.elev || 0} m · ${formatNumber(cell.p14)} l/m²${kmSuffix}`;
 
       info.append(name, meta);
       left.append(rank, info);
+
+      const rightWrap = document.createElement('span');
+      rightWrap.className = 'fav-zone-right';
 
       const val = Number(cell[scoreKey]) || 0;
       const badge = document.createElement('span');
@@ -4274,8 +5117,17 @@
       badge.textContent = currentLayer === 'precip'
         ? `${formatNumber(val)} mm`
         : `${formatNumber(val)}/100`;
+      rightWrap.append(badge);
 
-      btn.append(left, badge);
+      const trend = formatTrendBadge(cell.dcs);
+      if (trend && currentLayer === 'search' && trend.cls !== 'trend-flat') {
+        const tSpan = document.createElement('span');
+        tSpan.className = `trend-badge ${trend.cls}`;
+        tSpan.textContent = trend.text;
+        rightWrap.append(tSpan);
+      }
+
+      btn.append(left, rightWrap);
       btn.addEventListener('click', () => {
         map.flyTo({
           center: [Number(cell.lon), Number(cell.lat)],
@@ -4713,6 +5565,10 @@
 
   function forecastOutlookText(p) {
     if (!p || !p.fc_out) return null;
+    if (p.fc_out === 'snow_risk') {
+      const snowVal = Number.isFinite(Number(p.snowfc)) ? `${formatNumber(p.snowfc)} cm` : 'nieve';
+      return `Alerta 72h: se esperan nevadas (${snowVal}), posible cobertura o parón.`;
+    }
     if (p.fc_out === 'frost_risk') {
       return `Alerta 72h: se esperan heladas (${formatNumber(p.fc_tn)} °C de mínima), posible parón.`;
     }
@@ -5021,9 +5877,13 @@
       else if (moist < 18) cons.push(`La tierra está seca (${formatNumber(moist)}% de humedad).`);
     }
 
-    // 5. Frío / Heladas y temperatura del suelo
+    // 5. Frío / Heladas, nieve y temperatura del suelo
     const tmin3 = Number.isFinite(Number(p.tmin3)) ? Number(p.tmin3) : Number(p.tmin);
     const stemp = Number(p.stemp);
+    const snow7 = Number(p.snow7);
+    if (Number.isFinite(snow7) && snow7 >= 3) {
+      cons.push(`Ha nevado hace poco (~${formatNumber(snow7)} cm en 7d); puede tapar el suelo o frenar brotes.`);
+    }
     if (Number.isFinite(tmin3) && tmin3 < minTempLimit) {
       cons.push(`Ha hecho mucho frío hace poco (${formatNumber(tmin3)} °C de mínima) y eso frena que salgan.`);
     } else if (Number.isFinite(stemp)) {
@@ -5032,7 +5892,7 @@
       else if (stemp > 21) cons.push(`La tierra está demasiado caliente (${formatNumber(stemp)} °C).`);
     }
 
-    // 6. Tipo de tierra (pH)
+    // 6. Tipo de tierra (pH) y normativa
     if (profile && Array.isArray(profile.ph_tolerated) && Number.isFinite(Number(p.eph ?? p.ph))) {
       const effPh = Number(p.eph ?? p.ph);
       const [phMin, phMax] = profile.ph_tolerated;
@@ -5044,6 +5904,11 @@
         cons.push(`La tierra es demasiado ácida para esta seta (acidez ${formatNumber(effPh)}).`);
       }
     }
+    if (p.leg === 'national_park') {
+      cons.push(`Espacio protegido (${p.leg_n || 'Parque Nacional'}): recolección restringida o prohibida.`);
+    } else if (p.leg === 'regulated_coto') {
+      cons.push(`Zona regulada (${p.leg_n || 'Coto Micocyl'}): requiere permiso antes de recolectar.`);
+    }
 
     list.replaceChildren();
     const fcNote = forecastOutlookText(p);
@@ -5052,7 +5917,8 @@
       ...pros.slice(0, 3).map(t => ({ icon: '✅', text: t }))
     ];
     if (fcNote) {
-      items.push({ icon: p.fc_out === 'frost_risk' ? '🥶' : '🌦️', text: fcNote });
+      const fcIcon = p.fc_out === 'snow_risk' ? '❄️' : p.fc_out === 'frost_risk' ? '🥶' : '🌦️';
+      items.push({ icon: fcIcon, text: fcNote });
     }
     if (!items.length) {
       items.push({ icon: ws >= 50 ? '✅' : '⚠️', text: 'Condiciones intermedias en el bosque y el tiempo de estos días.' });
@@ -5090,16 +5956,66 @@
         : `${currentLayer === 'weather' ? 'Tiempo' : 'Bosque'}: ${formatNumber(displayScore)}/100`;
     pill.className = 'score-badge ' + (displayScore >= 50 ? 'b-ok' : displayScore > 0 ? 'b-mod' : 'b-no');
 
-    // KPI strip (Índice hoy / Bosque / Tiempo 14d)
+    // KPI strip (Índice hoy / Bosque / Tiempo 28d)
     const kpiCombined = document.getElementById('c-kpi-combined');
+    const kpiTrend = document.getElementById('c-kpi-trend');
     const kpiHabitat = document.getElementById('c-kpi-habitat');
     const kpiWeather = document.getElementById('c-kpi-weather');
     if (kpiCombined) kpiCombined.textContent = `${formatNumber(p.cs)}/100`;
+    if (kpiTrend) {
+      const trend = formatTrendBadge(p.dcs);
+      if (trend) {
+        kpiTrend.className = `trend-badge ${trend.cls}`;
+        kpiTrend.textContent = trend.text;
+        kpiTrend.title = dataset && dataset.prev_date
+          ? `Variación respecto a ${dataset.prev_date}`
+          : 'Tendencia diaria del índice';
+        kpiTrend.hidden = false;
+      } else {
+        kpiTrend.hidden = true;
+      }
+    }
     if (kpiHabitat) kpiHabitat.textContent = `${formatNumber(p.hs)}/100`;
     if (kpiWeather) kpiWeather.textContent = `${formatNumber(p.ws)}/100`;
 
-    // Resumen en lenguaje claro arriba
+    // Banner legal (OAPN Parque Nacional / IDECyL Micocyl / normativa general)
+    const legalBanner = document.getElementById('cell-legal-banner');
+    if (legalBanner) {
+      legalBanner.replaceChildren();
+      legalBanner.hidden = false;
+      if (p.leg === 'national_park') {
+        legalBanner.className = 'cell-legal-banner legal-ban';
+        legalBanner.textContent = `⛔ Parque Nacional (${p.leg_n || 'OAPN'}): recolección generalmente prohibida o restringida. Consulta la normativa oficial del parque.`;
+      } else if (p.leg === 'regulated_coto') {
+        legalBanner.className = 'cell-legal-banner legal-coto';
+        const txt = document.createTextNode(`🪪 Monte acotado (${p.leg_n || 'CyL'}): requiere permiso previo. `);
+        const lnk = document.createElement('a');
+        lnk.href = 'https://www.micocyl.es';
+        lnk.target = '_blank';
+        lnk.rel = 'noopener noreferrer';
+        lnk.textContent = 'Permisos Micocyl ↗';
+        legalBanner.append(txt, lnk);
+      } else {
+        legalBanner.className = 'cell-legal-banner legal-info';
+        legalBanner.textContent = 'ℹ️ Fuera de Parque Nacional y de coto perimetral Micocyl en capa oficial; respeta siempre topes locales y fincas privadas.';
+      }
+    }
+
+    // Resumen en lenguaje claro arriba + gráfica 28d + 3d
     renderPlainCellSummary(p, dataset);
+    const chartBox = document.getElementById('cell-meteo-chart');
+    if (chartBox && window.MapaSeteroJournal) {
+      window.MapaSeteroJournal.renderMeteoChart28d(chartBox, p, dataset);
+    }
+    syncFavoriteButtonState(p.h);
+    const btnMicro = document.getElementById('btn-micro-detail');
+    if (btnMicro) {
+      const mActive = Boolean(window.MapaSeteroMicro && window.MapaSeteroMicro.getState().active && window.MapaSeteroMicro.getState().parentCell?.h === p.h);
+      btnMicro.classList.toggle('active', mActive);
+      btnMicro.querySelector('span').textContent = mActive
+        ? '🔍 Micro-detalle activo (ver en mapa)'
+        : '🔍 Ver micro-detalle: vertientes y árboles (7 o 49 zonas)';
+    }
 
     // Ubicación y zona de la celda
     const nearestZone = findNearestZone(p.lat, p.lon);
@@ -5240,38 +6156,49 @@
       setCardStatus('card-soil-temp', 'h-soil-temp', 'neutral', 'Sin dato');
     }
 
-    // 7. Tipo de tierra (acidez / pH)
+    // 7. Tipo de tierra (acidez / pH + litología IGME)
     const effPhNum = Number.isFinite(Number(p.eph)) ? Number(p.eph) : Number(p.ph);
     const phDesc = Number.isFinite(effPhNum)
       ? (effPhNum < 5.5 ? 'Ácida' : effPhNum <= 6.7 ? 'Neutra / algo ácida' : 'Caliza')
       : '';
-    document.getElementById('c-ph').textContent = Number.isFinite(effPhNum) ? `${phDesc} (${formatNumber(effPhNum)})` : '—';
+    const lithLabels = { siliceous: 'Silíceo', calcareous: 'Calizo', mixed: 'Mixto' };
+    const lithTag = lithLabels[p.lith] ? ` · ${lithLabels[p.lith]}` : '';
+    const lithDetail = p.lith_d ? ` (${p.lith_d})` : '';
+    document.getElementById('c-ph').textContent = Number.isFinite(effPhNum)
+      ? `${phDesc} (${formatNumber(effPhNum)})${lithTag}`
+      : (lithTag ? lithLabels[p.lith] : '—');
     if (profile && Array.isArray(profile.ph_tolerated) && Number.isFinite(effPhNum)) {
       const [phMin, phMax] = profile.ph_tolerated;
-      if (effPhNum >= phMin && effPhNum <= phMax) setCardStatus('card-ph', 'h-ph', 'good', 'Bueno · Tierra adecuada para esta seta');
-      else if (effPhNum >= phMin - 0.3 && effPhNum <= phMax + 0.3) setCardStatus('card-ph', 'h-ph', 'warn', 'Regular · Al límite de acidez');
-      else setCardStatus('card-ph', 'h-ph', 'bad', effPhNum > phMax ? 'Malo · Tierra demasiado caliza' : 'Malo · Tierra demasiado ácida');
+      if (effPhNum >= phMin && effPhNum <= phMax) setCardStatus('card-ph', 'h-ph', 'good', `Bueno · Tierra adecuada${lithDetail}`);
+      else if (effPhNum >= phMin - 0.3 && effPhNum <= phMax + 0.3) setCardStatus('card-ph', 'h-ph', 'warn', `Regular · Al límite de acidez${lithDetail}`);
+      else setCardStatus('card-ph', 'h-ph', 'bad', `${effPhNum > phMax ? 'Malo · Tierra demasiado caliza' : 'Malo · Tierra demasiado ácida'}${lithDetail}`);
     } else {
-      setCardStatus('card-ph', 'h-ph', 'neutral', 'Valor orientativo');
+      setCardStatus('card-ph', 'h-ph', 'neutral', `Valor orientativo${lithDetail}`);
     }
 
-    // 8. Altura, orientación en español (SO/NO/O), pendiente y relieve (TPI)
+    // 8. Altura, orientación en español (SO/NO/O), pendiente, TPI y factor solar
     const aspLabel = aspectLabelEs(p.asp);
     const slopeNum = Number(p.slope);
     const tpiNum = Number(p.tpi);
+    const solNum = Number(p.sol_f);
+    const radNum = Number(p.rad7);
     const slopeSuffix = Number.isFinite(slopeNum) ? ` · ${Math.round(slopeNum)}° pend.` : '';
     const tpiSuffix = p.tpi !== null && p.tpi !== undefined && Number.isFinite(tpiNum)
       ? (tpiNum <= -8 ? ' · Vaguada' : tpiNum >= 10 ? ' · Cresta' : ' · Ladera')
       : '';
-    document.getElementById('c-topo').textContent = `${p.elev || 0} m · Ladera ${aspLabel}${slopeSuffix}${tpiSuffix}`;
+    const solSuffix = Number.isFinite(solNum)
+      ? (solNum >= 1.07 ? ' · Solana' : solNum <= 0.92 ? ' · Umbría' : '')
+      : '';
+    const radNote = Number.isFinite(radNum) ? ` · Rad. ${formatNumber(radNum)} MJ/m²` : '';
+    document.getElementById('c-topo').textContent = `${p.elev || 0} m · Ladera ${aspLabel}${slopeSuffix}${tpiSuffix}${solSuffix}`;
     if (profile && Array.isArray(profile.altitude_range_meters)) {
       const [eMin, eMax] = profile.altitude_range_meters;
       const elevNum = Number(p.elev) || 0;
-      if (elevNum >= eMin && elevNum <= eMax) setCardStatus('card-topo', 'h-topo', 'good', 'Bueno · Altura ideal');
-      else if (elevNum >= eMin - 200 && elevNum <= eMax + 200) setCardStatus('card-topo', 'h-topo', 'warn', 'Regular · Altura al límite');
-      else setCardStatus('card-topo', 'h-topo', 'bad', 'Malo · Demasiado alta o baja');
+      if (elevNum >= eMin && elevNum <= eMax) setCardStatus('card-topo', 'h-topo', 'good', `Bueno · Altura ideal${radNote}`);
+      else if (elevNum >= eMin - 200 && elevNum <= eMax + 200) setCardStatus('card-topo', 'h-topo', 'warn', `Regular · Altura al límite${radNote}`);
+      else setCardStatus('card-topo', 'h-topo', 'bad', `Malo · Demasiado alta o baja${radNote}`);
     } else {
-      setCardStatus('card-topo', 'h-topo', 'neutral', 'Orientación del terreno');
+      setCardStatus('card-topo', 'h-topo', 'neutral', `Orientación del terreno${radNote}`);
     }
 
     // 9. Época del año
@@ -5438,7 +6365,7 @@
   }
 
   function updateActiveFiltersBadge() {
-    const hasActive = currentMinScore > 0 || currentRainFilter > 0 || currentProv !== 'all' || currentLayer !== 'search';
+    const hasActive = currentMinScore > 0 || currentRainFilter > 0 || currentProv !== 'all' || currentLayer !== 'search' || currentFlushFilter !== 'all';
     const fToggle = document.getElementById('filters-toggle');
     if (fToggle) fToggle.classList.toggle('has-active-filters', hasActive);
     const resetBtn = document.getElementById('filters-reset-btn');
@@ -6045,9 +6972,12 @@
     filtersResetBtn.addEventListener('click', () => {
       currentMinScore = 0;
       currentRainFilter = 0;
+      currentFlushFilter = 'all';
       currentProv = 'all';
       document.getElementById('slider').value = '0';
       document.getElementById('rain-filter').value = '0';
+      const fpSelect = document.getElementById('flush-phase-filter');
+      if (fpSelect) fpSelect.value = 'all';
       document.querySelectorAll('.prov-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.prov === 'all');
       });
@@ -6056,6 +6986,506 @@
       setLayer('search');
     });
   }
+
+  const flushPhaseSelect = document.getElementById('flush-phase-filter');
+  if (flushPhaseSelect) {
+    flushPhaseSelect.addEventListener('change', e => {
+      currentFlushFilter = e.target.value || 'all';
+      updateActiveFiltersBadge();
+      render();
+    });
+  }
+
+  const topZonesSortSelect = document.getElementById('top-zones-sort');
+  if (topZonesSortSelect) {
+    topZonesSortSelect.addEventListener('change', e => {
+      topZonesSort = e.target.value || 'score';
+      if (topZonesSort === 'nearest' && !userCoords) {
+        getUserLocation(() => render());
+      } else {
+        render();
+      }
+    });
+  }
+
+  const topZonesRadiusSelect = document.getElementById('top-zones-radius');
+  if (topZonesRadiusSelect) {
+    topZonesRadiusSelect.addEventListener('change', e => {
+      topZonesRadiusKm = parseInt(e.target.value || '0', 10) || 0;
+      if (topZonesRadiusKm > 0 && !userCoords) {
+        getUserLocation(() => render());
+      } else {
+        render();
+      }
+    });
+  }
+
+  // ================================================================
+  // ZONAS HABITUALES, DIARIO LOCAL Y MICRO-DETALLE H3-9 / H3-10
+  // ================================================================
+  let currentSelectedMicroSubcell = null;
+
+  function syncFavoriteButtonState(cellH) {
+    const btn = document.getElementById('btn-fav-zone');
+    if (!btn || !window.MapaSeteroJournal) return;
+    const isFav = Boolean(cellH && window.MapaSeteroJournal.isCellFavorite(cellH));
+    btn.classList.toggle('is-fav', isFav);
+    btn.textContent = isFav ? '★ Guardada' : '⭐ Guardar zona';
+  }
+
+  function lookupFavoriteLiveCell(h) {
+    if (!h) return null;
+    const candidates = selectedSpecies
+      .map(id => speciesCellMaps.get(id)?.get(h))
+      .filter(Boolean);
+    if (!candidates.length && rawData && Array.isArray(rawData.cells)) {
+      const fallback = rawData.cells.find(c => c.h === h);
+      return fallback || null;
+    }
+    candidates.sort((a, b) => (Number(b.cs) || 0) - (Number(a.cs) || 0));
+    return candidates[0] || null;
+  }
+
+  function renderFavoriteZones() {
+    const container = document.getElementById('fav-zones-list');
+    if (!container || !window.MapaSeteroJournal) return;
+    container.replaceChildren();
+    const favs = window.MapaSeteroJournal.getFavoriteZones();
+    if (!favs.length) {
+      const empty = document.createElement('p');
+      empty.className = 'top-zones-sub';
+      empty.textContent = 'Aún no has guardado ninguna zona. Toca una celda en el mapa y pulsa «⭐ Guardar zona».';
+      container.append(empty);
+      return;
+    }
+
+    for (const z of favs) {
+      const liveCell = lookupFavoriteLiveCell(z.h);
+      const row = document.createElement('div');
+      row.className = 'fav-zone-row';
+
+      const mainBtn = document.createElement('button');
+      mainBtn.type = 'button';
+      mainBtn.className = 'fav-zone-main';
+
+      const nameEl = document.createElement('span');
+      nameEl.className = 'fav-zone-name';
+      nameEl.textContent = z.name;
+
+      const metaEl = document.createElement('span');
+      metaEl.className = 'fav-zone-meta';
+      if (liveCell) {
+        const fpInfo = flushPhaseInfo(liveCell.fp);
+        metaEl.textContent = `${fpInfo.icon} ${formatNumber(liveCell.cs)}/100 · lluvia ${formatNumber(liveCell.p14)} mm`;
+      } else {
+        metaEl.textContent = 'Cargando datos de la celda…';
+      }
+      mainBtn.append(nameEl, metaEl);
+      mainBtn.addEventListener('click', () => {
+        if (Number.isFinite(z.lat) && Number.isFinite(z.lon)) {
+          map.flyTo({ center: [Number(z.lon), Number(z.lat)], zoom: Math.max(map.getZoom(), 12.2), speed: 1.3 });
+        }
+        const cellToOpen = liveCell || findNearestDataCell(z.lat, z.lon, 15)?.cell;
+        if (cellToOpen) selectCell(cellToOpen);
+      });
+
+      const right = document.createElement('div');
+      right.className = 'fav-zone-right';
+
+      if (liveCell) {
+        const scoreVal = Number(liveCell.cs) || 0;
+        const badge = document.createElement('span');
+        badge.className = `top-zone-score ${scoreVal >= 50 ? 'b-ok' : scoreVal > 0 ? 'b-mod' : 'b-no'}`;
+        badge.textContent = `${formatNumber(scoreVal)}`;
+        right.append(badge);
+
+        const trend = formatTrendBadge(liveCell.dcs);
+        if (trend && trend.cls !== 'trend-flat') {
+          const tSpan = document.createElement('span');
+          tSpan.className = `trend-badge ${trend.cls}`;
+          tSpan.textContent = trend.text;
+          right.append(tSpan);
+        }
+      }
+
+      const renameBtn = document.createElement('button');
+      renameBtn.type = 'button';
+      renameBtn.className = 'icon-mini-btn';
+      renameBtn.title = 'Renombrar zona';
+      renameBtn.setAttribute('aria-label', `Renombrar ${z.name}`);
+      renameBtn.textContent = '✎';
+      renameBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = z.name;
+        input.maxLength = 64;
+        input.style.cssText = 'width:100%;font-size:12px;padding:3px 6px;border-radius:6px;border:1px solid #b89e7d;';
+        const commitRename = () => {
+          const newName = input.value.trim() || z.name;
+          window.MapaSeteroJournal.saveFavoriteZone({ ...z, name: newName });
+          renderFavoriteZones();
+        };
+        input.addEventListener('keydown', ev => {
+          if (ev.key === 'Enter') commitRename();
+          if (ev.key === 'Escape') renderFavoriteZones();
+        });
+        input.addEventListener('blur', commitRename);
+        mainBtn.replaceWith(input);
+        input.focus();
+        input.select();
+      });
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'icon-mini-btn';
+      delBtn.title = 'Quitar zona habitual';
+      delBtn.setAttribute('aria-label', `Quitar ${z.name}`);
+      delBtn.textContent = '×';
+      delBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        window.MapaSeteroJournal.removeFavoriteZone(z.h);
+        renderFavoriteZones();
+        if (currentSelectedCellData && currentSelectedCellData.h === z.h) {
+          syncFavoriteButtonState(z.h);
+        }
+      });
+
+      right.append(renameBtn, delBtn);
+      row.append(mainBtn, right);
+      container.append(row);
+    }
+  }
+
+  function renderOutingsList() {
+    const container = document.getElementById('outings-list');
+    if (!container || !window.MapaSeteroJournal) return;
+    container.replaceChildren();
+    const list = window.MapaSeteroJournal.getOutings();
+    if (!list.length) {
+      const empty = document.createElement('p');
+      empty.className = 'top-zones-sub';
+      empty.textContent = 'Sin apuntes aún. Abre cualquier celda o rodal y pulsa «📌 Setal aquí».';
+      container.append(empty);
+      return;
+    }
+
+    for (const o of list) {
+      const item = document.createElement('div');
+      item.className = 'outing-item';
+
+      const head = document.createElement('div');
+      head.className = 'outing-head';
+
+      const goBtn = document.createElement('button');
+      goBtn.type = 'button';
+      goBtn.className = 'fav-zone-main';
+      const titleSpan = document.createElement('span');
+      titleSpan.className = 'fav-zone-name';
+      const outLabel = window.MapaSeteroJournal.OUTCOME_LABELS[o.outcome] || o.outcome;
+      titleSpan.textContent = `${o.date} · ${o.name}`;
+      const subSpan = document.createElement('span');
+      subSpan.className = 'fav-zone-meta';
+      const spLabel = MUSH_LABELS[o.speciesId] || o.speciesId;
+      subSpan.textContent = `${spLabel} · ${outLabel}`;
+      goBtn.append(titleSpan, subSpan);
+      goBtn.addEventListener('click', () => {
+        if (Number.isFinite(o.lat) && Number.isFinite(o.lon)) {
+          map.flyTo({ center: [o.lon, o.lat], zoom: Math.max(map.getZoom(), 13), speed: 1.3 });
+          const nearest = findNearestDataCell(o.lat, o.lon, 25);
+          if (nearest) selectCell(getEnrichedCell(nearest.cell));
+        }
+      });
+
+      const actions = document.createElement('div');
+      actions.className = 'fav-zone-right';
+      const gpxBtn = document.createElement('button');
+      gpxBtn.type = 'button';
+      gpxBtn.className = 'icon-mini-btn';
+      gpxBtn.title = 'Descargar GPX';
+      gpxBtn.textContent = '⬇';
+      gpxBtn.addEventListener('click', () => {
+        window.MapaSeteroJournal.downloadGpxWaypoint({
+          name: o.name,
+          lat: o.lat,
+          lon: o.lon,
+          desc: `${o.date} · ${spLabel} · ${outLabel}`
+        });
+      });
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'icon-mini-btn';
+      delBtn.title = 'Borrar apunte';
+      delBtn.textContent = '×';
+      delBtn.addEventListener('click', () => {
+        window.MapaSeteroJournal.removeOuting(o.id);
+        renderOutingsList();
+        refreshOutingsMapLayer();
+      });
+      actions.append(gpxBtn, delBtn);
+      head.append(goBtn, actions);
+      item.append(head);
+
+      if (o.note) {
+        const noteEl = document.createElement('div');
+        noteEl.className = 'outing-note';
+        noteEl.textContent = o.note;
+        item.append(noteEl);
+      }
+      container.append(item);
+    }
+  }
+
+  function openOutingModal({ name, lat, lon, h, subH, speciesId, note }) {
+    const dlg = document.getElementById('outing-dialog');
+    if (!dlg) return;
+    document.getElementById('outing-date').value = getSpainTodayIso();
+    document.getElementById('outing-name').value = name || 'Mi setal';
+    document.getElementById('outing-lat').value = Number(lat || 0);
+    document.getElementById('outing-lon').value = Number(lon || 0);
+    document.getElementById('outing-h').value = h || '';
+    document.getElementById('outing-subh').value = subH || '';
+    document.getElementById('outing-species').value = speciesId || selectedSpecies[0] || 'boletus_edulis';
+    document.getElementById('outing-outcome').value = 'abundant';
+    document.getElementById('outing-note').value = note || '';
+    dlg.showModal();
+  }
+
+  function renderMicroHudSelected(subcell) {
+    currentSelectedMicroSubcell = subcell || null;
+    const hud = document.getElementById('micro-detail-hud');
+    const titleEl = document.getElementById('micro-hud-title');
+    const bodyEl = document.getElementById('micro-hud-body');
+    const gmapsEl = document.getElementById('micro-sub-gmaps');
+    if (!hud || !bodyEl || !subcell) return;
+
+    const state = window.MapaSeteroMicro ? window.MapaSeteroMicro.getState() : { resolution: 9 };
+    if (titleEl) {
+      titleEl.textContent = state.resolution === 10
+        ? '🔍 Micro-detalle: 49 zonas (~1,5 ha)'
+        : '🔍 Micro-detalle: 7 sub-zonas (~10,5 ha)';
+    }
+
+    const resBtn9 = document.getElementById('micro-res-9');
+    const resBtn10 = document.getElementById('micro-res-10');
+    if (resBtn9) resBtn9.classList.toggle('active', state.resolution === 9);
+    if (resBtn10) resBtn10.classList.toggle('active', state.resolution === 10);
+
+    bodyEl.replaceChildren();
+    const scoreTxt = subcell.microScore > 0 ? `${Math.round(subcell.microScore)}/100` : 'Excluida (0)';
+    const line1 = document.createElement('div');
+    const strong1 = document.createElement('strong');
+    strong1.textContent = `${scoreTxt} · ${subcell.reliefTag || 'Ladera'}`;
+    const aspText = subcell.asp ? `Vertiente ${subcell.asp} (${Math.round(subcell.slope || 0)}°)` : `Llano (${Math.round(subcell.slope || 0)}°)`;
+    line1.append(strong1, document.createTextNode(` — ${aspText} · ${subcell.elev} m · Sol ×${formatNumber(subcell.solarFactor)}`));
+
+    const line2 = document.createElement('div');
+    const treeDesc = subcell.tree ? `${forestNameEs(subcell.tree)} (${subcell.cc}% copa)` : 'Sin arbolado MFE50';
+    line2.textContent = `🌳 ${treeDesc} · 🧪 pH ${formatNumber(subcell.ph)} (${subcell.lithLabel || 'Sin dato'}) · ⛰️ ${subcell.demSource || ''}`;
+
+    const line3 = document.createElement('div');
+    line3.style.cssText = 'color:#6b5f52;font-size:11px;margin-top:2px;';
+    line3.textContent = subcell.reason || '';
+
+    bodyEl.append(line1, line2, line3);
+    if (gmapsEl && Number.isFinite(subcell.lat) && Number.isFinite(subcell.lon)) {
+      gmapsEl.href = `https://www.google.com/maps/dir/?api=1&destination=${subcell.lat},${subcell.lon}`;
+    }
+    hud.hidden = false;
+  }
+
+  async function openMicroDetailUi(resolution = 9) {
+    if (!currentSelectedCellData || !window.MapaSeteroMicro) return;
+    const parentCell = resolveBestSpeciesCell(currentSelectedCellData);
+    const activeSpeciesId = parentCell._speciesId || selectedSpecies[0] || 'boletus_edulis';
+    const dataset = speciesDatasets.get(activeSpeciesId);
+    if (!dataset) return;
+
+    const hud = document.getElementById('micro-detail-hud');
+    const bodyEl = document.getElementById('micro-hud-body');
+    const resBtn9 = document.getElementById('micro-res-9');
+    const resBtn10 = document.getElementById('micro-res-10');
+    if (resBtn9) resBtn9.classList.toggle('active', resolution === 9);
+    if (resBtn10) resBtn10.classList.toggle('active', resolution === 10);
+    if (hud) hud.hidden = false;
+    if (bodyEl) bodyEl.textContent = 'Cargando rodales MFE50, suelo y elevación detallada (~15 m)…';
+
+    if (window.innerWidth <= 768 && document.body.classList.contains('menu-open')) {
+      closeMenu();
+    }
+
+    try {
+      await window.MapaSeteroMicro.openMicroDetail(map, parentCell, dataset, resolution, renderMicroHudSelected);
+      applyH3FillOpacity();
+      const btnMicro = document.getElementById('btn-micro-detail');
+      if (btnMicro) {
+        btnMicro.classList.add('active');
+        btnMicro.querySelector('span').textContent = '🔍 Micro-detalle activo (ver en mapa)';
+      }
+    } catch (err) {
+      if (bodyEl) bodyEl.textContent = `No se pudo cargar el micro-detalle (${err && err.message ? err.message : 'error'}).`;
+    }
+  }
+
+  function closeMicroDetailUi() {
+    currentSelectedMicroSubcell = null;
+    if (window.MapaSeteroMicro) {
+      window.MapaSeteroMicro.closeMicroDetail(map);
+    }
+    const hud = document.getElementById('micro-detail-hud');
+    if (hud) hud.hidden = true;
+    const btnMicro = document.getElementById('btn-micro-detail');
+    if (btnMicro) {
+      btnMicro.classList.remove('active');
+      btnMicro.querySelector('span').textContent = '🔍 Ver micro-detalle: vertientes y árboles (7 o 49 zonas)';
+    }
+    applyH3FillOpacity();
+  }
+
+  const btnFavZone = document.getElementById('btn-fav-zone');
+  if (btnFavZone) {
+    btnFavZone.addEventListener('click', () => {
+      if (!currentSelectedCellData || !window.MapaSeteroJournal) return;
+      const cell = currentSelectedCellData;
+      if (window.MapaSeteroJournal.isCellFavorite(cell.h)) {
+        window.MapaSeteroJournal.removeFavoriteZone(cell.h);
+      } else {
+        const titleTxt = document.getElementById('c-zone-title')?.textContent || getCellDisplayName(cell);
+        const subTxt = document.getElementById('c-zone-subtitle')?.textContent || '';
+        const cityPart = subTxt && !subTxt.startsWith('Identificando') && !subTxt.startsWith('A ')
+          ? subTxt.split('·')[0].trim()
+          : '';
+        const defaultName = cityPart && cityPart !== titleTxt ? `${titleTxt} (${cityPart})` : titleTxt;
+        window.MapaSeteroJournal.saveFavoriteZone({
+          h: cell.h,
+          name: defaultName,
+          lat: cell.lat,
+          lon: cell.lon
+        });
+      }
+      syncFavoriteButtonState(cell.h);
+      renderFavoriteZones();
+    });
+  }
+
+  const btnAddOuting = document.getElementById('btn-add-outing');
+  if (btnAddOuting) {
+    btnAddOuting.addEventListener('click', () => {
+      if (!currentSelectedCellData) return;
+      const c = currentSelectedCellData;
+      const titleTxt = document.getElementById('c-zone-title')?.textContent || getCellDisplayName(c);
+      openOutingModal({
+        name: titleTxt,
+        lat: c.lat,
+        lon: c.lon,
+        h: c.h,
+        subH: '',
+        speciesId: c._speciesId || selectedSpecies[0],
+        note: `${forestNameEs(c.tree)} · ${c.elev || 0} m · Ladera ${aspectLabelEs(c.asp)}`
+      });
+    });
+  }
+
+  const btnExportGpx = document.getElementById('btn-export-gpx');
+  if (btnExportGpx) {
+    btnExportGpx.addEventListener('click', () => {
+      if (!currentSelectedCellData || !window.MapaSeteroJournal) return;
+      const c = currentSelectedCellData;
+      const titleTxt = document.getElementById('c-zone-title')?.textContent || getCellDisplayName(c);
+      window.MapaSeteroJournal.downloadGpxWaypoint({
+        name: titleTxt,
+        lat: c.lat,
+        lon: c.lon,
+        desc: `Celda ${c.h} · ${forestNameEs(c.tree)} · ${c.elev || 0} m`
+      });
+    });
+  }
+
+  const btnMicroDetail = document.getElementById('btn-micro-detail');
+  if (btnMicroDetail) {
+    btnMicroDetail.addEventListener('click', () => openMicroDetailUi(9));
+  }
+  document.getElementById('micro-res-9')?.addEventListener('click', () => openMicroDetailUi(9));
+  document.getElementById('micro-res-10')?.addEventListener('click', () => openMicroDetailUi(10));
+  document.getElementById('micro-bg-topo')?.addEventListener('click', () => setBasemapMode(basemapMode === 'topo' ? 'map' : 'topo'));
+  document.getElementById('micro-bg-pnoa')?.addEventListener('click', () => setBasemapMode(basemapMode === 'pnoa' ? 'map' : 'pnoa'));
+  document.getElementById('micro-hud-close')?.addEventListener('click', closeMicroDetailUi);
+
+  document.getElementById('micro-sub-gpx')?.addEventListener('click', () => {
+    if (!currentSelectedMicroSubcell || !window.MapaSeteroJournal) return;
+    const sc = currentSelectedMicroSubcell;
+    window.MapaSeteroJournal.downloadGpxWaypoint({
+      name: `Rodal ${sc.asp || ''} ${sc.elev}m`,
+      lat: sc.lat,
+      lon: sc.lon,
+      desc: `${sc.reliefTag} · ${sc.tree || ''} (${sc.cc}%) · Nota micro ${Math.round(sc.microScore)}/100`
+    });
+  });
+
+  document.getElementById('micro-sub-outing')?.addEventListener('click', () => {
+    if (!currentSelectedMicroSubcell) return;
+    const sc = currentSelectedMicroSubcell;
+    openOutingModal({
+      name: `Rodal ${sc.reliefTag} (${sc.elev} m)`,
+      lat: sc.lat,
+      lon: sc.lon,
+      h: currentSelectedCellData ? currentSelectedCellData.h : '',
+      subH: sc.h,
+      speciesId: (currentSelectedCellData && currentSelectedCellData._speciesId) || selectedSpecies[0],
+      note: `${sc.tree ? forestNameEs(sc.tree) : 'Sin MFE50'} · Vertiente ${sc.asp || 'Llano'} ${Math.round(sc.slope || 0)}° · pH ${formatNumber(sc.ph)}`
+    });
+  });
+
+  const outingDialog = document.getElementById('outing-dialog');
+  document.getElementById('outing-dialog-close')?.addEventListener('click', () => outingDialog?.close());
+  document.getElementById('outing-cancel-btn')?.addEventListener('click', () => outingDialog?.close());
+  document.getElementById('outing-form')?.addEventListener('submit', e => {
+    e.preventDefault();
+    if (!window.MapaSeteroJournal) return;
+    const c = currentSelectedCellData;
+    window.MapaSeteroJournal.addOuting({
+      date: document.getElementById('outing-date').value,
+      name: document.getElementById('outing-name').value,
+      lat: Number(document.getElementById('outing-lat').value),
+      lon: Number(document.getElementById('outing-lon').value),
+      h: document.getElementById('outing-h').value,
+      subH: document.getElementById('outing-subh').value,
+      speciesId: document.getElementById('outing-species').value,
+      outcome: document.getElementById('outing-outcome').value,
+      note: document.getElementById('outing-note').value,
+      snapshot: c ? { cs: c.cs, p14: c.p14, moist: c.moist, stemp: c.stemp, tmin3: c.tmin3 } : null
+    });
+    outingDialog?.close();
+    renderOutingsList();
+    refreshOutingsMapLayer();
+    const sec = document.getElementById('outings-section');
+    if (sec) sec.open = true;
+  });
+
+  document.getElementById('btn-outings-export')?.addEventListener('click', () => {
+    window.MapaSeteroJournal?.exportBackupJson();
+  });
+  const importInput = document.getElementById('outings-import-input');
+  document.getElementById('btn-outings-import')?.addEventListener('click', () => importInput?.click());
+  importInput?.addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file || !window.MapaSeteroJournal) return;
+    try {
+      const txt = await file.text();
+      const res = window.MapaSeteroJournal.importBackupJson(txt);
+      renderFavoriteZones();
+      renderOutingsList();
+      refreshOutingsMapLayer();
+      if (currentSelectedCellData) syncFavoriteButtonState(currentSelectedCellData.h);
+      const st = document.getElementById('data-status');
+      if (st) st.textContent = `Copia importada: +${res.addedFavs} zonas y +${res.addedOutings} setales.`;
+    } catch (err) {
+      console.error('Error importando backup local:', err);
+    } finally {
+      importInput.value = '';
+    }
+  });
+
   function openMenu() {
     closeFilters();
     document.body.classList.add('menu-open');
@@ -6082,6 +7512,9 @@
   });
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape') {
+      if (window.MapaSeteroMicro && window.MapaSeteroMicro.getState().active) {
+        closeMicroDetailUi();
+      }
       if (document.body.classList.contains('menu-open')) closeMenu();
       if (!filtersPanel.hidden) {
         closeFilters();
@@ -6090,6 +7523,8 @@
     }
   });
 
+  renderFavoriteZones();
+  renderOutingsList();
   setLayer(currentLayer);
   map.on('load', () => loadSpecies(selectedSpecies));
 

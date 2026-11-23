@@ -66,15 +66,35 @@ ni una guía de recolección.**
   tampoco demuestra ausencia de fructificación. El GBIF disponible es escaso y
   sesgado: se muestra como contexto, no se usa para calibrar las puntuaciones.
 - Los índices experimentales (hábitat potencial, meteorología reciente e índice
-  combinado) se exportan con
+  combinado) se exportan en formato dividido v2 con
   `.\backend\venv\Scripts\python.exe -m backend.src.export_relative_suitability`.
-  Usa el snapshot meteorológico más reciente y escribe los cinco conjuntos
-  experimentales (*Boletus edulis*, *B. aereus*, *B. pinophilus*, *B. reticulatus*
-  y *Lactarius deliciosus* / níscalo) en `frontend/public/data/experimental/`. Ejecuta el comando
-  después de actualizar la ingesta meteorológica para refrescar el mapa. El
-  exportador validado y el pipeline diario siguen bloqueados para datos
+  Genera un fichero compartido `frontend/public/data/experimental/cells_base.json`
+  (geometría, suelo, meteorología diaria 28d + previsión 3d, litología y capa
+  legal) junto con cinco ficheros ligeros por especie (*Boletus edulis*,
+  *B. aereus*, *B. pinophilus*, *B. reticulatus* y *Lactarius deliciosus* /
+  níscalo), incluyendo la tendencia diaria `dcs` frente a la fecha previa (`prev_date`).
+  El exportador validado y el pipeline diario siguen bloqueados para datos
   `sourced_unvalidated`; los snapshots históricos continúan apartados en
   `backend/data/processed/unverified_exports/`.
+- La capa de litología IGME 1:1M y normativa básica (Parques Nacionales OAPN y
+  cotos regulados IDECyL / Micocyl en Castilla y León) se actualiza con
+  `.\backend\venv\Scripts\python.exe -m backend.src.ingestion.static.lithology_legal`,
+  generando `frontend/public/data/legal_zones.geojson` y avisos en cada celda.
+- De forma opcional, si configuras la variable de entorno o secreto de GitHub
+  `AEMET_API_KEY` (clave gratuita de AEMET OpenData), `meteo_openmeteo.py` y
+  `aemet_opendata.py` calibran el sesgo regional de precipitación y mínimas con
+  observaciones reales de estaciones cercanas; sin clave, el pipeline continúa
+  sin errores usando Open-Meteo e interpolación altitudinal.
+- El motor (`backend/src/scoring/engine.py`) incorpora litología silícea/caliza,
+  penalización y alerta 72 h de nevadas (`snowfall_7d_cm`, `snow_risk`) y
+  radiación solar topográfica por vertiente (`_topographic_solar_factor`).
+- El micro-detalle bajo demanda divide cada celda H3-8 (~74 ha) en **7 sub-zonas
+  H3-9 (~10,5 ha)** o **49 micro-zonas H3-10 (~1,5 ha)** combinando rodales
+  precalculados MFE50, pH e IGME (`backend.src.processing.build_micro_index` ->
+  `frontend/public/data/micro/`) con muestreo bajo demanda de relieve a ~15 m
+  (AWS Terrarium z13 DEM) para vertiente, pendiente, TPI local y factor solar.
+  Esta herramienta orienta la exploración por ladera dentro de la celda y no
+  sustituye la cartografía oficial sobre el terreno.
 - Los cinco conjuntos experimentales aplican una máscara estática compartida:
   solo exportan hexágonos que no incumplen las exclusiones de hábitat de al
   menos una especie. Las formaciones forestales mixtas cuyo hospedador no se
@@ -140,7 +160,13 @@ python -m http.server 3000
 ```
 
 Abre `http://localhost:3000`. La interfaz muestra índices ambientales
-experimentales, no probabilidades ni predicciones validadas. Puedes marcar una o
+experimentales, no probabilidades ni predicciones validadas. Incluye selector de
+mapa base (`Mapa`, `Topo IGN` MTN y `Satélite PNOA` del IGN), capa opcional de
+Parques Nacionales y cotos Micocyl, filtros por fase de brotada y distancia GPS,
+gráfica de evolución 28 días + previsión 72 h, inspección bajo demanda en
+micro-detalle (7 sub-zonas H3-9 o 49 micro-zonas H3-10), guardado de **zonas
+habituales** y un **diario local de setales** (100 % privado en `localStorage` del
+navegador, con exportación/importación JSON y descarga GPX). Puedes marcar una o
 varias especies; al seleccionar una celda se muestran sus indicadores de
 hábitat, altitud, pH y meteorología. La capa inicial «Índice combinado» calcula
 la media geométrica de los índices experimentales de hábitat y tiempo para cada
@@ -201,6 +227,9 @@ tiendas. Necesita HTTPS para instalarse, por eso se recomienda GitHub Pages.
 4. En `Actions`, permite las acciones si GitHub muestra una confirmación. El
    primer despliegue comienza al subir `main`; también puedes ejecutarlo con
    `Actions > Actualizar y publicar Mapa setero > Run workflow`.
+   Opcionalmente, si añades tu clave gratuita de AEMET OpenData como secreto
+   `AEMET_API_KEY` en `Settings > Secrets and variables > Actions`, las
+   ejecuciones automáticas calibrarán el sesgo regional de precipitación y mínimas.
 5. Cuando termine correctamente, visita
    `https://TU_USUARIO.github.io/mapa-setero/`.
 6. En Android, abre esa dirección con Chrome y selecciona **Instalar app** o

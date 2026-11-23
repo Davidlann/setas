@@ -3,6 +3,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from backend.config.settings import TARGET_REGION_BOUNDS
+from backend.src.ingestion.dynamic.aemet_opendata import calibrate_weather_records_with_aemet
 from backend.src.ingestion.dynamic.meteo_openmeteo import (
     OpenMeteoClient,
     WEATHER_GRID_STEP_DEG,
@@ -89,6 +90,11 @@ def refresh_weather_snapshots(db=None, meteo_client=None):
             "water_balance_14d_mm": weather.get("water_balance_14d_mm"),
             "thermal_shock_celsius": weather.get("thermal_shock_celsius"),
             "wind_max_14d_kmh": weather.get("wind_max_14d_kmh"),
+            "snowfall_7d_cm": weather.get("snowfall_7d_cm"),
+            "snowfall_3d_fc_cm": weather.get("snowfall_3d_fc_cm"),
+            "radiation_mean_7d_mj": weather.get("radiation_mean_7d_mj"),
+            "forecast_3d_precip_daily": weather.get("forecast_3d_precip_daily"),
+            "forecast_3d_temp_min_daily": weather.get("forecast_3d_temp_min_daily"),
             "frost_days_7d": weather.get("frost_days_7d"),
             "frost_days_14d": weather.get("frost_days_14d"),
             "hard_frost_28d": weather.get("hard_frost_28d"),
@@ -97,11 +103,21 @@ def refresh_weather_snapshots(db=None, meteo_client=None):
             "forecast_3d_precip_mm": weather.get("forecast_3d_precip_mm"),
             "forecast_3d_temp_min_celsius": weather.get("forecast_3d_temp_min_celsius"),
             "forecast_3d_temp_mean_celsius": weather.get("forecast_3d_temp_mean_celsius"),
+            "aemet_calibrated": False,
+            "aemet_stations_used": 0,
             "weather_source": weather["weather_source"],
             "weather_sampling_step_deg": weather["weather_sampling_step_deg"],
             "weather_interpolation": weather["weather_interpolation"],
             "weather_nearest_distance_km": weather["weather_nearest_distance_km"],
         })
+
+    cell_meta_by_h3 = {
+        cell["h3_index"]: (cell["latitude"], cell["longitude"], cell["elevation_m"])
+        for cell in cells
+    }
+    records, aemet_info = calibrate_weather_records_with_aemet(
+        records, cell_meta_by_h3, snapshot_date
+    )
 
     db.upsert_meteo_snapshot(records, snapshot_date)
     if hasattr(db, "prune_old_meteo_snapshots"):
@@ -118,6 +134,8 @@ def refresh_weather_snapshots(db=None, meteo_client=None):
         "max_nearest_source_distance_km": max(
             record["weather_nearest_distance_km"] for record in records
         ),
+        "aemet_calibrated": bool(aemet_info.get("aemet_calibrated")),
+        "aemet_stations_used": int(aemet_info.get("aemet_stations_used", 0)),
         "records": records,
     }
 
