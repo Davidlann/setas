@@ -15,6 +15,7 @@ TARGET_SPECIES = {
     "boletus_aereus": 8733688,
     "boletus_pinophilus": 5954949,
     "boletus_reticulatus": 5954691,
+    "lactarius_deliciosus": 5248629,
 }
 MAX_COORDINATE_UNCERTAINTY_M = 250
 CSV_FIELDS = (

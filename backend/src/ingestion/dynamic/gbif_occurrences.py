@@ -13,6 +13,7 @@ TARGET_TAXA = {
     8733688: "Boletus aereus",
     5954949: "Boletus pinophilus",
     5954691: "Boletus reticulatus",
+    5248629: "Lactarius deliciosus",
 }
 PAGE_SIZE = 300
 MAX_COORDINATE_UNCERTAINTY_M = 1000
@@ -127,12 +128,13 @@ def ingest_gbif_occurrences():
         """)
         con.execute("BEGIN TRANSACTION")
         try:
+            taxon_placeholders = ", ".join("?" for _ in TARGET_TAXA)
             con.execute(
-                "DELETE FROM fungal_occurrences WHERE taxon_key IN (?, ?, ?, ?)",
+                f"DELETE FROM fungal_occurrences WHERE taxon_key IN ({taxon_placeholders})",
                 list(TARGET_TAXA),
             )
             con.execute(
-                "DELETE FROM fungal_occurrence_provenance WHERE taxon_key IN (?, ?, ?, ?)",
+                f"DELETE FROM fungal_occurrence_provenance WHERE taxon_key IN ({taxon_placeholders})",
                 list(TARGET_TAXA),
             )
             con.executemany("""

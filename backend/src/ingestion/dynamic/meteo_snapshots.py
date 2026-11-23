@@ -13,7 +13,7 @@ from backend.src.processing.duckdb_manager import DuckDBManager
 def refresh_weather_snapshots(db=None, meteo_client=None):
     """Descarga e interpola meteo para celdas forestales dentro del área objetivo."""
     db = db or DuckDBManager()
-    meteo_client = meteo_client or OpenMeteoClient(request_delay_seconds=1.0)
+    meteo_client = meteo_client or OpenMeteoClient(request_delay_seconds=0.8)
     min_lon, min_lat, max_lon, max_lat = TARGET_REGION_BOUNDS
 
     with db.get_connection() as con:
@@ -42,19 +42,17 @@ def refresh_weather_snapshots(db=None, meteo_client=None):
         }
         for row in rows
     ]
-    lats = [cell["latitude"] for cell in cells]
-    lons = [cell["longitude"] for cell in cells]
-    padding = WEATHER_GRID_STEP_DEG
-    meteo_grid = meteo_client.fetch_weather_for_bbox_grid(
-        min_lat=min(lats) - padding,
-        max_lat=max(lats) + padding,
-        min_lon=min(lons) - padding,
-        max_lon=max(lons) + padding,
-        grid_step_deg=WEATHER_GRID_STEP_DEG,
-        past_days=14,
-    )
     coordinates = [(cell["latitude"], cell["longitude"]) for cell in cells]
     elevations = [cell["elevation_m"] for cell in cells]
+    grid_coords = OpenMeteoClient.build_forest_covering_grid(
+        coordinates, grid_step_deg=WEATHER_GRID_STEP_DEG
+    )
+    meteo_grid = meteo_client.fetch_weather_for_coords(
+        grid_coords,
+        grid_step_deg=WEATHER_GRID_STEP_DEG,
+        past_days=28,
+        forecast_days=3,
+    )
     interpolated = meteo_client.batch_interpolate_weather(
         coordinates,
         meteo_grid,
@@ -68,10 +66,16 @@ def refresh_weather_snapshots(db=None, meteo_client=None):
         records.append({
             "h3_index": cell["h3_index"],
             "precip_daily_mm": weather["precip_daily_mm"],
+            "precip_daily_28d_mm": weather.get("precip_daily_28d_mm"),
+            "soil_temp_daily_28d_c": weather.get("soil_temp_daily_28d_c"),
+            "temp_min_daily_28d_c": weather.get("temp_min_daily_28d_c"),
+            "soil_moisture_daily_28d_pct": weather.get("soil_moisture_daily_28d_pct"),
             "precip_last_3d_mm": weather.get("precip_last_3d_mm"),
             "precip_accum_7d_mm": weather["precip_accum_7d_mm"],
             "precip_accum_10d_mm": weather["precip_accum_10d_mm"],
             "precip_accum_14d_mm": weather["precip_accum_14d_mm"],
+            "precip_accum_28d_mm": weather.get("precip_accum_28d_mm"),
+            "precip_15_28d_mm": weather.get("precip_15_28d_mm"),
             "temp_mean_14d_celsius": weather["temp_mean_14d_celsius"],
             "temp_mean_recent_3d_celsius": weather.get("temp_mean_recent_3d_celsius"),
             "temp_min_14d_celsius": weather["temp_min_14d_celsius"],
@@ -79,10 +83,20 @@ def refresh_weather_snapshots(db=None, meteo_client=None):
             "soil_moisture_percent": weather["soil_moisture_percent"],
             "humidity_mean_7d_percent": weather.get("humidity_mean_7d_percent"),
             "soil_temp_mean_14d_celsius": weather.get("soil_temp_mean_14d_celsius"),
+            "soil_temp_0_7cm_3d_celsius": weather.get("soil_temp_0_7cm_3d_celsius"),
+            "soil_temp_root_mean_14d_celsius": weather.get("soil_temp_root_mean_14d_celsius"),
             "et0_accum_14d_mm": weather.get("et0_accum_14d_mm"),
             "water_balance_14d_mm": weather.get("water_balance_14d_mm"),
             "thermal_shock_celsius": weather.get("thermal_shock_celsius"),
             "wind_max_14d_kmh": weather.get("wind_max_14d_kmh"),
+            "frost_days_7d": weather.get("frost_days_7d"),
+            "frost_days_14d": weather.get("frost_days_14d"),
+            "hard_frost_28d": weather.get("hard_frost_28d"),
+            "pre_rain_dry_streak_days": weather.get("pre_rain_dry_streak_days"),
+            "pre_rain_min_soil_moisture_pct": weather.get("pre_rain_min_soil_moisture_pct"),
+            "forecast_3d_precip_mm": weather.get("forecast_3d_precip_mm"),
+            "forecast_3d_temp_min_celsius": weather.get("forecast_3d_temp_min_celsius"),
+            "forecast_3d_temp_mean_celsius": weather.get("forecast_3d_temp_mean_celsius"),
             "weather_source": weather["weather_source"],
             "weather_sampling_step_deg": weather["weather_sampling_step_deg"],
             "weather_interpolation": weather["weather_interpolation"],
@@ -90,6 +104,13 @@ def refresh_weather_snapshots(db=None, meteo_client=None):
         })
 
     db.upsert_meteo_snapshot(records, snapshot_date)
+    if hasattr(db, "prune_old_meteo_snapshots"):
+        pruned = db.prune_old_meteo_snapshots(keep_dates=2)
+        if pruned:
+            print(f"[DuckDB] Podadas {pruned} filas de snapshots antiguos.")
+    if hasattr(db, "compact_database"):
+        db.compact_database()
+        print("[DuckDB] Base compactada correctamente.")
     return {
         "snapshot_date": snapshot_date,
         "cells_count": len(records),

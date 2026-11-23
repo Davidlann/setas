@@ -20,7 +20,7 @@ OUTPUT_DIR = project_root / "frontend" / "public" / "data"
 DB_PATH = project_root / "backend" / "data" / "processed" / "mycologist_spatial.duckdb"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-SPECIES = ["boletus_edulis", "boletus_aereus", "boletus_pinophilus", "boletus_reticulatus"]
+SPECIES = ["boletus_edulis", "boletus_aereus", "boletus_pinophilus", "boletus_reticulatus", "lactarius_deliciosus"]
 
 def export_lightweight():
     con = duckdb.connect(str(DB_PATH))

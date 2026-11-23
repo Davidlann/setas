@@ -75,7 +75,7 @@ class FieldSurveyImportTests(unittest.TestCase):
             """).fetchone()[0]
         self.assertEqual(visits, 1)
         self.assertTrue(detections)
-        self.assertEqual(non_detections, 3)
+        self.assertEqual(non_detections, len(TARGET_SPECIES) - 1)
 
     def test_reimport_is_idempotent(self):
         self._write_csv([self._valid_row()])
@@ -96,7 +96,7 @@ class FieldSurveyImportTests(unittest.TestCase):
             )
             self.assertEqual(
                 con.execute("SELECT COUNT(*) FROM fungal_survey_detections").fetchone()[0],
-                4,
+                len(TARGET_SPECIES),
             )
 
     def test_importing_an_append_only_csv_keeps_prior_visits(self):

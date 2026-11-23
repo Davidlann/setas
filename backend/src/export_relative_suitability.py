@@ -15,12 +15,14 @@ SPECIES = (
     "boletus_aereus",
     "boletus_pinophilus",
     "boletus_reticulatus",
+    "lactarius_deliciosus",
 )
 GBIF_TAXON_KEYS = {
     "boletus_edulis": 5954958,
     "boletus_aereus": 8733688,
     "boletus_pinophilus": 5954949,
     "boletus_reticulatus": 5954691,
+    "lactarius_deliciosus": 5248629,
 }
 
 
@@ -49,13 +51,15 @@ def export_relative_suitability(
         static_table_columns = {
             row[0] for row in con.execute("DESCRIBE cells_static").fetchall()
         }
-        texture_select = ", ".join(
+        optional_static_select = ", ".join(
             f"c.{column}" if column in static_table_columns
             else f"NULL AS {column}"
             for column in (
                 "soil_sand_percent",
                 "soil_silt_percent",
                 "soil_clay_percent",
+                "tpi_m",
+                "soil_soc_g_kg",
             )
         )
         meteo_table_columns = {
@@ -63,12 +67,20 @@ def export_relative_suitability(
         }
         weather_metadata_columns = (
             "precip_daily_mm_json",
+            "precip_daily_28d_mm_json",
+            "soil_temp_daily_28d_json",
+            "temp_min_daily_28d_json",
+            "soil_moisture_daily_28d_json",
             "precip_last_3d_mm",
+            "precip_accum_28d_mm",
+            "precip_15_28d_mm",
             "weather_source",
             "weather_sampling_step_deg",
             "weather_interpolation",
             "weather_nearest_distance_km",
             "soil_temp_mean_14d_celsius",
+            "soil_temp_0_7cm_3d_celsius",
+            "soil_temp_root_mean_14d_celsius",
             "temp_mean_recent_3d_celsius",
             "temp_min_recent_3d_celsius",
             "humidity_mean_7d_percent",
@@ -76,6 +88,14 @@ def export_relative_suitability(
             "water_balance_14d_mm",
             "thermal_shock_celsius",
             "wind_max_14d_kmh",
+            "frost_days_7d",
+            "frost_days_14d",
+            "hard_frost_28d",
+            "pre_rain_dry_streak_days",
+            "pre_rain_min_soil_moisture_pct",
+            "forecast_3d_precip_mm",
+            "forecast_3d_temp_min_celsius",
+            "forecast_3d_temp_mean_celsius",
         )
         metadata_select = ", ".join(
             f"m.{column}" if column in meteo_table_columns
@@ -86,7 +106,7 @@ def export_relative_suitability(
             SELECT
                 c.h3_index, c.latitude, c.longitude, c.elevation_m, c.slope_deg,
                 c.aspect_cardinal, c.soil_ph, c.soil_ph_q05, c.soil_ph_q95,
-                {texture_select},
+                {optional_static_select},
                 c.dominant_species, c.canopy_cover, c.environmental_data_quality,
                 m.precip_accum_14d_mm, m.temp_mean_14d_celsius,
                 m.temp_min_14d_celsius, m.soil_moisture_percent,
@@ -137,7 +157,7 @@ def export_relative_suitability(
             for key in (
                 "elevation_m", "soil_ph", "soil_ph_q05", "dominant_species",
                 "canopy_cover", "soil_sand_percent", "soil_silt_percent",
-                "soil_clay_percent",
+                "soil_clay_percent", "tpi_m", "soil_soc_g_kg",
             )
         }
         if engine.has_potential_habitat(static):
@@ -145,7 +165,7 @@ def export_relative_suitability(
     if not candidate_rows:
         raise RuntimeError(
             "Ninguna celda supera las exclusiones estáticas de hábitat "
-            "para las cuatro especies."
+            "para las especies configuradas."
         )
     excluded_cell_count = len(rows) - len(candidate_rows)
 
@@ -177,9 +197,10 @@ def export_relative_suitability(
                 2,
             ),
             "resolution_note": (
-                "La malla de consulta y la interpolación IDW-4 con ajuste "
-                "altitudinal suavizan la asignación, pero el modelo meteorológico "
-                "sigue siendo regional y no resuelve el microclima de cada hexágono H3."
+                "Ventana meteorológica de 28 días + previsión de 3 días interpolada con "
+                "IDW-4 y ajuste altitudinal (-0,6 °C/100 m aire; -0,45 °C/100 m suelo "
+                "0–28 cm), pero sigue siendo modelo regional y no resuelve el microclima "
+                "exacto de cada hexágono H3."
             ),
         }
     else:
@@ -214,12 +235,15 @@ def export_relative_suitability(
                     "elevation_m", "slope_deg", "aspect_cardinal",
                     "soil_ph", "soil_ph_q05", "dominant_species", "canopy_cover",
                     "soil_sand_percent", "soil_silt_percent", "soil_clay_percent",
+                    "tpi_m", "soil_soc_g_kg",
                     "environmental_data_quality",
                 )
             }
             meteo = {
                 "snapshot_date": snapshot_date_iso,
                 "precip_accum_14d_mm": source["precip_accum_14d_mm"],
+                "precip_accum_28d_mm": source.get("precip_accum_28d_mm"),
+                "precip_15_28d_mm": source.get("precip_15_28d_mm"),
                 "precip_last_3d_mm": source.get("precip_last_3d_mm"),
                 "temp_mean_14d_celsius": source["temp_mean_14d_celsius"],
                 "temp_mean_recent_3d_celsius": source.get("temp_mean_recent_3d_celsius"),
@@ -228,14 +252,36 @@ def export_relative_suitability(
                 "soil_moisture_percent": source["soil_moisture_percent"],
                 "humidity_mean_7d_percent": source.get("humidity_mean_7d_percent"),
                 "soil_temp_mean_14d_celsius": source.get("soil_temp_mean_14d_celsius"),
+                "soil_temp_0_7cm_3d_celsius": source.get("soil_temp_0_7cm_3d_celsius"),
+                "soil_temp_root_mean_14d_celsius": source.get("soil_temp_root_mean_14d_celsius"),
                 "et0_accum_14d_mm": source.get("et0_accum_14d_mm"),
                 "water_balance_14d_mm": source.get("water_balance_14d_mm"),
                 "thermal_shock_celsius": source.get("thermal_shock_celsius"),
                 "wind_max_14d_kmh": source.get("wind_max_14d_kmh"),
+                "frost_days_7d": source.get("frost_days_7d"),
+                "frost_days_14d": source.get("frost_days_14d"),
+                "hard_frost_28d": source.get("hard_frost_28d"),
+                "pre_rain_dry_streak_days": source.get("pre_rain_dry_streak_days"),
+                "pre_rain_min_soil_moisture_pct": source.get("pre_rain_min_soil_moisture_pct"),
+                "forecast_3d_precip_mm": source.get("forecast_3d_precip_mm"),
+                "forecast_3d_temp_min_celsius": source.get("forecast_3d_temp_min_celsius"),
+                "forecast_3d_temp_mean_celsius": source.get("forecast_3d_temp_mean_celsius"),
             }
-            if source["precip_daily_mm_json"]:
+            if source.get("precip_daily_mm_json"):
                 meteo["precip_daily_mm"] = json.loads(
                     source["precip_daily_mm_json"]
+                )
+            if source.get("precip_daily_28d_mm_json"):
+                meteo["precip_daily_28d_mm"] = json.loads(
+                    source["precip_daily_28d_mm_json"]
+                )
+            if source.get("soil_temp_daily_28d_json"):
+                meteo["soil_temp_daily_28d_c"] = json.loads(
+                    source["soil_temp_daily_28d_json"]
+                )
+            if source.get("temp_min_daily_28d_json"):
+                meteo["temp_min_daily_28d_c"] = json.loads(
+                    source["temp_min_daily_28d_json"]
                 )
             result = engine.calculate_relative_suitability(
                 species_id, static, meteo, season_phase=season_phase
@@ -250,10 +296,14 @@ def export_relative_suitability(
                 "st": result["status"],
                 "reason": result["reason"],
                 "host": breakdown.get("host_assessment", "unknown"),
+                "htier": breakdown.get("host_tier"),
+                "lhab": breakdown.get("host_leaf_habit"),
+                "fp": breakdown.get("flush_phase"),
                 "lat": source["latitude"],
                 "lon": source["longitude"],
                 "elev": source["elevation_m"],
                 "slope": source["slope_deg"],
+                "tpi": source.get("tpi_m"),
                 "asp": {"SW": "SO", "W": "O", "NW": "NO"}.get(
                     str(source["aspect_cardinal"]).upper(),
                     source["aspect_cardinal"],
@@ -265,12 +315,15 @@ def export_relative_suitability(
                 "sand": source["soil_sand_percent"],
                 "silt": source["soil_silt_percent"],
                 "clay": source["soil_clay_percent"],
+                "soc": source.get("soil_soc_g_kg"),
                 "soil_texture_score_max": engine.config[
                     "soil_texture_scoring"
                 ]["max_points"],
                 "tree": source["dominant_species"],
                 "cc": source["canopy_cover"],
                 "p14": meteo["precip_accum_14d_mm"],
+                "p28": breakdown.get("precip_accum_28d_mm"),
+                "pold": breakdown.get("precip_15_28d_mm"),
                 "p3": breakdown.get("precip_last_3d_mm"),
                 "pinc": breakdown.get("precip_incubation_mm"),
                 "prec": breakdown.get("precip_recent_4d_mm"),
@@ -280,15 +333,23 @@ def export_relative_suitability(
                 "t3": breakdown.get("temp_recent_3d_c"),
                 "tmin": meteo["temp_min_14d_celsius"],
                 "tmin3": breakdown.get("temp_min_recent_3d_c"),
+                "f7": breakdown.get("frost_days_7d"),
+                "hf28": breakdown.get("hard_frost_28d"),
                 "moist": meteo["soil_moisture_percent"],
                 "rh": breakdown.get("humidity_mean_7d_pct"),
                 "stemp": breakdown.get("soil_temp_mean_c"),
+                "st07": breakdown.get("soil_temp_0_7cm_3d_c"),
                 "wb": breakdown.get("water_balance_14d_mm"),
+                "drg": breakdown.get("drought_factor"),
+                "wl": breakdown.get("waterlog_factor"),
                 "tshock": breakdown.get("thermal_shock_celsius"),
                 "tshock_status": breakdown.get("thermal_shock_status"),
                 "wind": breakdown.get("wind_max_14d_kmh"),
                 "phen": breakdown.get("phenology_factor"),
                 "sstat": breakdown.get("season_status"),
+                "fc_r": breakdown.get("forecast_3d_precip_mm"),
+                "fc_tn": breakdown.get("forecast_3d_temp_min_celsius"),
+                "fc_out": breakdown.get("forecast_outlook"),
                 "weather_distance_km": source["weather_nearest_distance_km"],
                 "met": breakdown.get("meteorology"),
                 "p_pts": breakdown.get("precip_score"),
@@ -369,13 +430,13 @@ def export_relative_suitability(
                 "son experimentales y no están calibrados por especie ni con observaciones.",
                 "Si falta alguna fracción de textura, no se aplica ni bonificación ni "
                 "penalización textural; se conserva el cálculo edáfico basado en pH.",
-                "La lluvia eficaz usa una ponderación de 14 días junto con la humedad superficial y radicular de los últimos 3 días.",
+                "La lluvia eficaz usa tiempo térmico acumulado sobre 28 días, temperatura del suelo radicular (0–28 cm) y previsión a 3 días.",
                 "Solo se exportan celdas que pasan las exclusiones estáticas de hábitat "
                 "para al menos una especie; hospedadores mixtos no identificados se conservan.",
                 "El filtro común no elimina celdas por meteorología, que cambia "
                 "en la actualización diaria.",
-                "Meteo de los últimos 14 días interpolada desde una malla regional con corrección altitudinal.",
-                "Relieve y suelo de 200/250 m; las celdas H3 son más pequeñas.",
+                "Meteo de los últimos 28 días y previsión a 3 días interpolada desde malla regional con corrección altitudinal.",
+                "Relieve (elevación, pendiente, orientación y TPI) de 200 m y suelo (pH, textura y SOC) de 250 m; las celdas H3 son más pequeñas.",
                 "Los registros oportunistas de GBIF no corrigen el esfuerzo de observación.",
             ],
             "cells": cells,

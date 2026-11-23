@@ -17,7 +17,7 @@ from backend.src.export_geojson import export_all_species
 
 def run_daily_pipeline(target_species: List[str] = None):
     if target_species is None:
-        target_species = ["boletus_edulis", "boletus_aereus", "boletus_pinophilus", "boletus_reticulatus"]
+        target_species = ["boletus_edulis", "boletus_aereus", "boletus_pinophilus", "boletus_reticulatus", "lactarius_deliciosus"]
 
     print("[1/5] Conectando con la base espacial DuckDB...")
     db = DuckDBManager()
@@ -86,7 +86,7 @@ def run_daily_pipeline(target_species: List[str] = None):
         "Los valores siguen siendo de resolución meteorológica regional."
     )
 
-    print(f"[4/5] Ejecutando Motor Paramétrico de Scoring para las 4 especies de Boletus...")
+    print(f"[4/5] Ejecutando Motor Paramétrico de Scoring para las {len(target_species)} especies configuradas...")
     engine = MushroomScoringEngine()
     all_scores = []
 

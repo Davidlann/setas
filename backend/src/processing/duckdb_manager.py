@@ -4,6 +4,8 @@ Maneja tablas de celdas estáticas, métricas meteorológicas y scores diarios s
 """
 from typing import List, Dict, Any, Optional
 import json
+import os
+import tempfile
 import duckdb
 from pathlib import Path
 from backend.config.settings import DB_PATH, TARGET_REGION_BOUNDS
@@ -50,6 +52,8 @@ class DuckDBManager:
                 "soil_sand_percent",
                 "soil_silt_percent",
                 "soil_clay_percent",
+                "tpi_m",
+                "soil_soc_g_kg",
             ):
                 con.execute(
                     f"ALTER TABLE cells_static ADD COLUMN IF NOT EXISTS {column} DOUBLE"
@@ -85,6 +89,22 @@ class DuckDBManager:
                 ("water_balance_14d_mm", "DOUBLE"),
                 ("thermal_shock_celsius", "DOUBLE"),
                 ("wind_max_14d_kmh", "DOUBLE"),
+                ("precip_daily_28d_mm_json", "VARCHAR"),
+                ("soil_temp_daily_28d_json", "VARCHAR"),
+                ("temp_min_daily_28d_json", "VARCHAR"),
+                ("soil_moisture_daily_28d_json", "VARCHAR"),
+                ("soil_temp_0_7cm_3d_celsius", "DOUBLE"),
+                ("soil_temp_root_mean_14d_celsius", "DOUBLE"),
+                ("precip_accum_28d_mm", "DOUBLE"),
+                ("precip_15_28d_mm", "DOUBLE"),
+                ("frost_days_7d", "INTEGER"),
+                ("frost_days_14d", "INTEGER"),
+                ("hard_frost_28d", "BOOLEAN"),
+                ("pre_rain_dry_streak_days", "INTEGER"),
+                ("pre_rain_min_soil_moisture_pct", "DOUBLE"),
+                ("forecast_3d_precip_mm", "DOUBLE"),
+                ("forecast_3d_temp_min_celsius", "DOUBLE"),
+                ("forecast_3d_temp_mean_celsius", "DOUBLE"),
             ):
                 con.execute(
                     f"ALTER TABLE meteo_snapshots ADD COLUMN IF NOT EXISTS "
@@ -135,6 +155,11 @@ class DuckDBManager:
         if not records:
             return
 
+        def dump_json_opt(value: Any) -> Optional[str]:
+            if value is None:
+                return None
+            return json.dumps(value, separators=(",", ":"))
+
         with self.get_connection() as con:
             con.executemany("""
                 INSERT OR REPLACE INTO meteo_snapshots (
@@ -147,13 +172,21 @@ class DuckDBManager:
                     weather_nearest_distance_km,
                     soil_temp_mean_14d_celsius, et0_accum_14d_mm,
                     water_balance_14d_mm, thermal_shock_celsius,
-                    wind_max_14d_kmh
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    wind_max_14d_kmh,
+                    precip_daily_28d_mm_json, soil_temp_daily_28d_json,
+                    temp_min_daily_28d_json, soil_moisture_daily_28d_json,
+                    soil_temp_0_7cm_3d_celsius, soil_temp_root_mean_14d_celsius,
+                    precip_accum_28d_mm, precip_15_28d_mm,
+                    frost_days_7d, frost_days_14d, hard_frost_28d,
+                    pre_rain_dry_streak_days, pre_rain_min_soil_moisture_pct,
+                    forecast_3d_precip_mm, forecast_3d_temp_min_celsius,
+                    forecast_3d_temp_mean_celsius
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, [
                 (
                     r["h3_index"], snapshot_date, r["precip_accum_7d_mm"], r["precip_accum_10d_mm"],
                     r["precip_accum_14d_mm"], r.get("precip_last_3d_mm"),
-                    json.dumps(r["precip_daily_mm"], separators=(",", ":")),
+                    dump_json_opt(r.get("precip_daily_mm")),
                     r["temp_mean_14d_celsius"], r.get("temp_mean_recent_3d_celsius"),
                     r["temp_min_14d_celsius"], r.get("temp_min_recent_3d_celsius"),
                     r["soil_moisture_percent"], r.get("humidity_mean_7d_percent"), r.get("weather_source"),
@@ -163,10 +196,82 @@ class DuckDBManager:
                     r.get("et0_accum_14d_mm"),
                     r.get("water_balance_14d_mm"),
                     r.get("thermal_shock_celsius"),
-                    r.get("wind_max_14d_kmh")
+                    r.get("wind_max_14d_kmh"),
+                    dump_json_opt(r.get("precip_daily_28d_mm")),
+                    dump_json_opt(r.get("soil_temp_daily_28d_c")),
+                    dump_json_opt(r.get("temp_min_daily_28d_c")),
+                    dump_json_opt(r.get("soil_moisture_daily_28d_pct")),
+                    r.get("soil_temp_0_7cm_3d_celsius"),
+                    r.get("soil_temp_root_mean_14d_celsius"),
+                    r.get("precip_accum_28d_mm"),
+                    r.get("precip_15_28d_mm"),
+                    r.get("frost_days_7d"),
+                    r.get("frost_days_14d"),
+                    bool(r["hard_frost_28d"]) if r.get("hard_frost_28d") is not None else None,
+                    r.get("pre_rain_dry_streak_days"),
+                    float(r["pre_rain_min_soil_moisture_pct"]) if r.get("pre_rain_min_soil_moisture_pct") is not None else None,
+                    r.get("forecast_3d_precip_mm"),
+                    r.get("forecast_3d_temp_min_celsius"),
+                    r.get("forecast_3d_temp_mean_celsius"),
                 )
                 for r in records
             ])
+
+    def prune_old_meteo_snapshots(self, keep_dates: int = 2) -> int:
+        """Elimina snapshots antiguos conservando únicamente las fechas más recientes."""
+        if keep_dates < 1:
+            raise ValueError("keep_dates debe ser al menos 1.")
+        with self.get_connection() as con:
+            to_delete = con.execute("""
+                SELECT COUNT(*)
+                FROM meteo_snapshots
+                WHERE snapshot_date NOT IN (
+                    SELECT DISTINCT snapshot_date
+                    FROM meteo_snapshots
+                    ORDER BY snapshot_date DESC
+                    LIMIT ?
+                )
+            """, [keep_dates]).fetchone()[0]
+            if to_delete:
+                con.execute("""
+                    DELETE FROM meteo_snapshots
+                    WHERE snapshot_date NOT IN (
+                        SELECT DISTINCT snapshot_date
+                        FROM meteo_snapshots
+                        ORDER BY snapshot_date DESC
+                        LIMIT ?
+                    )
+                """, [keep_dates])
+        return int(to_delete)
+
+    def compact_database(self) -> None:
+        """Reconstruye atómicamente la base DuckDB para recuperar espacio tras podas."""
+        if self.db_path == ":memory:":
+            with self.get_connection() as con:
+                con.execute("CHECKPOINT")
+            return
+
+        db_path = Path(self.db_path)
+        with tempfile.NamedTemporaryFile(
+            dir=db_path.parent, suffix=".compact.duckdb", delete=False
+        ) as temp_file:
+            temp_path = Path(temp_file.name)
+        temp_path.unlink(missing_ok=True)
+        temp_wal = Path(f"{temp_path}.wal")
+
+        try:
+            with self.get_connection() as con:
+                con.execute("CHECKPOINT")
+                current_db = con.execute("SELECT current_database()").fetchone()[0]
+                quoted_db = '"' + str(current_db).replace('"', '""') + '"'
+                con.execute("ATTACH ? AS compacted", [str(temp_path)])
+                con.execute(f"COPY FROM DATABASE {quoted_db} TO compacted")
+                con.execute("DETACH compacted")
+            os.replace(temp_path, db_path)
+            Path(f"{db_path}.wal").unlink(missing_ok=True)
+        finally:
+            temp_path.unlink(missing_ok=True)
+            temp_wal.unlink(missing_ok=True)
 
     def upsert_scores(self, scores: List[Dict[str, Any]], calculation_date: str):
         """Inserta scores diarios calculados por especie."""

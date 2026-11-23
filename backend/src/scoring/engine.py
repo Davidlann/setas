@@ -51,8 +51,65 @@ class MushroomScoringEngine:
         return "early"
 
     @staticmethod
-    def _effective_soil_ph(cell_static_data: Dict[str, Any]) -> float:
-        """Calcula el pH efectivo del horizonte húmico combinando media y cuantil ácido (Q05)."""
+    def _smooth_trapezoid(
+        value: float, low_zero: float, opt_min: float, opt_max: float, high_zero: float
+    ) -> float:
+        """Función trapezoidal continua en [0.0, 1.0]."""
+        if opt_min <= value <= opt_max:
+            return 1.0
+        if value < opt_min:
+            if value <= low_zero:
+                return 0.0
+            return (value - low_zero) / max(1e-6, opt_min - low_zero)
+        if value >= high_zero:
+            return 0.0
+        return (high_zero - value) / max(1e-6, high_zero - opt_max)
+
+    @staticmethod
+    def _normalize_text(text: str) -> str:
+        normalized = unicodedata.normalize("NFKD", text.casefold())
+        normalized = "".join(
+            char for char in normalized if not unicodedata.combining(char)
+        )
+        return " ".join(normalized.split())
+
+    @classmethod
+    def _host_leaf_habit(cls, dominant_tree: str) -> str:
+        """Clasifica el hábito foliar del hospedador (evergreen_conifer, evergreen_broadleaf, deciduous, mixed)."""
+        normalized = cls._normalize_text(dominant_tree)
+        if "coniferas y frondosas" in normalized or "frondosas con" in normalized:
+            return "mixed"
+        if any(
+            token in normalized
+            for token in (
+                "pinus", "pino", "coniferas autoctonas", "coniferas aloctonas",
+                "sabinar", "enebral", "juniperus",
+            )
+        ):
+            return "evergreen_conifer"
+        if any(
+            token in normalized
+            for token in (
+                "quercus ilex", "encina", "quercus suber", "alcornoque",
+                "acebeda", "acebuchar",
+            )
+        ):
+            return "evergreen_broadleaf"
+        if any(
+            token in normalized
+            for token in (
+                "quercus pyrenaica", "melojar", "quercus petrae", "roble",
+                "quercus robur", "quercus faginea", "quejigar", "quejigo",
+                "fagus", "hayedo", "haya", "castanea", "castanar", "castano",
+                "betula", "abedul", "frondosas", "chopera", "riberen", "fresneda",
+            )
+        ):
+            return "deciduous"
+        return "mixed"
+
+    @classmethod
+    def _effective_soil_ph(cls, cell_static_data: Dict[str, Any]) -> float:
+        """Calcula el pH efectivo en humus amortiguado por carbonatos y tipo de hojarasca."""
         soil_ph = float(cell_static_data["soil_ph"])
         ph_q05 = cell_static_data.get("soil_ph_q05")
         if (
@@ -60,7 +117,21 @@ class MushroomScoringEngine:
             and math.isfinite(ph_q05)
             and 0.0 <= ph_q05 <= soil_ph
         ):
-            return round(soil_ph * 0.60 + float(ph_q05) * 0.40, 2)
+            dominant_tree = str(cell_static_data.get("dominant_species") or "")
+            leaf_habit = cls._host_leaf_habit(dominant_tree)
+            norm_tree = cls._normalize_text(dominant_tree)
+            is_acid_litter = (
+                leaf_habit == "evergreen_conifer"
+                or "fagus" in norm_tree
+                or "haya" in norm_tree
+                or "hayedo" in norm_tree
+                or "castan" in norm_tree
+            )
+            if soil_ph >= 6.8:
+                q_weight = 0.22 if leaf_habit == "evergreen_conifer" else 0.15
+            else:
+                q_weight = 0.30 if is_acid_litter else 0.22
+            return round(soil_ph * (1.0 - q_weight) + float(ph_q05) * q_weight, 2)
         return soil_ph
 
     @staticmethod
@@ -68,8 +139,10 @@ class MushroomScoringEngine:
         meteo_rules: Dict[str, Any],
         snapshot_date: Optional[str],
         elevation_m: Optional[float] = None,
+        leaf_habit: Optional[str] = None,
+        hard_frost_28d: bool = False,
     ) -> tuple[float, Optional[str]]:
-        """Calcula el factor fenológico estacional (0.05–1.0) según fecha y altitud."""
+        """Calcula el factor fenológico estacional (0.05–1.0) según fecha, altitud y dormancia foliar."""
         weights = meteo_rules.get("phenology_monthly_weights")
         if not weights or not snapshot_date:
             return 1.0, None
@@ -94,12 +167,27 @@ class MushroomScoringEngine:
         # Ajuste bioclimático por altitud en otoño tardío / primavera
         if isinstance(elevation_m, (int, float)) and math.isfinite(elevation_m):
             if month in (11, 12) and elevation_m >= 1300:
-                # En montaña (>=1300 m) en noviembre y diciembre la parada invernal llega antes
-                alt_penalty = min(0.45, (elevation_m - 1300.0) / 1400.0)
+                alt_penalty = min(0.38, (elevation_m - 1300.0) / 1500.0)
                 base_factor = max(0.15, base_factor - alt_penalty)
             elif month in (8, 9) and elevation_m >= 1400:
-                # En alta montaña la campaña otoñal arranca antes (finales de agosto/septiembre)
                 base_factor = min(1.0, base_factor + 0.12)
+
+        # Dormancia invernal en frondosas caducifolias tras caída foliar y heladas de noviembre
+        if leaf_habit == "deciduous" and (
+            month in (12, 1, 2, 3) or (month == 11 and parsed.day >= 10)
+        ):
+            if month == 11:
+                days_past = parsed.day - 10
+                dormancy = max(0.35, 1.0 - days_past * 0.032)
+            elif month in (12, 1, 2):
+                dormancy = 0.35
+            else:
+                dormancy = 0.50
+            if hard_frost_28d and (
+                not isinstance(elevation_m, (int, float)) or elevation_m >= 900
+            ):
+                dormancy *= 0.72
+            base_factor *= dormancy
 
         factor = round(max(0.05, min(1.0, base_factor)), 2)
         status = (
@@ -147,8 +235,10 @@ class MushroomScoringEngine:
         )
         result["data_quality"] = "sourced_unvalidated"
         result["score_type"] = "experimental_separated_habitat_weather"
-        result["combined_score"] = round(
-            math.sqrt(result["score"] * result["weather_score"]), 1
+        result["combined_score"] = (
+            round((result["score"] ** 0.40) * (result["weather_score"] ** 0.60), 1)
+            if result["score"] > 0 and result["weather_score"] > 0
+            else 0.0
         )
         return result
 
@@ -287,9 +377,12 @@ class MushroomScoringEngine:
         elevation = cell_static_data["elevation_m"]
         soil_ph = cell_static_data["soil_ph"]
         effective_soil_ph = self._effective_soil_ph(cell_static_data)
+        leaf_habit = self._host_leaf_habit(dominant_tree)
 
-        host_assessment, exclusion_reason = self._static_habitat_exclusion(
-            species_id, cell_static_data, allow_unknown_host=relative_mode
+        host_assessment, host_tier, host_multiplier, exclusion_reason = (
+            self._static_habitat_assessment(
+                species_id, cell_static_data, allow_unknown_host=relative_mode
+            )
         )
         host_details = {
             "host_assessment": (
@@ -297,6 +390,8 @@ class MushroomScoringEngine:
                 else "unknown" if host_assessment is None
                 else "incompatible"
             ),
+            "host_tier": host_tier,
+            "host_leaf_habit": leaf_habit,
             "host_tree": dominant_tree,
         }
         if exclusion_reason is not None and not relative_mode:
@@ -305,7 +400,7 @@ class MushroomScoringEngine:
             )
 
         # ==============================================================
-        # 2. PONDERACIÓN METEOROLÓGICA (Máximo 45 puntos)
+        # 2. PONDERACIÓN METEOROLÓGICA ACOPLADA (0–100 y equivalente 0–45)
         # ==============================================================
         meteo_rules = rules["meteorology"]
         precip_14d = cell_meteo_data["precip_accum_14d_mm"]
@@ -313,44 +408,88 @@ class MushroomScoringEngine:
         temp_min = cell_meteo_data["temp_min_14d_celsius"]
         soil_moisture = cell_meteo_data["soil_moisture_percent"]
 
-        # Factor Precipitación (0 a 25 pts)
         thresh_precip = meteo_rules["accumulated_precip_14d_threshold_mm"]
         opt_precip = meteo_rules["accumulated_precip_14d_optimal_mm"]
         lag_profile_name = meteo_rules.get("precipitation_lag_profile", "autumn_cool")
         lag_weights = self.PRECIPITATION_LAG_PROFILES.get(
             lag_profile_name, self.PRECIPITATION_LAG_WEIGHTS
         )
-        effective_precip = precip_14d
+
+        daily_p28 = cell_meteo_data.get("precip_daily_28d_mm")
+        daily_st28 = cell_meteo_data.get("soil_temp_daily_28d_c")
+        daily_tmin28 = cell_meteo_data.get("temp_min_daily_28d_c")
+
+        t_lo = float(meteo_rules.get("soil_temp_min_cutoff_celsius", 5.0))
+        t_hi = float(meteo_rules.get("soil_temp_max_cutoff_celsius", 24.0))
+        ref_speed_t = float(meteo_rules.get("thermal_speed_ref_celsius", 13.0))
+
+        eff_rain_active = precip_14d
+        eff_rain_tail = 0.0
         precip_incubation_mm = None
         precip_recent_4d_mm = cell_meteo_data.get("precip_last_3d_mm")
         rain_timing_status = None
-        if daily_precipitation is not None:
-            weight_mean = sum(lag_weights) / len(lag_weights)
-            effective_precip = sum(
-                rain * weight
-                for rain, weight in zip(
-                    reversed(daily_precipitation),
-                    lag_weights,
+        used_thermal_time_28d = False
+
+        if (
+            isinstance(daily_p28, list)
+            and len(daily_p28) == 28
+            and isinstance(daily_st28, list)
+            and len(daily_st28) == 28
+        ):
+            used_thermal_time_28d = True
+            cum_td = 0.0
+            eff_rain_active = 0.0
+            eff_rain_tail = 0.0
+            for age in range(28):
+                day_idx = 27 - age
+                day_st = float(daily_st28[day_idx])
+                speed = max(
+                    0.10,
+                    min(1.25, (day_st - t_lo) / max(2.0, ref_speed_t - t_lo)),
                 )
+                if age > 0:
+                    cum_td += speed
+                rain_day = float(daily_p28[day_idx])
+                if 3.5 <= cum_td <= 15.5:
+                    eff_rain_active += rain_day * self._smooth_trapezoid(
+                        cum_td, 3.5, 6.5, 11.5, 15.5
+                    )
+                if 10.5 <= cum_td <= 24.5:
+                    eff_rain_tail += rain_day * self._smooth_trapezoid(
+                        cum_td, 10.5, 13.0, 19.0, 24.5
+                    )
+            series_14 = daily_precipitation if daily_precipitation is not None else daily_p28[-14:]
+            precip_incubation_mm = round(sum(series_14[:10]), 2)
+            precip_recent_4d_mm = round(sum(series_14[10:]), 2)
+            if eff_rain_active >= thresh_precip * 0.75:
+                rain_timing_status = "optimal_incubation"
+            elif eff_rain_tail >= thresh_precip * 0.38:
+                rain_timing_status = "mature_tail"
+            elif (precip_recent_4d_mm or 0.0) >= thresh_precip * 0.40:
+                rain_timing_status = "too_recent_for_flush"
+            elif eff_rain_active >= thresh_precip * 0.35:
+                rain_timing_status = "moderate"
+            else:
+                rain_timing_status = "dry"
+        elif daily_precipitation is not None:
+            weight_mean = sum(lag_weights) / len(lag_weights)
+            eff_rain_active = sum(
+                rain * weight
+                for rain, weight in zip(reversed(daily_precipitation), lag_weights)
             ) / weight_mean
-            # Los 10 primeros valores son hace 4–13 días (ventana de incubación);
-            # los últimos 4 son hoy y los 3 días anteriores (lluvia demasiado reciente para brotar hoy).
             precip_incubation_mm = round(sum(daily_precipitation[:10]), 2)
             precip_recent_4d_mm = round(sum(daily_precipitation[10:]), 2)
             if precip_incubation_mm < thresh_precip * 0.25:
-                # Freno por dormancia: si apenas llovió hace 4–13 días, la tormenta de ayer/hoy aún no ha incubado
-                effective_precip = min(effective_precip, thresh_precip * 0.55)
+                eff_rain_active = min(eff_rain_active, thresh_precip * 0.55)
                 rain_timing_status = (
                     "too_recent_for_flush"
                     if precip_recent_4d_mm >= thresh_precip * 0.35
                     else "dry"
                 )
             elif precip_incubation_mm < thresh_precip * 0.75:
-                # Si la lluvia en ventana de incubación (hace 4–13 días) no alcanza el 75% del umbral,
-                # limitamos cuánto puede inflar la lluvia de los últimos 3–4 días para que no alcance el óptimo prematuramente
                 max_allowed = min(opt_precip * 0.85, precip_incubation_mm * 2.2)
-                if effective_precip > max_allowed:
-                    effective_precip = max_allowed
+                if eff_rain_active > max_allowed:
+                    eff_rain_active = max_allowed
                 rain_timing_status = (
                     "optimal_incubation"
                     if precip_incubation_mm >= thresh_precip * 0.60
@@ -366,28 +505,70 @@ class MushroomScoringEngine:
             else:
                 rain_timing_status = "moderate"
 
-        # Ajuste por balance hídrico (evapotranspiración) si está disponible
+        # Ajuste por balance hídrico (evapotranspiración)
         water_balance = cell_meteo_data.get("water_balance_14d_mm")
         if water_balance is not None:
             if water_balance < 0:
                 drying_factor = max(0.75, 1.0 + (water_balance / 140.0))
-                effective_precip *= drying_factor
+                eff_rain_active *= drying_factor
+                eff_rain_tail *= drying_factor
             elif water_balance > 25.0:
-                effective_precip = min(opt_precip * 1.2, effective_precip * 1.05)
+                eff_rain_active = min(opt_precip * 1.2, eff_rain_active * 1.05)
 
-        if effective_precip < thresh_precip:
-            # Lluvia insuficiente para romper la dormancia miceliar
-            precip_pts = (effective_precip / thresh_precip) * 8.0
-        elif effective_precip >= opt_precip:
-            precip_pts = 25.0
-        else:
-            # Rango entre umbral y óptimo
-            progress = (effective_precip - thresh_precip) / (opt_precip - thresh_precip)
-            precip_pts = 8.0 + progress * 17.0
+        def rain_curve(rain_mm: float) -> float:
+            if rain_mm < thresh_precip:
+                return (rain_mm / thresh_precip) * 0.35
+            if rain_mm >= opt_precip:
+                return 1.0
+            return 0.35 + 0.65 * (rain_mm - thresh_precip) / max(
+                1.0, opt_precip - thresh_precip
+            )
 
-        # Factor Temperatura Térmica (0 a 15 pts)
-        # Si se dispone de temperatura del suelo superficial (0-7 cm), se pondera con la temperatura ambiental
+        active_rain_idx = rain_curve(eff_rain_active)
+        tail_rain_idx = rain_curve(eff_rain_tail) * 0.68
+        rain_idx = (
+            max(active_rain_idx, min(1.0, active_rain_idx * 0.80 + tail_rain_idx * 0.45))
+            if used_thermal_time_28d
+            else active_rain_idx
+        )
+
+        # Arrastre de sequía prolongada previa a las lluvias
+        dry_streak = cell_meteo_data.get("pre_rain_dry_streak_days")
+        pre_rain_sm = cell_meteo_data.get("pre_rain_min_soil_moisture_pct")
+        drought_factor = 1.0
+        if (
+            isinstance(dry_streak, (int, float))
+            and isinstance(pre_rain_sm, (int, float))
+            and math.isfinite(pre_rain_sm)
+            and dry_streak >= 11
+            and pre_rain_sm < 19.5
+        ):
+            drought_factor = 0.72 + 0.28 * max(
+                0.0, min(1.0, (float(pre_rain_sm) - 13.0) / 6.5)
+            )
+
+        # Penalización por encharcamiento frío (anoxia radicular)
         soil_temp = cell_meteo_data.get("soil_temp_mean_14d_celsius")
+        waterlog_factor = 1.0
+        if (
+            soil_moisture >= 37.5
+            and soil_temp is not None
+            and soil_temp < 10.5
+            and precip_14d >= 70.0
+        ):
+            waterlog_factor = max(0.70, 1.0 - (soil_moisture - 36.5) * 0.05)
+
+        min_soil_m = meteo_rules.get("soil_moisture_min_percent", 20.0)
+        sm_idx = min(1.0, soil_moisture / max(1.0, min_soil_m + 2.0))
+        moisture_index = (
+            min(1.0, rain_idx * 0.82 + sm_idx * 0.18)
+            * drought_factor
+            * waterlog_factor
+        )
+        precip_pts = rain_idx * 25.0 * drought_factor * waterlog_factor
+        soil_pts = sm_idx * 5.0
+
+        # Índice térmico continuo (0..1) usando temperatura radicular + aérea
         temp_recent_3d = cell_meteo_data.get("temp_mean_recent_3d_celsius")
         air_temp_ref = (
             temp_recent_3d * 0.6 + temp_mean * 0.4
@@ -401,73 +582,109 @@ class MushroomScoringEngine:
             t_opt_min, t_opt_max = meteo_rules["mean_temp_optimal_celsius"]
             eval_temp = air_temp_ref
 
-        if t_opt_min <= eval_temp <= t_opt_max:
-            temp_pts = 15.0
-        elif abs(eval_temp - t_opt_min) <= 4.0 or abs(eval_temp - t_opt_max) <= 4.0:
-            temp_pts = 9.0
-        else:
-            temp_pts = 3.0
+        thermal_index = self._smooth_trapezoid(
+            eval_temp, t_lo, t_opt_min, t_opt_max, t_hi
+        )
 
-        # Choque térmico (disparador fisiológico de fructificación otoñal/estival)
-        thermal_shock = cell_meteo_data.get("thermal_shock_celsius")
-        thermal_shock_status = None
-        thermal_shock_adj = 0.0
-        if thermal_shock is not None:
-            shock_trigger = meteo_rules.get("thermal_shock_trigger")
-            if shock_trigger is True:
-                # Especies otoñales que responden a caída térmica tras lluvia acumulada
-                if thermal_shock <= -2.0 and effective_precip >= thresh_precip:
-                    thermal_shock_adj = 2.5
-                    thermal_shock_status = "triggered_favorable"
-                elif thermal_shock > 2.0:
-                    thermal_shock_adj = -2.0
-                    thermal_shock_status = "warming_inhibited"
-                else:
-                    thermal_shock_status = "stable"
-            elif shock_trigger is False:
-                # Especies termófilas que se inhiben ante frío prematuro
-                if thermal_shock <= -3.5:
-                    thermal_shock_adj = -4.0
-                    thermal_shock_status = "cold_suppressed"
-                elif thermal_shock >= 0.0:
-                    thermal_shock_status = "warm_favorable"
-                else:
-                    thermal_shock_status = "stable"
+        st07_recent = cell_meteo_data.get("soil_temp_0_7cm_3d_celsius")
+        if (
+            isinstance(st07_recent, (int, float))
+            and math.isfinite(st07_recent)
+            and st07_recent < t_lo + 0.5
+        ):
+            thermal_index *= max(
+                0.20,
+                self._smooth_trapezoid(
+                    float(st07_recent), t_lo - 2.0, t_lo + 1.0, 25.0, 30.0
+                ),
+            )
 
-        # Penalización por heladas destructivas del carpóforo (priorizando últimos 3 días si existe,
-        # pero manteniendo penalización parcial si hubo heladas fuertes durante la ventana de incubación de 14d)
-        min_limit = meteo_rules.get("min_temp_limit_celsius", 0.0)
+        # Penalización graduada por heladas recientes y días con helada
+        min_limit = float(meteo_rules.get("min_temp_limit_celsius", 0.0))
         temp_min_recent = cell_meteo_data.get("temp_min_recent_3d_celsius")
         has_recent_min = (
             isinstance(temp_min_recent, (int, float))
             and math.isfinite(temp_min_recent)
         )
+        frost_days_species_7d = 0
+        if isinstance(daily_tmin28, list) and len(daily_tmin28) == 28:
+            frost_days_species_7d = sum(
+                1 for t_val in daily_tmin28[-7:] if t_val < min_limit
+            )
+        elif (
+            cell_meteo_data.get("frost_days_7d") is not None
+            and abs(min_limit - 0.5) < 0.6
+        ):
+            frost_days_species_7d = int(cell_meteo_data["frost_days_7d"])
+
         if has_recent_min:
             if float(temp_min_recent) < min_limit:
-                temp_pts *= 0.3  # Helada reciente en los últimos 3 días: daño directo al carpóforo
-            elif temp_min < min_limit - 3.0:
-                temp_pts *= 0.65  # Helada severa durante la incubación (14d)
+                severity = min(1.0, (min_limit - float(temp_min_recent)) / 3.0)
+                thermal_index *= max(0.10, 0.45 - 0.35 * severity)
+            elif frost_days_species_7d >= 2:
+                thermal_index *= 0.55
+            elif temp_min < min_limit - 2.0:
+                thermal_index *= 0.75
             elif temp_min < min_limit:
-                temp_pts *= 0.85  # Helada moderada previa en la ventana de 14d
+                thermal_index *= 0.88
         else:
             if temp_min < min_limit:
-                temp_pts *= 0.3  # Sin desglose de 3 días: penalización estándar por helada en 14d
+                severity = min(1.0, (min_limit - float(temp_min)) / 3.0)
+                thermal_index *= max(0.10, 0.45 - 0.35 * severity)
+        temp_pts = thermal_index * 15.0
 
-        # Factor Humedad del suelo (0 a 5 pts)
-        min_soil_m = meteo_rules.get("soil_moisture_min_percent", 20.0)
-        soil_pts = 5.0 if soil_moisture >= min_soil_m else (soil_moisture / min_soil_m) * 5.0
+        # Choque térmico biológicamente coherente
+        thermal_shock = cell_meteo_data.get("thermal_shock_celsius")
+        thermal_shock_status = None
+        thermal_shock_adj = 0.0
+        shock_mult = 1.0
+        if thermal_shock is not None:
+            shock_trigger = meteo_rules.get("thermal_shock_trigger")
+            recent_above_frost = (
+                (not has_recent_min or float(temp_min_recent) >= min_limit + 1.0)
+                and (has_recent_min or temp_min >= min_limit + 1.0)
+            )
+            if shock_trigger is True:
+                if (
+                    thermal_shock <= -2.0
+                    and eff_rain_active >= thresh_precip
+                    and eval_temp >= t_opt_min - 1.5
+                    and recent_above_frost
+                ):
+                    shock_mult = 1.07
+                    thermal_shock_adj = 2.5
+                    thermal_shock_status = "triggered_favorable"
+                elif thermal_shock <= -2.5 and eval_temp < t_opt_min - 2.0:
+                    shock_mult = 0.88
+                    thermal_shock_adj = -3.0
+                    thermal_shock_status = "cold_snap_stalled"
+                elif thermal_shock > 2.0 and eval_temp > t_opt_max - 1.5:
+                    shock_mult = 0.92
+                    thermal_shock_adj = -2.0
+                    thermal_shock_status = "warming_inhibited"
+                else:
+                    thermal_shock_status = "stable"
+            elif shock_trigger is False:
+                if thermal_shock <= -3.5:
+                    shock_mult = 0.85
+                    thermal_shock_adj = -4.0
+                    thermal_shock_status = "cold_suppressed"
+                elif thermal_shock >= 0.0 and eval_temp >= t_opt_min - 1.0:
+                    thermal_shock_status = "warm_favorable"
+                else:
+                    thermal_shock_status = "stable"
 
-        # Ajuste por humedad relativa ambiental reciente (si está disponible)
+        # Ajuste por humedad relativa ambiental reciente
         humidity_7d = cell_meteo_data.get("humidity_mean_7d_percent")
         humidity_adj = 0.0
+        rh_mult = 1.0
         if isinstance(humidity_7d, (int, float)) and math.isfinite(humidity_7d):
-            if humidity_7d >= 72.0 and effective_precip >= thresh_precip * 0.6:
+            if humidity_7d >= 72.0 and eff_rain_active >= thresh_precip * 0.6:
+                rh_mult = 1.0 + min(0.05, (humidity_7d - 72.0) / 360.0)
                 humidity_adj = min(2.0, (humidity_7d - 72.0) / 10.0)
             elif humidity_7d < 45.0:
+                rh_mult = 1.0 - min(0.12, (45.0 - humidity_7d) / 200.0)
                 humidity_adj = -min(2.5, (45.0 - humidity_7d) / 8.0)
-
-        score_meteo = precip_pts + temp_pts + soil_pts + thermal_shock_adj + humidity_adj
-        score_meteo = max(0.0, min(45.0, score_meteo))
 
         # Factor viento (desecación de primordios en cumbres/laderas)
         wind_max = cell_meteo_data.get("wind_max_14d_kmh")
@@ -476,16 +693,107 @@ class MushroomScoringEngine:
             wind_limit = meteo_rules.get("wind_max_limit_kmh", 45.0)
             if wind_max > wind_limit:
                 wind_penalty = min(0.20, (wind_max - wind_limit) / 100.0)
-                score_meteo *= (1.0 - wind_penalty)
+        wind_mult = 1.0 - wind_penalty
 
-        # Factor fenológico estacional (según fecha del snapshot y altitud)
+        # Factor fenológico estacional consciente de la especie arbórea y heladas previas
         snapshot_date = cell_meteo_data.get("snapshot_date")
+        hard_frost_28d = bool(cell_meteo_data.get("hard_frost_28d")) or (temp_min <= -1.0)
         phenology_factor, season_status = self._compute_phenology_factor(
-            meteo_rules, snapshot_date, elevation_m=elevation
+            meteo_rules,
+            snapshot_date,
+            elevation_m=elevation,
+            leaf_habit=leaf_habit,
+            hard_frost_28d=hard_frost_28d,
         )
-        score_meteo *= phenology_factor
 
-        weather_score = min(100.0, round(score_meteo / 45.0 * 100.0, 1))
+        # Acoplamiento multiplicativo (Ley del Mínimo)
+        raw_meteo = (moisture_index ** 0.52) * (thermal_index ** 0.48)
+        coupled_meteo = min(
+            raw_meteo, min(moisture_index, thermal_index) * 1.45 + 0.10
+        )
+        weather_unit = max(
+            0.0,
+            min(
+                1.0,
+                coupled_meteo * shock_mult * rh_mult * wind_mult * phenology_factor,
+            ),
+        )
+        weather_score = min(100.0, round(weather_unit * 100.0, 1))
+        score_meteo = round(weather_unit * 45.0, 1)
+
+        # Clasificador de fase de brotada (flush_phase) y previsión 3d (forecast_outlook)
+        parsed_snap_date = None
+        if snapshot_date:
+            try:
+                parsed_snap_date = date.fromisoformat(str(snapshot_date)[:10])
+            except ValueError:
+                parsed_snap_date = None
+
+        tmin_eval = float(temp_min_recent) if has_recent_min else float(temp_min)
+        recent_4d_val = float(precip_recent_4d_mm or 0.0)
+        if exclusion_reason is not None:
+            flush_phase = "excluded"
+        elif phenology_factor < 0.30:
+            flush_phase = "off_season"
+        elif (
+            leaf_habit == "deciduous"
+            and parsed_snap_date is not None
+            and (
+                parsed_snap_date.month in (12, 1, 2)
+                or (parsed_snap_date.month == 11 and parsed_snap_date.day >= 12)
+            )
+            and hard_frost_28d
+        ):
+            flush_phase = "dormant_host"
+        elif (
+            tmin_eval < min_limit
+            or (st07_recent is not None and float(st07_recent) < t_lo)
+            or thermal_index < 0.25
+        ):
+            flush_phase = "cold_stalled"
+        elif (
+            eff_rain_active >= thresh_precip * 0.85
+            and thermal_index >= 0.55
+            and drought_factor >= 0.85
+            and eff_rain_tail >= thresh_precip * 0.40
+        ):
+            flush_phase = "peak_flush"
+        elif (
+            eff_rain_active >= thresh_precip * 0.75
+            and thermal_index >= 0.50
+            and drought_factor >= 0.85
+        ):
+            flush_phase = "emerging_buttons"
+        elif eff_rain_tail >= thresh_precip * 0.38 or (
+            eff_rain_active >= thresh_precip * 0.60 and thermal_index < 0.50
+        ):
+            flush_phase = "mature_tail"
+        elif rain_timing_status == "too_recent_for_flush" or (
+            recent_4d_val >= thresh_precip * 0.45 and eff_rain_active < thresh_precip * 0.60
+        ):
+            flush_phase = "incubating"
+        elif max(eff_rain_active, eff_rain_tail) < thresh_precip * 0.40:
+            flush_phase = "dry"
+        else:
+            flush_phase = "moderate_active"
+
+        fc_precip = cell_meteo_data.get("forecast_3d_precip_mm")
+        fc_tmin = cell_meteo_data.get("forecast_3d_temp_min_celsius")
+        fc_tmean = cell_meteo_data.get("forecast_3d_temp_mean_celsius")
+        forecast_outlook = None
+        if any(v is not None for v in (fc_precip, fc_tmin, fc_tmean)):
+            if fc_tmin is not None and float(fc_tmin) < min_limit:
+                forecast_outlook = "frost_risk"
+            elif fc_precip is not None and float(fc_precip) >= 12.0:
+                forecast_outlook = "rain_incoming"
+            elif (
+                fc_tmean is not None
+                and float(fc_tmean) >= t_opt_min
+                and eval_temp < t_opt_min
+            ):
+                forecast_outlook = "warming_favorable"
+            else:
+                forecast_outlook = "stable"
 
         # ==============================================================
         # 3. PONDERACIÓN EDAFOLÓGICA (Máximo 35 puntos)
@@ -495,7 +803,6 @@ class MushroomScoringEngine:
         if ph_opt_min <= effective_soil_ph <= ph_opt_max:
             score_ph = 35.0
         else:
-            # Distancia al rango óptimo dentro del tolerado
             if effective_soil_ph < ph_opt_min:
                 dist = ph_opt_min - effective_soil_ph
                 max_d = ph_opt_min - ph_tol_min
@@ -504,7 +811,7 @@ class MushroomScoringEngine:
                 max_d = ph_tol_max - ph_opt_max
 
             ratio = max(0.0, 1.0 - (dist / max(0.1, max_d)))
-            score_ph = 15.0 + ratio * 20.0
+            score_ph = 12.0 + ratio * 23.0
 
         texture_score = None
         if texture_is_complete:
@@ -513,7 +820,17 @@ class MushroomScoringEngine:
                 cell_static_data["soil_silt_percent"],
                 cell_static_data["soil_clay_percent"],
             )
+        soil_soc = cell_static_data.get("soil_soc_g_kg")
+        soc_score = None
+        if isinstance(soil_soc, (int, float)) and math.isfinite(soil_soc):
+            soc_score = self._soil_soc_score(float(soil_soc))
+
+        if texture_score is not None and soc_score is not None:
+            score_edaphic = score_ph * (25.0 / 35.0) + texture_score + soc_score
+        elif texture_score is not None:
             score_edaphic = score_ph * (28.0 / 35.0) + texture_score
+        elif soc_score is not None:
+            score_edaphic = score_ph * (32.0 / 35.0) + soc_score
         else:
             score_edaphic = score_ph
 
@@ -523,33 +840,80 @@ class MushroomScoringEngine:
         topo_rules = rules["topography"]
         slope = cell_static_data["slope_deg"]
         aspect = aspect_norm
+        tpi_val = cell_static_data.get("tpi_m")
 
-        # Penalización por pendiente excesiva (lavado de esporas / erosión hídrica)
         max_slope = topo_rules.get("slope_max_deg", 45)
-        slope_pts = 10.0 if slope <= (max_slope * 0.7) else max(0.0, (1.0 - (slope / max_slope)) * 10.0)
+        slope_raw = (
+            1.0
+            if slope <= (max_slope * 0.7)
+            else max(0.0, 1.0 - (slope / max_slope))
+        )
 
-        # Orientación / Exposición según fase estacional
         pref_aspects = (
             topo_rules.get("aspect_preference_early_season", [])
             if season_phase == "early"
             else topo_rules.get("aspect_preference_late_season", [])
         )
-        aspect_pts = 10.0 if aspect in pref_aspects else 5.0
+        aspect_raw = 1.0 if aspect in pref_aspects else 0.5
 
-        score_topo = slope_pts + aspect_pts
+        tpi_score = None
+        if isinstance(tpi_val, (int, float)) and math.isfinite(tpi_val):
+            slope_pts = slope_raw * 9.0
+            aspect_pts = aspect_raw * 8.0
+            tpi_f = float(tpi_val)
+            if tpi_f <= -18.0:
+                tpi_score = 1.8 if tmin_eval <= 1.0 else 2.6
+            elif tpi_f <= 4.0:
+                tpi_score = 3.0
+            elif tpi_f <= 18.0:
+                tpi_score = 3.0 - ((tpi_f - 4.0) / 14.0) * 1.4
+            else:
+                tpi_score = 1.2
+            score_topo = slope_pts + aspect_pts + tpi_score
+        else:
+            slope_pts = slope_raw * 10.0
+            aspect_pts = aspect_raw * 10.0
+            score_topo = slope_pts + aspect_pts
 
         # ==============================================================
         # TOTAL SCORE (0 a 100)
         # ==============================================================
         if relative_mode:
-            habitat_score = score_edaphic + score_topo
-            total_score = 100.0 * (habitat_score / 55.0)
+            habitat_rules = rules["habitat"]
+            habitat_raw = 100.0 * ((score_edaphic + score_topo) / 55.0)
+            cc_min = float(habitat_rules.get("minimum_canopy_cover_percent", 20))
+            cc_opt = habitat_rules.get("optimal_canopy_cover_percent", [40, 80])
+            if cc_opt[0] <= canopy_cover <= cc_opt[1]:
+                canopy_factor = 1.0
+            elif canopy_cover < cc_opt[0]:
+                canopy_factor = 0.80 + 0.20 * max(
+                    0.0, (canopy_cover - cc_min) / max(1.0, cc_opt[0] - cc_min)
+                )
+            else:
+                canopy_factor = max(0.92, 1.0 - (canopy_cover - cc_opt[1]) / 250.0)
+
+            alt_lim = habitat_rules["altitude_range_meters"]
+            alt_opt = habitat_rules.get("optimal_altitude_range_meters", alt_lim)
+            if alt_opt[0] <= elevation <= alt_opt[1]:
+                alt_factor = 1.0
+            elif elevation < alt_opt[0]:
+                span = max(1.0, alt_opt[0] - (alt_lim[0] - 150.0))
+                alt_factor = 0.80 + 0.20 * max(
+                    0.0, 1.0 - (alt_opt[0] - elevation) / span
+                )
+            else:
+                span = max(1.0, (alt_lim[1] + 150.0) - alt_opt[1])
+                alt_factor = 0.80 + 0.20 * max(
+                    0.0, 1.0 - (elevation - alt_opt[1]) / span
+                )
+
+            total_score = habitat_raw * canopy_factor * alt_factor * host_multiplier
             if exclusion_reason is not None:
                 total_score = 0.0
         else:
             total_score = score_meteo + score_edaphic + score_topo
-        if host_assessment is None:
-            total_score *= 0.82
+            if host_assessment is None:
+                total_score *= 0.82
         total_score = min(100.0, round(total_score, 1))
 
         result = self._build_result(
@@ -578,6 +942,10 @@ class MushroomScoringEngine:
                     }
                     if texture_score is not None else None
                 ),
+                "soil_soc_g_kg": soil_soc,
+                "soil_soc_score": round(soc_score, 1) if soc_score is not None else None,
+                "tpi_m": tpi_val,
+                "tpi_score": round(tpi_score, 1) if tpi_score is not None else None,
                 "weather_score": weather_score,
                 "edaphic": round(score_edaphic, 1),
                 "topography": round(score_topo, 1),
@@ -590,8 +958,18 @@ class MushroomScoringEngine:
                     else "unknown" if host_assessment is None
                     else "incompatible"
                 ),
+                "host_tier": host_tier,
+                "host_leaf_habit": leaf_habit,
+                "flush_phase": flush_phase,
+                "forecast_outlook": forecast_outlook,
+                "forecast_3d_precip_mm": fc_precip,
+                "forecast_3d_temp_min_celsius": fc_tmin,
+                "forecast_3d_temp_mean_celsius": fc_tmean,
                 "precip_14d_mm": precip_14d,
-                "effective_precip_14d_mm": round(effective_precip, 2),
+                "precip_accum_28d_mm": cell_meteo_data.get("precip_accum_28d_mm"),
+                "precip_15_28d_mm": cell_meteo_data.get("precip_15_28d_mm"),
+                "effective_precip_14d_mm": round(eff_rain_active, 2),
+                "effective_precip_tail_mm": round(eff_rain_tail, 2),
                 "precip_incubation_mm": precip_incubation_mm,
                 "precip_recent_4d_mm": precip_recent_4d_mm,
                 "rain_timing_status": rain_timing_status,
@@ -599,6 +977,8 @@ class MushroomScoringEngine:
                 "precip_score": round(precip_pts, 1),
                 "temp_score": round(temp_pts, 1),
                 "soil_moisture_score": round(soil_pts, 1),
+                "drought_factor": round(drought_factor, 2),
+                "waterlog_factor": round(waterlog_factor, 2),
                 "thermal_shock_adj": round(thermal_shock_adj, 1),
                 "humidity_adj": round(humidity_adj, 1),
                 "wind_penalty_pct": round(wind_penalty * 100.0, 1),
@@ -608,6 +988,9 @@ class MushroomScoringEngine:
                 "temp_recent_3d_c": temp_recent_3d,
                 "temp_min_recent_3d_c": temp_min_recent,
                 "soil_temp_mean_c": soil_temp,
+                "soil_temp_0_7cm_3d_c": st07_recent,
+                "frost_days_7d": frost_days_species_7d,
+                "hard_frost_28d": hard_frost_28d,
                 "humidity_mean_7d_pct": humidity_7d,
                 "water_balance_14d_mm": water_balance,
                 "thermal_shock_celsius": thermal_shock,
@@ -623,6 +1006,20 @@ class MushroomScoringEngine:
         if relative_mode:
             result["weather_score"] = weather_score
         return result
+
+    def _soil_soc_score(self, soc_g_kg: float) -> float:
+        """Puntúa la riqueza orgánica superficial (SoilGrids SOC 0-5 cm)."""
+        rules = self.config.get("soil_soc_scoring") or {}
+        max_pts = float(rules.get("max_points", 3.0))
+        low = float(rules.get("low_g_kg", 12.0))
+        opt_min = float(rules.get("optimal_min_g_kg", 30.0))
+        opt_max = float(rules.get("optimal_max_g_kg", 95.0))
+        if opt_min <= soc_g_kg <= opt_max:
+            return max_pts
+        if soc_g_kg < opt_min:
+            ratio = max(0.25, min(1.0, (soc_g_kg - low * 0.5) / max(1.0, opt_min - low * 0.5)))
+            return max_pts * ratio
+        return max_pts * max(0.70, 1.0 - (soc_g_kg - opt_max) / 250.0)
 
     def _soil_texture_score(
         self, sand_percent: float, silt_percent: float, clay_percent: float
@@ -648,12 +1045,12 @@ class MushroomScoringEngine:
         )) / 3
         return texture_rules["max_points"] * balanced_fraction
 
-    def _static_habitat_exclusion(
+    def _static_habitat_assessment(
         self,
         species_id: str,
         cell_static_data: Dict[str, Any],
         allow_unknown_host: bool,
-    ) -> tuple[bool | None, str | None]:
+    ) -> tuple[bool | None, str, float, str | None]:
         rules = self.species_matrix[species_id]
         habitat = rules["habitat"]
         edaphic = rules["edaphic"]
@@ -662,118 +1059,149 @@ class MushroomScoringEngine:
         elevation = cell_static_data["elevation_m"]
         effective_ph = self._effective_soil_ph(cell_static_data)
 
-        host_assessment = self._assess_host(
-            dominant_tree, habitat["preferred_forest_types"]
+        host_assessment, host_tier, host_multiplier = self._assess_host_detail(
+            dominant_tree,
+            habitat["preferred_forest_types"],
+            habitat.get("host_tiers"),
         )
         if host_assessment is False or (
             host_assessment is None and not allow_unknown_host
         ):
-            return host_assessment, (
+            return host_assessment, host_tier, host_multiplier, (
                 "Exclusión: Especie forestal no hospedadora para micorriza"
             )
         if canopy_cover < habitat.get("minimum_canopy_cover_percent", 20):
-            return host_assessment, "Exclusión: Cobertura de copa insuficiente"
+            return host_assessment, host_tier, host_multiplier, (
+                "Exclusión: Cobertura de copa insuficiente"
+            )
 
         alt_min, alt_max = habitat["altitude_range_meters"]
         if elevation < (alt_min - 150) or elevation > (alt_max + 150):
-            return host_assessment, (
+            return host_assessment, host_tier, host_multiplier, (
                 "Exclusión: Fuera del rango bioclimático altitudinal"
             )
 
         ph_tol_min, ph_tol_max = edaphic["ph_tolerated"]
         if effective_ph < ph_tol_min or effective_ph > ph_tol_max:
-            return host_assessment, (
+            return host_assessment, host_tier, host_multiplier, (
                 f"Exclusión: pH {effective_ph} incompatible "
                 f"(Tolerado: {ph_tol_min}-{ph_tol_max})"
             )
-        return host_assessment, None
+        return host_assessment, host_tier, host_multiplier, None
 
-    @staticmethod
-    def _assess_host(
-        dominant_tree: str, preferred_forest_types: list[str]
-    ) -> bool | None:
-        normalized = unicodedata.normalize("NFKD", dominant_tree.casefold())
-        normalized = "".join(
-            char for char in normalized if not unicodedata.combining(char)
+    def _static_habitat_exclusion(
+        self,
+        species_id: str,
+        cell_static_data: Dict[str, Any],
+        allow_unknown_host: bool,
+    ) -> tuple[bool | None, str | None]:
+        host_assessment, _, _, exclusion_reason = self._static_habitat_assessment(
+            species_id, cell_static_data, allow_unknown_host=allow_unknown_host
         )
-        normalized = " ".join(normalized.split())
-        host_aliases = {
-            "Pinus sylvestris": (
-                "pino albar",
-                "pinus sylvestris",
-                "mezclas de coniferas autoctonas",
-            ),
-            "Pinus nigra": ("pino salgareno", "pino laricio", "pinus nigra"),
-            "Pinus pinaster": (
-                "pino pinaster",
-                "pinus pinaster",
-                "mezclas de coniferas autoctonas",
-            ),
-            "Pinus pinea": ("pino pinonero", "pinus pinea"),
-            "Pinus halepensis": ("pino carrasco", "pinus halepensis"),
-            "Pinus uncinata": ("pino negro", "pinus uncinata"),
-            "Fagus sylvatica": ("hayedo", "haya", "fagus sylvatica"),
-            "Quercus pyrenaica": (
-                "melojar",
-                "melojares",
-                "quercus pyrenaica",
-                "bosques mixtos de frondosas",
-            ),
-            "Quercus petraea": (
-                "roble albar",
-                "quercus petraea",
-                "quercus petrae",
-                "bosques mixtos de frondosas",
-            ),
-            "Quercus robur": (
-                "roble carballo",
-                "quercus robur",
-                "bosques mixtos de frondosas",
-            ),
-            "Quercus faginea": (
-                "quejigar",
-                "quejigo",
-                "quercus faginea",
-                "bosques mixtos de frondosas",
-            ),
-            "Quercus ilex": ("encinar", "encina", "quercus ilex"),
-            "Quercus suber": ("alcornocal", "alcornoque", "quercus suber"),
-            "Castanea sativa": ("castanar", "castano", "castanea sativa"),
-            "Betula alba": ("abedular", "abedul", "betula alba"),
-            "Non_Mycorrhizal_Or_Non_Boletus": (
-                "bosques riberenos",
-                "sabinares",
-                "juniperus",
-                "choperas",
-                "plataneras",
-                "enebrales",
-                "fresnedas",
-                "acebedas",
-                "acebuchares",
-                "frondosas aloctonas invasoras",
-                "arbolado disperso de frondosas",
-                "coniferas aloctonas de gestion",
-                "otras coniferas aloctonas de produccion",
-            ),
-        }
-        for preferred in preferred_forest_types:
-            aliases = host_aliases.get(preferred, (preferred.casefold(),))
+        return host_assessment, exclusion_reason
+
+    _HOST_ALIASES = {
+        "Pinus sylvestris": ("pino albar", "pinus sylvestris"),
+        "Pinus nigra": ("pino salgareno", "pino laricio", "pinus nigra"),
+        "Pinus pinaster": ("pino pinaster", "pinus pinaster"),
+        "Pinus pinea": ("pino pinonero", "pinus pinea"),
+        "Pinus halepensis": ("pino carrasco", "pinus halepensis"),
+        "Pinus uncinata": ("pino negro", "pinus uncinata"),
+        "Fagus sylvatica": ("hayedo", "haya", "fagus sylvatica"),
+        "Quercus pyrenaica": ("melojar", "melojares", "quercus pyrenaica"),
+        "Quercus petraea": ("roble albar", "quercus petraea", "quercus petrae"),
+        "Quercus robur": ("roble carballo", "quercus robur"),
+        "Quercus faginea": ("quejigar", "quejigo", "quercus faginea"),
+        "Quercus ilex": ("encinar", "encina", "quercus ilex"),
+        "Quercus suber": ("alcornocal", "alcornoque", "quercus suber"),
+        "Castanea sativa": ("castanar", "castano", "castanea sativa"),
+        "Betula alba": ("abedular", "abedul", "betula alba"),
+        "Non_Mycorrhizal_Or_Non_Boletus": (
+            "bosques riberenos",
+            "sabinares",
+            "juniperus",
+            "choperas",
+            "plataneras",
+            "enebrales",
+            "fresnedas",
+            "acebedas",
+            "acebuchares",
+            "frondosas aloctonas invasoras",
+            "arbolado disperso de frondosas",
+            "coniferas aloctonas de gestion",
+            "otras coniferas aloctonas de produccion",
+        ),
+    }
+
+    @classmethod
+    def _assess_host_detail(
+        cls,
+        dominant_tree: str,
+        preferred_forest_types: list[str],
+        host_tiers: Optional[Dict[str, list[str]]] = None,
+    ) -> tuple[bool | None, str, float]:
+        normalized = cls._normalize_text(dominant_tree)
+        tier_weights = {"primary": 1.0, "secondary": 0.86, "marginal": 0.70}
+
+        ordered_preferred: list[tuple[str, str, float]] = []
+        if host_tiers:
+            for tier_name in ("primary", "secondary", "marginal"):
+                for sp_name in host_tiers.get(tier_name) or ():
+                    ordered_preferred.append(
+                        (sp_name, tier_name, tier_weights[tier_name])
+                    )
+        seen_names = {item[0] for item in ordered_preferred}
+        for sp_name in preferred_forest_types:
+            if sp_name not in seen_names:
+                ordered_preferred.append((sp_name, "primary", 1.0))
+
+        for preferred, tier_name, mult in ordered_preferred:
+            aliases = cls._HOST_ALIASES.get(preferred, (preferred.casefold(),))
             for alias in aliases:
-                decomposed_alias = unicodedata.normalize("NFKD", alias.casefold())
-                decomposed_alias = "".join(
-                    char for char in decomposed_alias if not unicodedata.combining(char)
+                if cls._normalize_text(alias) in normalized:
+                    return True, tier_name, mult
+
+        if "coniferas y frondosas" in normalized:
+            return None, "unknown", 0.80
+
+        if (
+            "mezclas de coniferas autoctonas" in normalized
+            or "mezclas de coniferas con" in normalized
+        ):
+            accepts_conifer = any(
+                "pinus" in cls._normalize_text(sp_name)
+                for sp_name in preferred_forest_types
+            )
+            if accepts_conifer:
+                return True, "mixed", 0.84
+            return False, "incompatible", 0.0
+
+        if "bosques mixtos de frondosas" in normalized:
+            accepts_broadleaf = any(
+                any(
+                    genus in cls._normalize_text(sp_name)
+                    for genus in ("quercus", "fagus", "castanea", "betula")
                 )
-                if decomposed_alias in normalized:
-                    return True
-        for aliases in host_aliases.values():
+                for sp_name in preferred_forest_types
+            )
+            if accepts_broadleaf:
+                return True, "mixed", 0.84
+            return False, "incompatible", 0.0
+
+        for aliases in cls._HOST_ALIASES.values():
             for alias in aliases:
-                decomposed_alias = unicodedata.normalize("NFKD", alias.casefold())
-                decomposed_alias = "".join(
-                    char for char in decomposed_alias if not unicodedata.combining(char)
-                )
-                if decomposed_alias in normalized:
-                    return False
-        return None
+                if cls._normalize_text(alias) in normalized:
+                    return False, "incompatible", 0.0
+        return None, "unknown", 0.80
+
+    @classmethod
+    def _assess_host(
+        cls, dominant_tree: str, preferred_forest_types: list[str]
+    ) -> bool | None:
+        assessment, _, _ = cls._assess_host_detail(
+            dominant_tree, preferred_forest_types
+        )
+        return assessment
 
     @staticmethod
     def _is_compatible_host(dominant_tree: str, preferred_forest_types: list[str]) -> bool:

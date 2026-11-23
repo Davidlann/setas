@@ -15,7 +15,7 @@ def export_all_species():
     output_dir = root_path / "frontend" / "public" / "data"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    species_list = ["boletus_edulis", "boletus_aereus", "boletus_pinophilus", "boletus_reticulatus"]
+    species_list = ["boletus_edulis", "boletus_aereus", "boletus_pinophilus", "boletus_reticulatus", "lactarius_deliciosus"]
     for sp in species_list:
         geojson_data = get_scores_geojson(species_id=sp, min_score=0.0)
         out_file = output_dir / f"{sp}.geojson"

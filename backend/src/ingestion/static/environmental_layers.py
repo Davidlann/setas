@@ -16,6 +16,7 @@ import requests
 from rasterio.io import MemoryFile
 from rasterio.transform import Affine
 from rasterio.warp import transform
+from scipy.ndimage import uniform_filter
 from scipy.spatial import cKDTree
 
 from backend.config.settings import DB_PATH, RAW_DATA_DIR, TARGET_REGION_BOUNDS
@@ -33,6 +34,9 @@ SOIL_TEXTURE_LAYERS = {
     "sand": "sand/sand_5-15cm_mean",
     "silt": "silt/silt_5-15cm_mean",
     "clay": "clay/clay_5-15cm_mean",
+}
+SOIL_ORGANIC_LAYERS = {
+    "soc": "soc/soc_0-5cm_mean",
 }
 SOIL_SCALE_FACTOR = 10
 
@@ -213,17 +217,32 @@ def _sample_soil(session, coords, layer, cache_dir, refresh):
     return values, paths
 
 
-def _terrain_values(dataset, lat, lon, data):
+def _compute_tpi_grid(elevation_data: np.ndarray, nodata) -> np.ndarray:
+    """Calcula el Topographic Position Index (TPI) en vecindario 5x5 (~1 km)."""
+    dem = elevation_data.astype(np.float64, copy=True)
+    if nodata is not None:
+        dem[dem == nodata] = np.nan
+    valid = np.isfinite(dem).astype(np.float64)
+    filled = np.where(np.isfinite(dem), dem, 0.0)
+    mean_5 = uniform_filter(filled, size=5, mode="nearest") / np.maximum(
+        uniform_filter(valid, size=5, mode="nearest"), 1e-9
+    )
+    tpi = dem - mean_5
+    tpi[~np.isfinite(dem)] = np.nan
+    return tpi
+
+
+def _terrain_values(dataset, lat, lon, data, tpi_grid=None):
     row, column = dataset.index(lon, lat)
     if row < 1 or column < 1 or row + 1 >= data.shape[0] or column + 1 >= data.shape[1]:
-        return None, None, None
+        return None, None, None, None
 
     window = data[row - 1:row + 2, column - 1:column + 2]
     nodata = dataset.nodata
     if not np.all(np.isfinite(window)) or (
         nodata is not None and np.any(window == nodata)
     ):
-        return None, None, None
+        return None, None, None, None
 
     lat_cellsize_m = abs(dataset.transform.e) * 111320
     lon_cellsize_m = abs(dataset.transform.a) * 111320 * math.cos(math.radians(lat))
@@ -242,7 +261,10 @@ def _terrain_values(dataset, lat, lon, data):
         azimuth = (math.degrees(math.atan2(-dz_dx, -dz_dy)) + 360) % 360
         directions = ("N", "NE", "E", "SE", "S", "SW", "W", "NW")
         aspect = directions[round(azimuth / 45) % 8]
-    return float(window[1, 1]), slope, aspect
+    tpi_val = None
+    if tpi_grid is not None and np.isfinite(tpi_grid[row, column]):
+        tpi_val = round(float(tpi_grid[row, column]), 2)
+    return float(window[1, 1]), slope, aspect, tpi_val
 
 
 def ingest_environmental_layers(refresh=False, cell_limit=None):
@@ -265,6 +287,8 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
             "soil_sand_percent",
             "soil_silt_percent",
             "soil_clay_percent",
+            "tpi_m",
+            "soil_soc_g_kg",
         ):
             con.execute(
                 f"ALTER TABLE cells_static ADD COLUMN IF NOT EXISTS {column} DOUBLE"
@@ -292,8 +316,9 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
         if dem.crs is None or dem.crs.to_epsg() != 4326:
             raise RuntimeError("El MDT del IGN no está en EPSG:4326 como se esperaba.")
         elevation_data = dem.read(1)
+        tpi_grid = _compute_tpi_grid(elevation_data, dem.nodata)
         terrain = [
-            _terrain_values(dem, lat, lon, elevation_data)
+            _terrain_values(dem, lat, lon, elevation_data, tpi_grid=tpi_grid)
             for lat, lon in coords
         ]
 
@@ -341,9 +366,30 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
             for relative_path, path in tile_paths.items()
         )
 
+    for component, layer in SOIL_ORGANIC_LAYERS.items():
+        try:
+            soil_results[component], tile_paths = _sample_soil(
+                session, coords, layer, soil_cache, refresh
+            )
+            print(f"SoilGrids {layer}: {len(tile_paths)} teselas consultadas.")
+            source_assets.extend(
+                (
+                    f"soil_{component}_g_kg",
+                    relative_path.removeprefix("./"),
+                    f"{SOIL_BASE_URL}/{layer.rsplit('/', 1)[0]}/{relative_path.removeprefix('./')}",
+                    _sha256(path),
+                    str(path),
+                    retrieved_at,
+                )
+                for relative_path, path in tile_paths.items()
+            )
+        except Exception as exc:
+            print(f"[Aviso] No se pudo obtener SoilGrids {layer} ({exc}); se deja opcional en NULL.")
+            soil_results[component] = [None] * len(coords)
+
     records = []
     for index, cell in enumerate(cells):
-        elevation, slope, aspect = terrain[index]
+        elevation, slope, aspect, tpi_m = terrain[index]
         soil_mean = soil_results["mean"][index]
         soil_q05 = soil_results["q05"][index]
         soil_q95 = soil_results["q95"][index]
@@ -351,6 +397,7 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
             soil_results[f"texture_{component}"][index]
             for component in ("sand", "silt", "clay")
         )
+        soil_soc = soil_results["soc"][index]
         soil_values = (soil_mean, soil_q05, soil_q95)
         if all(value is not None for value in soil_values) and not (
             0 <= soil_q05 <= soil_mean <= soil_q95 <= 14
@@ -364,13 +411,18 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
                 f"Textura SoilGrids fuera del rango 0-100 % "
                 f"en la celda {cell['h3_index']}: {texture_values}"
             )
+        if soil_soc is not None and not 0 <= soil_soc <= 500:
+            raise RuntimeError(
+                f"Carbono orgánico SoilGrids fuera del rango 0-500 g/kg "
+                f"en la celda {cell['h3_index']}: {soil_soc}"
+            )
         has_values = (
             elevation is not None and slope is not None
             and soil_mean is not None and soil_q05 is not None and soil_q95 is not None
         )
         records.append((
-            elevation, slope, aspect, soil_mean, soil_q05, soil_q95,
-            *texture_values,
+            elevation, slope, aspect, tpi_m, soil_mean, soil_q05, soil_q95,
+            *texture_values, soil_soc,
             "sourced_unvalidated" if has_values else "unverified",
             cell["h3_index"],
         ))
@@ -381,12 +433,14 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
                 elevation_m = ?,
                 slope_deg = ?,
                 aspect_cardinal = ?,
+                tpi_m = ?,
                 soil_ph = ?,
                 soil_ph_q05 = ?,
                 soil_ph_q95 = ?,
                 soil_sand_percent = ?,
                 soil_silt_percent = ?,
                 soil_clay_percent = ?,
+                soil_soc_g_kg = ?,
                 environmental_data_quality = ?
             WHERE h3_index = ?
         """, records)
@@ -408,10 +462,10 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
                 f"{DEM_URL}?service=WCS&request=GetCoverage&coverageId={DEM_COVERAGE}",
                 "IGN PNOA-LiDAR Digital Terrain Model",
                 "200 m",
-                "elevation m; slope degrees; aspect cardinal",
+                "elevation m; slope degrees; aspect cardinal; tpi_m",
                 "CC BY 4.0 SCNE",
                 retrieved_at,
-                "Elevation sampled at H3 center; slope and aspect from 3x3 Horn gradient.",
+                "Elevation sampled at H3 center; slope and aspect from 3x3 Horn gradient; TPI from 5x5 mean window.",
             ),
             *[
                 (
@@ -439,6 +493,19 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
                 )
                 for component, layer in SOIL_TEXTURE_LAYERS.items()
             ],
+            *[
+                (
+                    f"soil_{component}_g_kg",
+                    f"{SOIL_BASE_URL}/{layer}.vrt",
+                    "ISRIC SoilGrids 2.0 soil organic carbon, depth 0-5 cm (mean)",
+                    "250 m",
+                    "dg/kg divided by 10 to g/kg",
+                    "CC BY 4.0",
+                    retrieved_at,
+                    "Nearest SoilGrids raster pixel sampled at H3 center.",
+                )
+                for component, layer in SOIL_ORGANIC_LAYERS.items()
+            ],
         ]
         con.executemany("""
             INSERT OR REPLACE INTO environmental_layer_provenance
@@ -460,20 +527,22 @@ def ingest_environmental_layers(refresh=False, cell_limit=None):
         VALUES (?, ?, ?, ?, ?, ?)
         """, source_assets)
 
-    sourced = sum(record[9] == "sourced_unvalidated" for record in records)
+    sourced = sum(record[-2] == "sourced_unvalidated" for record in records)
     print(
         f"Variables ambientales obtenidas para {sourced}/{len(records)} celdas. "
         "Calidad: sourced_unvalidated; no habilita puntuaciones predictivas."
     )
     print(
         "Valores ausentes: elevación "
-        f"{sum(record[0] is None for record in records)}, pH medio "
-        f"{sum(record[3] is None for record in records)}, cuantiles "
-        f"q05 {sum(record[4] is None for record in records)} / "
-        f"q95 {sum(record[5] is None for record in records)}; textura ausente "
-        f"arena {sum(record[6] is None for record in records)}, "
-        f"limo {sum(record[7] is None for record in records)}, "
-        f"arcilla {sum(record[8] is None for record in records)}."
+        f"{sum(record[0] is None for record in records)}, TPI "
+        f"{sum(record[3] is None for record in records)}, pH medio "
+        f"{sum(record[4] is None for record in records)}, cuantiles "
+        f"q05 {sum(record[5] is None for record in records)} / "
+        f"q95 {sum(record[6] is None for record in records)}; textura ausente "
+        f"arena {sum(record[7] is None for record in records)}, "
+        f"limo {sum(record[8] is None for record in records)}, "
+        f"arcilla {sum(record[9] is None for record in records)}; SOC "
+        f"{sum(record[10] is None for record in records)}."
     )
 
 

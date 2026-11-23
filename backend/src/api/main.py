@@ -42,7 +42,8 @@ def health_check():
             "boletus_edulis",
             "boletus_aereus",
             "boletus_pinophilus",
-            "boletus_reticulatus"
+            "boletus_reticulatus",
+            "lactarius_deliciosus"
         ]
     }
 

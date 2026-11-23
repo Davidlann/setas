@@ -80,6 +80,7 @@
     .data-status.verified { background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.4); color: #a7f3d0; }
     .data-status:empty { display: none; }
     .guide-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .guide-buttons .guide-btn:last-child:nth-child(odd) { grid-column: 1 / -1; }
     .guide-btn {
       padding: 8px; border: 1px solid var(--border); border-radius: 8px;
       background: rgba(255,255,255,.04); color: var(--text); cursor: pointer;
@@ -169,6 +170,7 @@
     .ctrl { display: flex; flex-direction: column; gap: 6px; }
     .ctrl-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
     .species-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .species-picker .species-option:last-child:nth-child(odd) { grid-column: 1 / -1; }
     .species-option {
       display: flex; align-items: center; gap: 7px; padding: 8px;
       border: 1px solid var(--border); border-radius: 8px;
@@ -342,6 +344,22 @@
       align-items: center;
       gap: 6px;
     }
+    .flush-phase-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      align-self: flex-start;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 750;
+      border: 1px solid transparent;
+    }
+    .flush-phase-pill[hidden] { display: none; }
+    .flush-phase-pill.fp-good { color: #166534; background: #dcfce7; border-color: #86efac; }
+    .flush-phase-pill.fp-warn { color: #92400e; background: #fef3c7; border-color: #fcd34d; }
+    .flush-phase-pill.fp-bad { color: #991b1b; background: #fee2e2; border-color: #fca5a5; }
+    .flush-phase-pill.fp-neutral { color: #514334; background: #eee7da; border-color: #d8ccb8; }
     .cell-summary-list {
       margin: 0;
       padding: 0;
@@ -1248,7 +1266,7 @@
       display: none;
       flex-direction: column;
       gap: 3px;
-      max-height: 280px;
+      max-height: min(340px, 58vh);
       overflow-y: auto;
     }
     .custom-select-wrap.open .custom-select-list {
@@ -2043,6 +2061,15 @@
               <small>Boleto de verano</small>
             </div>
           </div>
+          <div class="custom-select-option" role="option" data-value="lactarius_deliciosus" aria-selected="false">
+            <span class="option-icon" aria-hidden="true">
+              <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="6.5" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M11.6 13.8c-.4 3.2-.8 6.8-.4 9.5.3 1.5 1.5 2.1 2.8 2.1s2.5-.6 2.8-2.1c.4-2.7 0-6.3-.4-9.5h-4.8z" fill="#f7b778"/><ellipse cx="13.1" cy="17.8" rx="0.9" ry="1.2" fill="#d96b27" opacity="0.65"/><ellipse cx="15.1" cy="20.7" rx="0.8" ry="1.1" fill="#d96b27" opacity="0.65"/><path d="M5.4 13.3c1.8 1.5 5 2 8.6 2s6.8-.5 8.6-2c-.7.5-1.8.8-3.4 1l-5.2.3-5.2-.3c-1.6-.2-2.7-.5-3.4-1z" fill="#ea8c3e"/><path d="M4.5 11.4c1.2 1.8 4.8 2.7 9.5 2.7s8.3-.9 9.5-2.7c-1-3.2-4.6-4.7-9.5-4.7s-8.5 1.5-9.5 4.7z" fill="url(#grad-lactarius)"/><path d="M7.5 10.6c1.6 1 4 1.4 6.5 1.4s4.9-.4 6.5-1.4" stroke="#b94816" stroke-width="0.95" stroke-linecap="round" opacity="0.7"/><path d="M9.6 8.8c1.2.7 2.8 1 4.4 1s3.2-.3 4.4-1" stroke="#b94816" stroke-width="0.8" stroke-linecap="round" opacity="0.6"/><path d="M5.6 12.1c1 .5 2.2.8 3.2.9" stroke="#5d8d67" stroke-width="1" stroke-linecap="round" opacity="0.75"/><defs><linearGradient id="grad-lactarius" x1="14" y1="6.7" x2="14" y2="14.1" gradientUnits="userSpaceOnUse"><stop stop-color="#f28c28"/><stop offset="1" stop-color="#c95414"/></linearGradient></defs></svg>
+            </span>
+            <div class="option-text">
+              <strong>L. deliciosus</strong>
+              <small>Níscalo / Robellón</small>
+            </div>
+          </div>
           <div class="custom-select-option" role="option" data-value="all" aria-selected="false">
             <span class="option-icon" aria-hidden="true">
               <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="9" ry="2" fill="#71685b" opacity="0.2"/><path d="M8 18c-.4 2-1 4-.6 5.5.4 1 1.5 1.3 2.8 1.3 1.4 0 2.4-.3 2.8-1.3.4-1.5-.2-3.5-.6-5.5H8z" fill="#f4ebd9"/><path d="M5 18c-.3-3 1.8-5.5 5-5.5s5.3 2.5 5 5.5c-.8.5-2.2.6-5 .6s-4.2-.1-5-.6z" fill="#9e5e2e"/><path d="M15.5 16c-.5 2.5-1.5 5.5-.9 7.5.4 1.3 1.8 1.6 3.4 1.6 1.8 0 3-.3 3.4-1.6.6-2-.4-5-.9-7.5h-5z" fill="#ebd6bf"/><path d="M12 16c-.4-4 2.5-7 7-7s7.4 3 7 7c-1 .6-3 .8-7 .8s-6-.2-7-.8z" fill="#692b1b"/><path d="M8 22c2.5-.5 5 1 5.5 2.5-2 1.5-4.5 1-5.5-2.5z" fill="#d97706"/><path d="M18 23c2 0 3.5 1.5 4 2.5-1.5 1-3.5.5-4-2.5z" fill="#6e8053"/></svg>
@@ -2058,6 +2085,7 @@
           <option value="boletus_pinophilus">B. pinophilus (pinícola)</option>
           <option value="boletus_aereus">B. aereus (negro / bronce)</option>
           <option value="boletus_reticulatus">B. reticulatus (verano)</option>
+          <option value="lactarius_deliciosus">L. deliciosus (níscalo)</option>
           <option value="all">Todas las especies</option>
         </select>
       </div>
@@ -2150,6 +2178,13 @@
             <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.8 14.5c-.8 2.8-2.2 6.5-1.5 9.2.5 1.8 2.4 2.3 4.7 2.3 2.5 0 4.2-.6 4.7-2.3.7-2.7-.7-6.4-1.5-9.2h-6.4z" fill="#f2e4d0"/><path d="M11 16.5l6 5m-6 0l6-5m-5 2.5l4 3.5m-4 0l4-3.5" stroke="#bc946e" stroke-width="0.75" opacity="0.7"/><ellipse cx="14" cy="14.8" rx="8" ry="1.6" fill="#dedaaa"/><path d="M5.5 14.5C5 9.5 8.5 5 14 5s9 4.5 8.5 9.5c-1.3.8-4 1-8.5 1s-7.2-.2-8.5-1z" fill="url(#grad-reticulatus-side)"/><path d="M11 8c1 1.5 2 2 3 1.5m-5 3c2-.5 3 0 4 .5" stroke="#9e6e44" stroke-width="0.7" stroke-linecap="round" opacity="0.6"/><defs><linearGradient id="grad-reticulatus-side" x1="14" y1="5" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#ba8251"/><stop offset="1" stop-color="#8a5327"/></linearGradient></defs></svg>
           </span>
           <span>Boletus reticulatus</span>
+        </label>
+        <label class="species-option">
+          <input type="checkbox" value="lactarius_deliciosus"/>
+          <span class="option-icon-wrap" aria-hidden="true">
+            <svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="6.5" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M11.6 13.8c-.4 3.2-.8 6.8-.4 9.5.3 1.5 1.5 2.1 2.8 2.1s2.5-.6 2.8-2.1c.4-2.7 0-6.3-.4-9.5h-4.8z" fill="#f7b778"/><ellipse cx="13.1" cy="17.8" rx="0.9" ry="1.2" fill="#d96b27" opacity="0.65"/><ellipse cx="15.1" cy="20.7" rx="0.8" ry="1.1" fill="#d96b27" opacity="0.65"/><path d="M5.4 13.3c1.8 1.5 5 2 8.6 2s6.8-.5 8.6-2c-.7.5-1.8.8-3.4 1l-5.2.3-5.2-.3c-1.6-.2-2.7-.5-3.4-1z" fill="#ea8c3e"/><path d="M4.5 11.4c1.2 1.8 4.8 2.7 9.5 2.7s8.3-.9 9.5-2.7c-1-3.2-4.6-4.7-9.5-4.7s-8.5 1.5-9.5 4.7z" fill="url(#grad-lactarius-side)"/><path d="M7.5 10.6c1.6 1 4 1.4 6.5 1.4s4.9-.4 6.5-1.4" stroke="#b94816" stroke-width="0.95" stroke-linecap="round" opacity="0.7"/><path d="M9.6 8.8c1.2.7 2.8 1 4.4 1s3.2-.3 4.4-1" stroke="#b94816" stroke-width="0.8" stroke-linecap="round" opacity="0.6"/><path d="M5.6 12.1c1 .5 2.2.8 3.2.9" stroke="#5d8d67" stroke-width="1" stroke-linecap="round" opacity="0.75"/><defs><linearGradient id="grad-lactarius-side" x1="14" y1="6.7" x2="14" y2="14.1" gradientUnits="userSpaceOnUse"><stop stop-color="#f28c28"/><stop offset="1" stop-color="#c95414"/></linearGradient></defs></svg>
+          </span>
+          <span>Lactarius deliciosus (Níscalo)</span>
         </label>
       </div>
       <p class="species-comparison-note">El índice pondera la fenología mensual, la altitud, las mínimas de los últimos 3 días y la humedad reciente de cada especie.</p>
@@ -2269,7 +2304,7 @@
           <strong class="cell-kpi-val" id="c-kpi-habitat">—</strong>
         </div>
         <div class="cell-kpi-pill">
-          <span class="cell-kpi-label">Tiempo 14d</span>
+          <span class="cell-kpi-label">Tiempo 28d</span>
           <strong class="cell-kpi-val" id="c-kpi-weather">—</strong>
         </div>
       </div>
@@ -2294,6 +2329,7 @@
       </div>
       <div id="cell-summary-box" class="cell-summary-box">
         <div id="cell-summary-title" class="cell-summary-title">¿Por qué es buen o mal sitio hoy?</div>
+        <div id="cell-flush-phase" class="flush-phase-pill fp-neutral" hidden></div>
         <ul id="cell-summary-list" class="cell-summary-list">
           <li>Toca una celda para ver qué tiene a favor y qué le falta hoy.</li>
         </ul>
@@ -2352,7 +2388,7 @@
           <div class="info-item status-neutral" id="card-ph">
             <div class="info-item-head">
               <span class="info-item-head-left"><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M10 2v7.31L4.66 17.5A2 2 0 0 0 6.32 20.5h11.36a2 2 0 0 0 1.66-3L14 9.31V2"/></svg> Tipo de tierra (acidez)</span>
-              <button class="info-help-btn" type="button" aria-label="Información sobre tipo de tierra" data-title="Acidez de la tierra (pH)" data-info="Indica si la tierra es ácida (suelta y de pinar/robledal) o caliza. La mayoría de Boletus prefieren tierras ácidas o neutras.">i</button>
+              <button class="info-help-btn" type="button" aria-label="Información sobre tipo de tierra" data-title="Acidez de la tierra (pH)" data-info="Indica si la tierra es ácida (suelta y de pinar/robledal silíceo) o caliza. Los Boletus prefieren suelos ácidos o neutros, mientras que el níscalo tolera también pinares calizos.">i</button>
             </div>
             <span class="info-item-val" id="c-ph">—</span>
             <span class="info-item-hint" id="h-ph"><span class="status-dot"></span><span>—</span></span>
@@ -2444,6 +2480,7 @@
         <button class="guide-btn" type="button" data-guide="boletus_pinophilus">Boletus pinophilus</button>
         <button class="guide-btn" type="button" data-guide="boletus_aereus">Boletus aereus</button>
         <button class="guide-btn" type="button" data-guide="boletus_reticulatus">Boletus reticulatus</button>
+        <button class="guide-btn" type="button" data-guide="lactarius_deliciosus">Lactarius deliciosus (Níscalo)</button>
       </div>
     </details>
 
@@ -2562,6 +2599,7 @@
     {n:"Puerto de Cotos (Sierra de Guadarrama, Madrid)", lat:40.8250, lon:-3.9622},
     {n:"Puerto de la Morcuera (Madrid)", lat:40.8267, lon:-3.8306},
     {n:"Puerto de los Leones (Guadarrama, Madrid)", lat:40.7064, lon:-4.1378},
+    {n:"Alto del León — Puerto de Guadarrama (Madrid/Segovia)", lat:40.7064, lon:-4.1378},
     {n:"Puerto de la Fuenfría (Madrid/Segovia)", lat:40.7550, lon:-4.0583},
     {n:"Los Molinos (Guadarrama, Madrid)", lat:40.7142, lon:-4.0744},
     {n:"Guadarrama (Madrid)", lat:40.6722, lon:-4.0889},
@@ -2630,6 +2668,7 @@
     {n:"Majaelrayo (Sierra de Ayllón, Guadalajara)", lat:41.1133, lon:-3.3039},
     {n:"Campillo de Ranas (Pueblos Negros, Guadalajara)", lat:41.0853, lon:-3.3150},
     {n:"Valverde de los Arroyos (Pico Ocejón, Guadalajara)", lat:41.1292, lon:-3.2403},
+    {n:"Arroyo de las Fraguas (Sierra Norte, Guadalajara)", lat:41.1060, lon:-3.1290},
     {n:"Galve de Sorbe (Sierra Pela, Guadalajara)", lat:41.2231, lon:-3.1811},
     {n:"Condemios de Arriba (Pinar de Condemios, Guadalajara)", lat:41.2022, lon:-3.1250},
     {n:"Condemios de Abajo (Guadalajara)", lat:41.2189, lon:-3.1097},
@@ -2848,7 +2887,8 @@
     'boletus_edulis',
     'boletus_pinophilus',
     'boletus_aereus',
-    'boletus_reticulatus'
+    'boletus_reticulatus',
+    'lactarius_deliciosus'
   ];
   const SPECIES_GUIDES = {
     boletus_edulis: {
@@ -3056,6 +3096,56 @@
             'Frente a Boletus edulis, suele tener aspecto más seco y agrietado y retícula más extendida por el pie; ambos rasgos pueden variar.',
             'Puede confundirse con Boletus aereus, que suele tener el sombrero más oscuro y bronceado.',
             'Boletus pinophilus aparece sobre todo en pinares. El árbol acompañante orienta, pero no confirma la especie.'
+          ]
+        }
+      ]
+    },
+    lactarius_deliciosus: {
+      scientificName: 'Lactarius deliciosus (Níscalo / Robellón)',
+      image: {
+        src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/Echte_Reizker_Lactarius_deliciosus.JPG/960px-Echte_Reizker_Lactarius_deliciosus.JPG',
+        alt: 'Ejemplares de Lactarius deliciosus (níscalo) con sombrero zonado anaranjado',
+        artist: 'Holger Krisp',
+        fileUrl: 'https://commons.wikimedia.org/wiki/File:Echte_Reizker_Lactarius_deliciosus.JPG',
+        license: 'CC BY 3.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by/3.0/'
+      },
+      sections: [
+        {
+          title: 'Dónde buscarla',
+          items: [
+            'Especie estrictamente micorrícica de pinos (Pinus sylvestris, P. pinaster, P. nigra, P. pinea y P. halepensis). No la busques en hayedos o melojares puros sin pinos.',
+            'Tolera tanto suelos ácidos/silíceos como pinares calizos (pH más amplio que los Boletus).',
+            'Abunda en pinares jóvenes o de espesura media, bordes de pistas, cortafuegos, claros cubiertos de acículas, musgo, brezo o jara.'
+          ]
+        },
+        {
+          title: 'Lluvia y microhábitat',
+          items: [
+            'Responde bien a lluvias otoñales moderadas y humedad retenida bajo la pinocha y el musgo.',
+            'Soporta claros algo más abiertos que los boletos, aunque tras días secos o ventosos conviene buscar en cunetas herbosas, vaguadas y umbrías.'
+          ]
+        },
+        {
+          title: 'Época orientativa',
+          items: [
+            'Seta típicamente otoñal y de inicio de invierno: su pico suele concentrarse en octubre y noviembre, manteniéndose activa en diciembre en cotas medias o abrigadas.',
+            'Resiste heladas débiles y temperaturas frescas mejor que los Boletus, aunque las heladas intensas seguidas detienen el brote.'
+          ]
+        },
+        {
+          title: 'Cómo reconocerla',
+          items: [
+            'Sombrero de color naranja zanahoria a rojizo con círculos concéntricos más oscuros (zonado), convexo de joven y embudado/deprimido en el centro al madurar.',
+            'Láminas apretadas y decurrentes de color naranja vivo que se manchan de verde cardenillo con los roces o la edad (típico y comestible).',
+            'Pie cilíndrico, generalmente hueco en ejemplares adultos, con hoyuelos más oscuros (escrobículas). Al cortar la carne exuda látex rojo-naranja zanahoria de sabor suave.'
+          ]
+        },
+        {
+          title: 'Cómo distinguirla y precauciones',
+          items: [
+            'A diferencia de los Boletus (con poros tipo esponja), el níscalo tiene láminas y suelta leche (látex) naranja al corte.',
+            'Precaución con otros Lactarius tóxicos o no comestibles que comparten el hábitat (como Lactarius torminosus —borde muy peloso— o Lactarius chrysorrheus): sueltan látex blanco, crema o que amarillea al aire, y tienen sabor picante o amargo. Si el látex no es naranja zanahoria claro, no recolectar.'
           ]
         }
       ]
@@ -3837,14 +3927,19 @@
           const selectedCells = selectedSpecies
             .map(speciesId => speciesCellMaps.get(speciesId)?.get(cellData.h))
             .filter(Boolean);
+          const sortedCandidates = [...selectedCells].sort(
+            (a, b) => (Number(b.cs) || 0) - (Number(a.cs) || 0)
+          );
           const mergedCell = {
-            ...cellData,
+            ...(sortedCandidates[0] || cellData),
             hs: Math.max(...selectedCells.map(selectedCell => selectedCell.hs)),
             ws: Math.max(...selectedCells.map(selectedCell => selectedCell.ws)),
             cs: Math.max(...selectedCells.map(selectedCell =>
               Number.isFinite(selectedCell.cs)
                 ? selectedCell.cs
-                : Math.sqrt(Math.max(0, selectedCell.hs) * Math.max(0, selectedCell.ws))
+                : (selectedCell.hs > 0 && selectedCell.ws > 0
+                  ? Math.pow(selectedCell.hs, 0.40) * Math.pow(selectedCell.ws, 0.60)
+                  : 0)
             )),
           };
           selectCell(mergedCell);
@@ -3883,6 +3978,8 @@
     document.getElementById('c-tree').textContent = 'Datos no disponibles';
     const summaryBox = document.getElementById('cell-summary-box');
     const summaryList = document.getElementById('cell-summary-list');
+    const flushPill = document.getElementById('cell-flush-phase');
+    if (flushPill) flushPill.hidden = true;
     if (summaryBox) summaryBox.classList.remove('sum-good', 'sum-warn', 'sum-bad');
     if (summaryList) summaryList.innerHTML = '<li>Toca una celda para ver qué tiene a favor y qué le falta hoy.</li>';
     document.getElementById('c-ph').textContent = '—';
@@ -3918,14 +4015,19 @@
       const selectedCells = selectedSpecies
         .map(speciesId => speciesCellMaps.get(speciesId)?.get(cell.h))
         .filter(Boolean);
+      const sortedCandidates = [...selectedCells].sort(
+        (a, b) => (Number(b.cs) || 0) - (Number(a.cs) || 0)
+      );
       return {
-        ...cell,
+        ...(sortedCandidates[0] || cell),
         hs: Math.max(...selectedCells.map(selectedCell => selectedCell.hs)),
         ws: Math.max(...selectedCells.map(selectedCell => selectedCell.ws)),
         cs: Math.max(...selectedCells.map(selectedCell =>
           Number.isFinite(selectedCell.cs)
             ? selectedCell.cs
-            : Math.sqrt(Math.max(0, selectedCell.hs) * Math.max(0, selectedCell.ws))
+            : (selectedCell.hs > 0 && selectedCell.ws > 0
+              ? Math.pow(selectedCell.hs, 0.40) * Math.pow(selectedCell.ws, 0.60)
+              : 0)
         )),
       };
     });
@@ -4315,6 +4417,12 @@
       addDiff(15, `Árboles del bosque: ${winner} tiene los árboles que necesita esta seta (${forestNameEs(a.tree)} vs ${forestNameEs(b.tree)}).`);
     }
 
+    if (a.fp && b.fp && a.fp !== b.fp) {
+      const infoA = flushPhaseInfo(a.fp);
+      const infoB = flushPhaseInfo(b.fp);
+      addDiff(12, `Fase de brotada: ${nameA} está en «${infoA.label}» mientras ${nameB} está en «${infoB.label}».`);
+    }
+
     diffs.sort((x, y) => y.abs - x.abs);
     return diffs.slice(0, 5).map(d => d.text);
   }
@@ -4363,8 +4471,17 @@
       }
     }
 
+    const fpRank = fp => fp === 'peak_flush' ? 4 : fp === 'emerging_buttons' ? 3 : fp === 'moderate_active' || fp === 'mature_tail' ? 2 : fp === 'incubating' ? 1 : 0;
     const rows = [
       { label: 'Índice global', valA: `${formatNumber(csA)}/100`, valB: `${formatNumber(csB)}/100`, numA: csA, numB: csB, unit: ' pts', higherBetter: true },
+      ...(a.fp || b.fp ? [{
+        label: 'Fase de brotada',
+        valA: a.fp ? `${flushPhaseInfo(a.fp).icon} ${flushPhaseInfo(a.fp).label}` : '—',
+        valB: b.fp ? `${flushPhaseInfo(b.fp).icon} ${flushPhaseInfo(b.fp).label}` : '—',
+        numA: fpRank(a.fp),
+        numB: fpRank(b.fp),
+        textOnly: true
+      }] : []),
       { label: 'Hábitat potencial', valA: `${formatNumber(a.hs)}/100`, valB: `${formatNumber(b.hs)}/100`, numA: Number(a.hs), numB: Number(b.hs), unit: ' pts', higherBetter: true },
       { label: 'Tiempo reciente', valA: `${formatNumber(a.ws)}/100`, valB: `${formatNumber(b.ws)}/100`, numA: Number(a.ws), numB: Number(b.ws), unit: ' pts', higherBetter: true },
       { label: 'Masa forestal', valA: `${forestNameEs(a.tree)} (${a.cc}%)`, valB: `${forestNameEs(b.tree)} (${b.cc}%)`, numA: a.host === 'compatible' ? 1 : 0, numB: b.host === 'compatible' ? 1 : 0, textOnly: true },
@@ -4375,6 +4492,14 @@
       { label: 'Temp. suelo / mín. 3d', valA: `${formatNumber(a.stemp)} °C / ${formatNumber(a.tmin3 ?? a.tmin)} °C`, valB: `${formatNumber(b.stemp)} °C / ${formatNumber(b.tmin3 ?? b.tmin)} °C`, numA: Number(a.t_pts), numB: Number(b.t_pts), unit: ' pts', higherBetter: true },
       { label: 'Humedad suelo / aire', valA: `${formatNumber(a.moist)}% / ${formatNumber(a.rh)}%`, valB: `${formatNumber(b.moist)}% / ${formatNumber(b.rh)}%`, numA: Number(a.moist), numB: Number(b.moist), unit: '%', higherBetter: true },
       { label: 'Altitud y orientación', valA: `${a.elev} m · ${aspectCodeEs(a.asp)} (${formatNumber(a.topo)}/20)`, valB: `${b.elev} m · ${aspectCodeEs(b.asp)} (${formatNumber(b.topo)}/20)`, numA: Number(a.topo), numB: Number(b.topo), unit: ' pts', higherBetter: true },
+      ...(a.fc_out || b.fc_out ? [{
+        label: 'Previsión 72h',
+        valA: `${Number.isFinite(Number(a.fc_r)) ? formatNumber(a.fc_r) + ' mm' : '—'} · mín. ${Number.isFinite(Number(a.fc_tn)) ? formatNumber(a.fc_tn) + ' °C' : '—'}`,
+        valB: `${Number.isFinite(Number(b.fc_r)) ? formatNumber(b.fc_r) + ' mm' : '—'} · mín. ${Number.isFinite(Number(b.fc_tn)) ? formatNumber(b.fc_tn) + ' °C' : '—'}`,
+        numA: 0,
+        numB: 0,
+        neutral: true
+      }] : []),
     ];
 
     const tbody = document.getElementById('compare-table-body');
@@ -4570,6 +4695,36 @@
     document.getElementById('species-dialog').showModal();
   }
 
+  function flushPhaseInfo(fp) {
+    const mapInfo = {
+      peak_flush: { cls: 'fp-good', icon: '🍄', label: 'Florada activa (botones y adultos)' },
+      emerging_buttons: { cls: 'fp-good', icon: '🌱', label: 'Posible salida de botones' },
+      mature_tail: { cls: 'fp-warn', icon: '🍂', label: 'Cola de brotada (posibles crecidos, pocos botones)' },
+      moderate_active: { cls: 'fp-warn', icon: '🍄', label: 'Actividad moderada' },
+      incubating: { cls: 'fp-warn', icon: '💧', label: 'Incubando tras lluvia reciente' },
+      cold_stalled: { cls: 'fp-bad', icon: '❄️', label: 'Frenado por frío o helada' },
+      dormant_host: { cls: 'fp-bad', icon: '🍁', label: 'Caducifolio en reposo otoñal' },
+      dry: { cls: 'fp-bad', icon: '☀️', label: 'Monte seco' },
+      off_season: { cls: 'fp-bad', icon: '📅', label: 'Fuera de época' },
+      excluded: { cls: 'fp-bad', icon: '⛔', label: 'Hábitat no compatible' }
+    };
+    return mapInfo[fp] || { cls: 'fp-neutral', icon: 'ℹ️', label: 'Condiciones mixtas' };
+  }
+
+  function forecastOutlookText(p) {
+    if (!p || !p.fc_out) return null;
+    if (p.fc_out === 'frost_risk') {
+      return `Alerta 72h: se esperan heladas (${formatNumber(p.fc_tn)} °C de mínima), posible parón.`;
+    }
+    if (p.fc_out === 'rain_incoming') {
+      return `Previsión 72h: llegan lluvias relevantes (${formatNumber(p.fc_r)} l/m²).`;
+    }
+    if (p.fc_out === 'warming_favorable') {
+      return 'Previsión 72h: sube la temperatura hacia valores más templados.';
+    }
+    return null;
+  }
+
   function getSpeciesChecks(cell, dataset) {
     const profile = dataset.species_profile;
     const habitatScore = Number(cell.hs);
@@ -4616,7 +4771,8 @@
     const hasTexture = ['sand', 'silt', 'clay'].every(key =>
       cell[key] !== undefined && cell[key] !== null && Number.isFinite(Number(cell[key]))
     );
-    const phMaxPts = hasTexture ? 28 : 35;
+    const hasSoc = cell.soc !== undefined && cell.soc !== null && Number.isFinite(Number(cell.soc));
+    const phMaxPts = 35;
     const phScoreText = Number.isFinite(cell.soil_ph_score)
       ? ` (${formatNumber(cell.soil_ph_score)}/${phMaxPts} pts)`
       : '';
@@ -4626,9 +4782,10 @@
       dataset.soil_texture_metadata.scoring
       ? dataset.soil_texture_metadata.scoring.max_points
       : null;
+    const socSuffix = hasSoc ? ` Humus: ${formatNumber(cell.soc)} g/kg.` : '';
     const textureText = hasTexture
-      ? `Tierra con ${formatNumber(cell.sand)}% arena y ${formatNumber(cell.clay)}% arcilla.${Number.isFinite(textureScore) ? ` (${formatNumber(textureScore)}/${formatNumber(textureMaxPoints)} pts)` : ''}`
-      : 'Sin dato de tipo de grano del suelo.';
+      ? `Tierra con ${formatNumber(cell.sand)}% arena y ${formatNumber(cell.clay)}% arcilla.${Number.isFinite(textureScore) ? ` (${formatNumber(textureScore)}/${formatNumber(textureMaxPoints)} pts)` : ''}${socSuffix}`
+      : `Sin dato de tipo de grano del suelo.${socSuffix}`;
 
     const sourceDistance = Number(cell.weather_distance_km);
     const distanceNote = cell.weather_distance_km != null && Number.isFinite(sourceDistance)
@@ -4636,7 +4793,6 @@
       : '';
     const minTempLimit = Number(profile.min_temp_limit_celsius);
     const minTemp3d = Number.isFinite(Number(cell.tmin3)) ? Number(cell.tmin3) : Number(cell.tmin);
-    const minTemp = Number(cell.tmin);
     const seasonFactor = Number.isFinite(Number(cell.phen)) ? Number(cell.phen) : 1.0;
     const weatherStatus = (Number.isFinite(minTemp3d) && Number.isFinite(minTempLimit) && minTemp3d < minTempLimit) || seasonFactor < 0.25
       ? 'bad'
@@ -4655,14 +4811,17 @@
         : ' En plena temporada.';
     const p3Note = Number.isFinite(Number(cell.p3)) ? ` (${formatNumber(cell.p3)} l/m² en últimos 3d)` : '';
     const pincNote = Number.isFinite(Number(cell.pinc)) ? `; hace 5–14d: ${formatNumber(cell.pinc)} l/m²` : '';
+    const p28Note = Number.isFinite(Number(cell.p28)) ? `; 28d: ${formatNumber(cell.p28)} l/m²` : '';
     const timingNote = cell.rtstat === 'too_recent_for_flush'
       ? ' Llovió hace muy pocos días sobre suelo seco: aún tardarán en salir.'
       : cell.rtstat === 'optimal_incubation'
         ? ' Llovió justo a tiempo para poder coger hoy.'
-        : '';
-    const weatherText = `Nota del tiempo: ${formatNumber(cell.ws)}/100. Lluvia 14d: ${formatNumber(cell.p14)} l/m²${p3Note}${pincNote}; humedad tierra: ${formatNumber(cell.moist)}%.${frostText}${timingNote}${phenologyNote}${distanceNote}`;
+        : cell.rtstat === 'mature_tail'
+          ? ' Brotada de lluvias antiguas: posibles ejemplares crecidos.'
+          : '';
+    const weatherText = `Nota del tiempo: ${formatNumber(cell.ws)}/100. Lluvia 14d: ${formatNumber(cell.p14)} l/m²${p3Note}${pincNote}${p28Note}; humedad tierra: ${formatNumber(cell.moist)}%.${frostText}${timingNote}${phenologyNote}${distanceNote}`;
 
-    return [
+    const checksList = [
       { label: 'Nota del bosque', status: habitatIndexStatus, text: habitatIndexText },
       { label: 'Árboles', status: habitatStatus, text: `${habitatText}${canopyText}` },
       {
@@ -4674,6 +4833,20 @@
       { label: 'Suelo (arena/arcilla)', status: 'uncertain', text: textureText },
       { label: 'Tiempo y época', status: weatherStatus, text: weatherText }
     ];
+    if (cell.fp) {
+      const fpInfo = flushPhaseInfo(cell.fp);
+      const fpStatus = fpInfo.cls === 'fp-good' ? 'good' : fpInfo.cls === 'fp-bad' ? 'bad' : 'uncertain';
+      checksList.push({ label: 'Fase de brotada', status: fpStatus, text: `${fpInfo.icon} ${fpInfo.label}.` });
+    }
+    const fcText = forecastOutlookText(cell);
+    if (fcText) {
+      checksList.push({
+        label: 'Previsión 72h',
+        status: cell.fc_out === 'frost_risk' ? 'bad' : 'good',
+        text: fcText
+      });
+    }
+    return checksList;
   }
 
   function createSpeciesCard(cell, dataset) {
@@ -4688,7 +4861,7 @@
     name.textContent = profile.scientific_name;
     const combinedScore = Number.isFinite(cell.cs)
       ? cell.cs
-      : Math.sqrt(Math.max(0, cell.hs) * Math.max(0, cell.ws));
+      : (cell.hs > 0 && cell.ws > 0 ? Math.pow(cell.hs, 0.40) * Math.pow(cell.ws, 0.60) : 0);
     const score = document.createElement('span');
     score.className = 'species-explanation-score';
     score.textContent = `${formatNumber(combinedScore)}/100 condiciones favorables`;
@@ -4751,6 +4924,7 @@
   function renderPlainCellSummary(p, dataset) {
     const box = document.getElementById('cell-summary-box');
     const title = document.getElementById('cell-summary-title');
+    const flushPill = document.getElementById('cell-flush-phase');
     const list = document.getElementById('cell-summary-list');
     if (!box || !title || !list) return;
 
@@ -4761,11 +4935,24 @@
     const minTempLimit = profile && Number.isFinite(Number(profile.min_temp_limit_celsius))
       ? Number(profile.min_temp_limit_celsius) : 1.0;
 
+    if (flushPill) {
+      if (p.fp) {
+        const fpInfo = flushPhaseInfo(p.fp);
+        flushPill.className = `flush-phase-pill ${fpInfo.cls}`;
+        flushPill.textContent = `${fpInfo.icon} ${fpInfo.label}`;
+        flushPill.hidden = false;
+      } else {
+        flushPill.hidden = true;
+      }
+    }
+
+    const isActivePhase = !p.fp || p.fp === 'peak_flush' || p.fp === 'emerging_buttons';
+    const isBlockedPhase = p.fp === 'excluded' || p.fp === 'off_season' || p.fp === 'cold_stalled' || p.fp === 'dormant_host';
     box.classList.remove('sum-good', 'sum-warn', 'sum-bad');
-    if (cs >= 55) {
+    if (cs >= 58 && ws >= 48 && isActivePhase) {
       box.classList.add('sum-good');
       title.textContent = '🟢 Buen sitio para buscar hoy';
-    } else if (cs >= 25) {
+    } else if (cs >= 25 && ws >= 20 && !isBlockedPhase) {
       box.classList.add('sum-warn');
       title.textContent = '🟡 Sitio regular hoy (puede haber alguna suelta)';
     } else {
@@ -4779,20 +4966,28 @@
     // 1. Árboles y bosque
     const treeName = forestNameEs(p.tree);
     if (p.host === 'compatible' && hs > 0) {
-      pros.push(`Tiene árboles adecuados (${treeName}).`);
+      if (p.htier === 'marginal') {
+        cons.push(`El árbol (${treeName}) es secundario o marginal para esta seta.`);
+      } else {
+        pros.push(`Tiene árboles adecuados (${treeName}).`);
+      }
     } else if (p.host === 'incompatible' || hs <= 0) {
       cons.push(p.reason ? p.reason : `Aquí no hay los árboles que necesita esta seta (${treeName}).`);
     } else {
       cons.push(`El tipo de bosque (${treeName}) no es seguro para esta seta.`);
     }
 
-    // 2. Época del año
-    if (p.sstat === 'out_of_season' || p.sstat === 'off_season') {
+    // 2. Fase fenológica / dormancia / frío
+    if (p.fp === 'dormant_host') {
+      cons.push(`Los árboles caducifolios (${treeName}) ya han entrado en reposo otoñal tras las heladas.`);
+    } else if (p.fp === 'cold_stalled') {
+      cons.push('El suelo o el ambiente están demasiado fríos para formar botones nuevos.');
+    } else if (p.sstat === 'out_of_season' || p.sstat === 'off_season') {
       cons.push('Ahora mismo estamos fuera de la época en la que suele salir esta seta aquí.');
     } else if (p.sstat === 'peak_season' || p.sstat === 'in_season') {
       pros.push('Estamos en plena temporada de esta seta.');
     } else if (p.sstat === 'active_season' || p.sstat === 'shoulder_season') {
-      pros.push('Sigue siendo buena temporada para esta seta, aunque más avanzada según la altura.');
+      pros.push('Sigue siendo temporada activa para esta seta a esta altura.');
     }
 
     // 3. Lluvia y tiempo de crecimiento
@@ -4800,14 +4995,23 @@
     const p3 = Number(p.p3);
     const p14 = Number(p.p14);
     const pe = Number(p.pe);
-    if (p.rtstat === 'too_recent_for_flush') {
-      cons.push(`Llovió hace poco (${formatNumber(p3)} l/m² en 3 días), pero antes estuvo seco: las setas aún tardarán varios días en salir.`);
+    if (p.fp === 'mature_tail') {
+      cons.push('La florada viene de lluvias pasadas: puede quedar algún ejemplar crecido, pero sin botones nuevos.');
+    } else if (p.fp === 'incubating' || p.rtstat === 'too_recent_for_flush') {
+      cons.push(`Llovió hace pocos días (${formatNumber(p3)} l/m² en 3 días): el micelio está incubando y tardarán días en salir.`);
     } else if (p.rtstat === 'optimal_incubation' || (Number.isFinite(pinc) && pinc >= 20)) {
-      pros.push(`Llovió bien hace 1 o 2 semanas (${formatNumber(pinc)} l/m²), justo a tiempo para que hayan salido.`);
+      pros.push(`Llovió a tiempo para haber incubado (${formatNumber(pinc)} l/m² hace 4–14 días).`);
     } else if (Number.isFinite(p14) && p14 < 12) {
       cons.push(`Falta lluvia reciente (solo ${formatNumber(p14)} l/m² en 14 días); el monte está seco.`);
     } else if ((Number.isFinite(pinc) && pinc >= 8) || (Number.isFinite(pe) && pe >= 25)) {
-      pros.push(`Cayó lluvia hace 4–14 días (${formatNumber(pinc)} l/m² previos y ${formatNumber(p3)} l/m² recientes), suficiente para empezar a mover el micelio.`);
+      pros.push(`Cayó lluvia hace 4–14 días (${formatNumber(pinc)} l/m² previos y ${formatNumber(p3)} l/m² recientes), suficiente para mover el micelio.`);
+    }
+
+    if (Number.isFinite(Number(p.drg)) && Number(p.drg) < 0.90) {
+      cons.push('El monte arrastraba sequía previa, lo que retrasa y debilita la primera brotada.');
+    }
+    if (Number.isFinite(Number(p.wl)) && Number(p.wl) < 0.92) {
+      cons.push('Exceso de agua en suelo frío: las raíces y el micelio sufren encharcamiento.');
     }
 
     // 4. Humedad de la tierra
@@ -4823,8 +5027,8 @@
     if (Number.isFinite(tmin3) && tmin3 < minTempLimit) {
       cons.push(`Ha hecho mucho frío hace poco (${formatNumber(tmin3)} °C de mínima) y eso frena que salgan.`);
     } else if (Number.isFinite(stemp)) {
-      if (stemp >= 8 && stemp <= 17) pros.push(`La tierra tiene buena temperatura (${formatNumber(stemp)} °C).`);
-      else if (stemp < 6) cons.push(`La tierra está demasiado fría (${formatNumber(stemp)} °C).`);
+      if (stemp >= 8.5 && stemp <= 17) pros.push(`La tierra tiene buena temperatura radicular (${formatNumber(stemp)} °C).`);
+      else if (stemp < 6.5) cons.push(`La tierra está fría (${formatNumber(stemp)} °C en zona radicular).`);
       else if (stemp > 21) cons.push(`La tierra está demasiado caliente (${formatNumber(stemp)} °C).`);
     }
 
@@ -4842,10 +5046,14 @@
     }
 
     list.replaceChildren();
+    const fcNote = forecastOutlookText(p);
     const items = [
       ...cons.slice(0, 3).map(t => ({ icon: '⚠️', text: t })),
       ...pros.slice(0, 3).map(t => ({ icon: '✅', text: t }))
     ];
+    if (fcNote) {
+      items.push({ icon: p.fc_out === 'frost_risk' ? '🥶' : '🌦️', text: fcNote });
+    }
     if (!items.length) {
       items.push({ icon: ws >= 50 ? '✅' : '⚠️', text: 'Condiciones intermedias en el bosque y el tiempo de estos días.' });
     }
@@ -4952,19 +5160,23 @@
     const p3Num = Number(p.p3);
     const pincNum = Number(p.pinc);
     const p14Num = Number(p.p14);
+    const p28Num = Number(p.p28);
     const peNum = Number(p.pe);
     if (Number.isFinite(pincNum)) {
+      const p28Suffix = Number.isFinite(p28Num) ? ` · ${formatNumber(p28Num)} l/m² (28d)` : '';
       document.getElementById('c-rain').textContent =
-        `${formatNumber(pincNum)} l/m² hace 4–14d · ${Number.isFinite(p3Num) ? formatNumber(p3Num) : '0'} l/m² últimos 3d`;
+        `${formatNumber(pincNum)} l/m² 4–14d · ${Number.isFinite(p3Num) ? formatNumber(p3Num) : '0'} l/m² 3d${p28Suffix}`;
     } else {
       document.getElementById('c-rain').textContent = Number.isFinite(p14Num) ? `${formatNumber(p14Num)} l/m² en 14d` : '—';
     }
-    if (p.rtstat === 'too_recent_for_flush') {
-      setCardStatus('card-rain', 'h-rain', 'warn', 'Regular · Llovió muy reciente, tardarán días en salir');
+    if (p.fp === 'mature_tail' || p.rtstat === 'mature_tail') {
+      setCardStatus('card-rain', 'h-rain', 'warn', 'Regular · Lluvias antiguas (posibles crecidos, pocos botones)');
+    } else if (p.rtstat === 'too_recent_for_flush' || p.fp === 'incubating') {
+      setCardStatus('card-rain', 'h-rain', 'warn', 'Regular · Llovió muy reciente, aún incubando');
     } else if (p.rtstat === 'optimal_incubation' || (Number.isFinite(pincNum) && pincNum >= 20)) {
       setCardStatus('card-rain', 'h-rain', 'good', 'Bueno · Llovió a tiempo para coger hoy');
     } else if ((Number.isFinite(pincNum) && pincNum >= 8) || (Number.isFinite(peNum) && peNum >= 22)) {
-      setCardStatus('card-rain', 'h-rain', 'warn', 'Regular · Lluvia previa moderada, gran aporte reciente');
+      setCardStatus('card-rain', 'h-rain', 'warn', 'Regular · Lluvia previa moderada');
     } else {
       setCardStatus('card-rain', 'h-rain', 'bad', 'Malo · Muy poca lluvia previa para haber brotado hoy');
     }
@@ -4985,33 +5197,45 @@
     // 5. Frío y heladas
     const tmin3Num = Number.isFinite(Number(p.tmin3)) ? Number(p.tmin3) : Number(p.tmin);
     const tmin14Num = Number(p.tmin);
+    const fcTnNum = Number(p.fc_tn);
+    const f7Num = Number(p.f7);
     const minLimit = profile && Number.isFinite(Number(profile.min_temp_limit_celsius))
       ? Number(profile.min_temp_limit_celsius) : 1.0;
     const tempMinEl = document.getElementById('c-temp-min');
     if (tempMinEl) {
+      const fcSuffix = p.fc_tn !== null && p.fc_tn !== undefined && Number.isFinite(fcTnNum)
+        ? ` · próx. 3d ${formatNumber(fcTnNum)} °C` : '';
       if (Number.isFinite(tmin3Num) && Number.isFinite(tmin14Num)) {
-        tempMinEl.textContent = `${formatNumber(tmin3Num)} °C (3d) · ${formatNumber(tmin14Num)} °C (14d)`;
+        tempMinEl.textContent = `${formatNumber(tmin3Num)} °C (3d) · ${formatNumber(tmin14Num)} °C (14d)${fcSuffix}`;
       } else if (Number.isFinite(tmin14Num)) {
-        tempMinEl.textContent = `${formatNumber(tmin14Num)} °C (14d)`;
+        tempMinEl.textContent = `${formatNumber(tmin14Num)} °C (14d)${fcSuffix}`;
       } else {
         tempMinEl.textContent = '—';
       }
     }
     if (Number.isFinite(tmin3Num)) {
-      if (tmin3Num < minLimit) setCardStatus('card-temp-min', 'h-temp-min', 'bad', 'Malo · Helada reciente');
-      else if (tmin3Num < minLimit + 2.5) setCardStatus('card-temp-min', 'h-temp-min', 'warn', 'Regular · Noches frescas');
-      else setCardStatus('card-temp-min', 'h-temp-min', 'good', 'Bueno · Sin heladas');
+      if (tmin3Num < minLimit || (Number.isFinite(f7Num) && f7Num >= 3)) {
+        setCardStatus('card-temp-min', 'h-temp-min', 'bad', 'Malo · Helada reciente');
+      } else if (tmin3Num < minLimit + 2.5 || (Number.isFinite(f7Num) && f7Num >= 1)) {
+        setCardStatus('card-temp-min', 'h-temp-min', 'warn', 'Regular · Noches frescas o con riesgo');
+      } else {
+        setCardStatus('card-temp-min', 'h-temp-min', 'good', 'Bueno · Sin heladas');
+      }
     } else {
       setCardStatus('card-temp-min', 'h-temp-min', 'neutral', 'Sin dato');
     }
 
     // 6. Calor de la tierra
     const stempNum = Number(p.stemp);
-    document.getElementById('c-soil-temp').textContent = Number.isFinite(stempNum) ? `${formatNumber(stempNum)} °C` : '—';
+    const st07Num = Number(p.st07);
+    const st07Suffix = p.st07 !== null && p.st07 !== undefined && Number.isFinite(st07Num)
+      ? ` (sup. ${formatNumber(st07Num)} °C)` : '';
+    document.getElementById('c-soil-temp').textContent = Number.isFinite(stempNum)
+      ? `${formatNumber(stempNum)} °C${st07Suffix}` : '—';
     if (Number.isFinite(stempNum)) {
-      if (stempNum >= 8 && stempNum <= 17) setCardStatus('card-soil-temp', 'h-soil-temp', 'good', 'Bueno · Tierra templada ideal');
-      else if ((stempNum >= 6 && stempNum < 8) || (stempNum > 17 && stempNum <= 21)) setCardStatus('card-soil-temp', 'h-soil-temp', 'warn', 'Regular · Un poco fría o cálida');
-      else setCardStatus('card-soil-temp', 'h-soil-temp', 'bad', stempNum < 6 ? 'Malo · Tierra demasiado fría' : 'Malo · Tierra demasiado caliente');
+      if (stempNum >= 8.5 && stempNum <= 17) setCardStatus('card-soil-temp', 'h-soil-temp', 'good', 'Bueno · Tierra templada ideal');
+      else if ((stempNum >= 6.5 && stempNum < 8.5) || (stempNum > 17 && stempNum <= 21)) setCardStatus('card-soil-temp', 'h-soil-temp', 'warn', 'Regular · Un poco fría o cálida');
+      else setCardStatus('card-soil-temp', 'h-soil-temp', 'bad', stempNum < 6.5 ? 'Malo · Tierra demasiado fría' : 'Malo · Tierra demasiado caliente');
     } else {
       setCardStatus('card-soil-temp', 'h-soil-temp', 'neutral', 'Sin dato');
     }
@@ -5031,11 +5255,15 @@
       setCardStatus('card-ph', 'h-ph', 'neutral', 'Valor orientativo');
     }
 
-    // 8. Altura, orientación en español (SO/NO/O) y pendiente
+    // 8. Altura, orientación en español (SO/NO/O), pendiente y relieve (TPI)
     const aspLabel = aspectLabelEs(p.asp);
     const slopeNum = Number(p.slope);
+    const tpiNum = Number(p.tpi);
     const slopeSuffix = Number.isFinite(slopeNum) ? ` · ${Math.round(slopeNum)}° pend.` : '';
-    document.getElementById('c-topo').textContent = `${p.elev || 0} m · Ladera ${aspLabel}${slopeSuffix}`;
+    const tpiSuffix = p.tpi !== null && p.tpi !== undefined && Number.isFinite(tpiNum)
+      ? (tpiNum <= -8 ? ' · Vaguada' : tpiNum >= 10 ? ' · Cresta' : ' · Ladera')
+      : '';
+    document.getElementById('c-topo').textContent = `${p.elev || 0} m · Ladera ${aspLabel}${slopeSuffix}${tpiSuffix}`;
     if (profile && Array.isArray(profile.altitude_range_meters)) {
       const [eMin, eMax] = profile.altitude_range_meters;
       const elevNum = Number(p.elev) || 0;
@@ -5102,7 +5330,7 @@
       if (p.tshock_status === 'triggered_favorable') {
         shockStatus = 'good';
         shockHint = 'Bueno · Refrescó tras lluvia y anima el brote';
-      } else if (p.tshock_status === 'cold_suppressed') {
+      } else if (p.tshock_status === 'cold_suppressed' || p.tshock_status === 'cold_snap_stalled') {
         shockStatus = 'bad';
         shockHint = 'Malo · Bajón brusco de frío';
       } else if (p.tshock_status === 'warming_inhibited') {
@@ -5116,13 +5344,15 @@
     document.getElementById('c-thermal-shock').textContent = shockText;
     setCardStatus('card-thermal-shock', 'h-thermal-shock', shockStatus, shockHint);
 
-    // 13. Suelo (arena / arcilla)
+    // 13. Suelo (arena / arcilla / humus)
     const hasTexture = ['sand', 'silt', 'clay'].every(key =>
       p[key] !== undefined && p[key] !== null && Number.isFinite(Number(p[key]))
     );
+    const hasSoc = p.soc !== undefined && p.soc !== null && Number.isFinite(Number(p.soc));
+    const socText = hasSoc ? ` · humus ${formatNumber(p.soc)} g/kg` : '';
     document.getElementById('c-texture').textContent = hasTexture
-      ? `Arena ${formatNumber(p.sand)}% · arcilla ${formatNumber(p.clay)}%`
-      : 'Sin dato';
+      ? `Arena ${formatNumber(p.sand)}% · arcilla ${formatNumber(p.clay)}%${socText}`
+      : (hasSoc ? `Humus ${formatNumber(p.soc)} g/kg` : 'Sin dato');
     if (hasTexture) {
       const clayNum = Number(p.clay);
       if (clayNum <= 28) setCardStatus('card-texture', 'h-texture', 'good', 'Bueno · Suelo suelto que drena bien');
@@ -5157,7 +5387,7 @@
     weather: { title:'Condiciones recientes (0–100)', bar: SCORE_GRADIENT_BAR, labels: SCORE_GRADIENT_LABELS, note:'Señal reciente de lluvia, temperatura y humedad.' },
     precip: { title:'Lluvia acumulada en 14 días', bar:['#0f172a','#0284c7','#06b6d4','#38bdf8','#7dd3fc'], labels:['0 mm','10 mm','25 mm','45 mm','≥45 mm'], note:'Precipitación estimada en los últimos 14 días.' },
     forest: { title:'Masa forestal (árboles)', categorical:true, bar:['#059669','#d97706','#b45309','#4d7c0f','#475569'], labels:['Pinos','Hayas','Robles / melojos','Encinas','Otros'], note:'Tipo de árbol o bosque predominante en la zona.' },
-    ph:     { title:'pH del suelo (acidez)', bar:['#ef4444','#f59e0b','#10b981','#3b82f6'], labels:['<4,5 ácido','4,5–5,5','5,5–6,5','≥6,5'], note:'Niveles de acidez. Valores menores a 6,5 favorecen a Boletus edulis y pinófilos.' }
+    ph:     { title:'pH del suelo (acidez)', bar:['#ef4444','#f59e0b','#10b981','#3b82f6'], labels:['<4,5 ácido','4,5–5,5','5,5–6,5','≥6,5'], note:'Niveles de acidez. Valores <6,5 favorecen a Boletus edulis y pinófilos; el níscalo tolera también pinares calizos (≥6,5).' }
   };
 
   function renderLegendBar(container, config) {
@@ -5596,6 +5826,7 @@
     boletus_pinophilus: `<svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7.5" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.5 14.5c-.7 2.8-2 6.5-1.3 9.2.6 1.8 2.6 2.3 4.8 2.3 2.4 0 4.2-.6 4.8-2.3.7-2.7-.6-6.4-1.3-9.2h-7z" fill="#edd6c4"/><path d="M11.5 17c.5 3 2.5 5 5 4" stroke="#ab5945" stroke-width="0.9" stroke-linecap="round" opacity="0.6"/><ellipse cx="14" cy="14.8" rx="8.2" ry="1.6" fill="#dad2a3"/><path d="M5.2 14.5C4.8 9.5 8.2 4.8 14 4.8s9.2 4.7 8.8 9.7c-1.3.8-4 1-8.8 1s-7.5-.2-8.8-1z" fill="url(#grad-pinophilus-d)"/><path d="M7 23l4 3m-4.5-1l4.5 2" stroke="#4a633a" stroke-width="0.9" stroke-linecap="round"/><defs><linearGradient id="grad-pinophilus-d" x1="14" y1="4.8" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#8e3629"/><stop offset="1" stop-color="#541b14"/></linearGradient></defs></svg>`,
     boletus_aereus: `<svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7.5" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.8 14.5c-.8 2.8-2 6.5-1.4 9.2.5 1.8 2.5 2.3 4.6 2.3 2.3 0 4.1-.6 4.6-2.3.6-2.7-.6-6.4-1.4-9.2h-6.4z" fill="#ebd6bf"/><path d="M12.5 16c-.2 2.5-.5 5-.3 7m3.3-7c.2 2.5.5 5 .3 7" stroke="#b08660" stroke-width="0.75" stroke-dasharray="1.2 1"/><ellipse cx="14" cy="14.8" rx="8" ry="1.6" fill="#f0ebd9"/><path d="M5.5 14.5C5 9.5 8.5 5 14 5s9 4.5 8.5 9.5c-1.3.8-4 1-8.5 1s-7.2-.2-8.5-1z" fill="url(#grad-aereus-d)"/><ellipse cx="20.5" cy="24" rx="1.8" ry="2.2" fill="#7a5430"/><path d="M19.5 22c.8-.8 2-.6 2.4 0" stroke="#50331b" stroke-width="1.2" stroke-linecap="round"/><defs><linearGradient id="grad-aereus-d" x1="14" y1="5" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#4a3525"/><stop offset="0.6" stop-color="#2d1e14"/><stop offset="1" stop-color="#1e130c"/></linearGradient></defs></svg>`,
     boletus_reticulatus: `<svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="7" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M10.8 14.5c-.8 2.8-2.2 6.5-1.5 9.2.5 1.8 2.4 2.3 4.7 2.3 2.5 0 4.2-.6 4.7-2.3.7-2.7-.7-6.4-1.5-9.2h-6.4z" fill="#f2e4d0"/><path d="M11 16.5l6 5m-6 0l6-5m-5 2.5l4 3.5m-4 0l4-3.5" stroke="#bc946e" stroke-width="0.75" opacity="0.7"/><ellipse cx="14" cy="14.8" rx="8" ry="1.6" fill="#dedaaa"/><path d="M5.5 14.5C5 9.5 8.5 5 14 5s9 4.5 8.5 9.5c-1.3.8-4 1-8.5 1s-7.2-.2-8.5-1z" fill="url(#grad-reticulatus-d)"/><path d="M11 8c1 1.5 2 2 3 1.5m-5 3c2-.5 3 0 4 .5" stroke="#9e6e44" stroke-width="0.7" stroke-linecap="round" opacity="0.6"/><defs><linearGradient id="grad-reticulatus-d" x1="14" y1="5" x2="14" y2="15.5" gradientUnits="userSpaceOnUse"><stop stop-color="#ba8251"/><stop offset="1" stop-color="#8a5327"/></linearGradient></defs></svg>`,
+    lactarius_deliciosus: `<svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="6.5" ry="1.8" fill="#71685b" opacity="0.2"/><path d="M11.6 13.8c-.4 3.2-.8 6.8-.4 9.5.3 1.5 1.5 2.1 2.8 2.1s2.5-.6 2.8-2.1c.4-2.7 0-6.3-.4-9.5h-4.8z" fill="#f7b778"/><ellipse cx="13.1" cy="17.8" rx="0.9" ry="1.2" fill="#d96b27" opacity="0.65"/><ellipse cx="15.1" cy="20.7" rx="0.8" ry="1.1" fill="#d96b27" opacity="0.65"/><path d="M5.4 13.3c1.8 1.5 5 2 8.6 2s6.8-.5 8.6-2c-.7.5-1.8.8-3.4 1l-5.2.3-5.2-.3c-1.6-.2-2.7-.5-3.4-1z" fill="#ea8c3e"/><path d="M4.5 11.4c1.2 1.8 4.8 2.7 9.5 2.7s8.3-.9 9.5-2.7c-1-3.2-4.6-4.7-9.5-4.7s-8.5 1.5-9.5 4.7z" fill="url(#grad-lactarius-d)"/><path d="M7.5 10.6c1.6 1 4 1.4 6.5 1.4s4.9-.4 6.5-1.4" stroke="#b94816" stroke-width="0.95" stroke-linecap="round" opacity="0.7"/><path d="M9.6 8.8c1.2.7 2.8 1 4.4 1s3.2-.3 4.4-1" stroke="#b94816" stroke-width="0.8" stroke-linecap="round" opacity="0.6"/><path d="M5.6 12.1c1 .5 2.2.8 3.2.9" stroke="#5d8d67" stroke-width="1" stroke-linecap="round" opacity="0.75"/><defs><linearGradient id="grad-lactarius-d" x1="14" y1="6.7" x2="14" y2="14.1" gradientUnits="userSpaceOnUse"><stop stop-color="#f28c28"/><stop offset="1" stop-color="#c95414"/></linearGradient></defs></svg>`,
     all: `<svg class="mush-icon" viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="14" cy="25" rx="9" ry="2" fill="#71685b" opacity="0.2"/><path d="M8 18c-.4 2-1 4-.6 5.5.4 1 1.5 1.3 2.8 1.3 1.4 0 2.4-.3 2.8-1.3.4-1.5-.2-3.5-.6-5.5H8z" fill="#f4ebd9"/><path d="M5 18c-.3-3 1.8-5.5 5-5.5s5.3 2.5 5 5.5c-.8.5-2.2.6-5 .6s-4.2-.1-5-.6z" fill="#9e5e2e"/><path d="M15.5 16c-.5 2.5-1.5 5.5-.9 7.5.4 1.3 1.8 1.6 3.4 1.6 1.8 0 3-.3 3.4-1.6.6-2-.4-5-.9-7.5h-5z" fill="#ebd6bf"/><path d="M12 16c-.4-4 2.5-7 7-7s7.4 3 7 7c-1 .6-3 .8-7 .8s-6-.2-7-.8z" fill="#692b1b"/><path d="M8 22c2.5-.5 5 1 5.5 2.5-2 1.5-4.5 1-5.5-2.5z" fill="#d97706"/><path d="M18 23c2 0 3.5 1.5 4 2.5-1.5 1-3.5.5-4-2.5z" fill="#6e8053"/></svg>`
   };
 
@@ -5604,6 +5835,7 @@
     boletus_pinophilus: 'B. pinophilus',
     boletus_aereus: 'B. aereus',
     boletus_reticulatus: 'B. reticulatus',
+    lactarius_deliciosus: 'L. deliciosus (Níscalo)',
     all: 'Todas las especies'
   };
 

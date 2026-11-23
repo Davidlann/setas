@@ -36,7 +36,7 @@ class RelativeSuitabilityTests(unittest.TestCase):
         self.assertIn("heurístico", result["reason"])
         self.assertEqual(
             result["combined_score"],
-            round(math.sqrt(result["score"] * result["weather_score"]), 1),
+            round((result["score"] ** 0.40) * (result["weather_score"] ** 0.60), 1),
         )
         self.assertNotEqual(result["combined_score"], result["weather_score"])
 
@@ -286,15 +286,15 @@ class RelativeSuitabilityTests(unittest.TestCase):
         self.assertTrue(self.engine.has_potential_habitat(encinar))
 
     def test_shared_habitat_filter_removes_cells_excluded_for_all_species(self):
-        pine_carrasco = {
+        sabinar = {
             **self.static,
-            "dominant_species": "Pinus halepensis",
+            "dominant_species": "Sabinares albares",
             "canopy_cover": 65.0,
-            "elevation_m": 600.0,
-            "soil_ph": 6.0,
+            "elevation_m": 1100.0,
+            "soil_ph": 6.5,
         }
 
-        self.assertFalse(self.engine.has_potential_habitat(pine_carrasco))
+        self.assertFalse(self.engine.has_potential_habitat(sabinar))
 
     def test_shared_habitat_filter_keeps_uncertain_mixed_forest(self):
         mixed_forest = {
@@ -429,7 +429,7 @@ class RelativeSuitabilityTests(unittest.TestCase):
             "boletus_edulis", siliceous_pine_with_q05, self.weather
         )
         self.assertGreater(result["score"], 50.0)
-        self.assertAlmostEqual(result["breakdown"]["effective_soil_ph"], 6.04, places=2)
+        self.assertAlmostEqual(result["breakdown"]["effective_soil_ph"], 6.38, places=2)
 
     def test_phenology_differentiates_summer_vs_late_autumn_species(self):
         june_weather = {**self.weather, "snapshot_date": "2026-06-20"}
@@ -565,6 +565,58 @@ class RelativeSuitabilityTests(unittest.TestCase):
             severe_14d_frost["breakdown"]["temp_score"],
             recent_frost["breakdown"]["temp_score"],
         )
+
+    def test_lactarius_deliciosus_accepts_mediterranean_pines_and_calcareous_ph(self):
+        calcareous_halepensis = {
+            **self.static,
+            "dominant_species": "Pinus halepensis",
+            "canopy_cover": 50.0,
+            "elevation_m": 850.0,
+            "soil_ph": 7.4,
+            "soil_ph_q05": 6.6,
+        }
+        delic = self.engine.calculate_relative_suitability(
+            "lactarius_deliciosus", calcareous_halepensis, self.weather
+        )
+        edulis = self.engine.calculate_relative_suitability(
+            "boletus_edulis", calcareous_halepensis, self.weather
+        )
+        self.assertGreater(delic["score"], 50.0)
+        self.assertEqual(delic["breakdown"]["host_tier"], "secondary")
+        self.assertEqual(edulis["score"], 0.0)
+
+    def test_lactarius_deliciosus_excludes_pure_broadleaf_forests(self):
+        for tree in ("Quercus pyrenaica", "Encinares", "Fagus sylvatica"):
+            static = {**self.static, "dominant_species": tree}
+            res = self.engine.calculate_relative_suitability(
+                "lactarius_deliciosus", static, self.weather
+            )
+            self.assertEqual(res["score"], 0.0, f"Debería excluir {tree}")
+            self.assertEqual(res["breakdown"]["host_assessment"], "incompatible")
+
+    def test_lactarius_deliciosus_tolerates_cool_late_autumn_better_than_boletus(self):
+        cool_nov = {
+            **self.weather,
+            "snapshot_date": "2026-11-23",
+            "precip_accum_14d_mm": 52.0,
+            "precip_daily_mm": [0.0, 0.0, 12.0, 18.0, 8.0, 4.0, 0.0, 2.0, 4.0, 2.0, 2.0, 0.0, 0.0, 0.0],
+            "temp_mean_14d_celsius": 7.5,
+            "temp_mean_recent_3d_celsius": 6.0,
+            "temp_min_14d_celsius": -1.2,
+            "temp_min_recent_3d_celsius": -1.0,
+            "soil_temp_mean_14d_celsius": 7.5,
+            "soil_temp_0_7cm_3d_celsius": 6.5,
+            "soil_moisture_percent": 31.0,
+        }
+        delic = self.engine.calculate_relative_suitability(
+            "lactarius_deliciosus", self.static, cool_nov
+        )
+        edulis = self.engine.calculate_relative_suitability(
+            "boletus_edulis", self.static, cool_nov
+        )
+        self.assertGreater(delic["weather_score"], edulis["weather_score"])
+        self.assertNotEqual(delic["breakdown"]["flush_phase"], "cold_stalled")
+        self.assertEqual(edulis["breakdown"]["flush_phase"], "cold_stalled")
 
 
 if __name__ == "__main__":

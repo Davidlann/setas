@@ -20,21 +20,25 @@ ni una guía de recolección.**
 - La ingesta ambiental puede ejecutarse con
   `.\backend\venv\Scripts\python.exe -m backend.src.ingestion.static.environmental_layers`.
   Obtiene el
-  [MDT de 200 m del IGN/SCNE](https://servicios.idee.es/wcs-inspire/mdt) y pH
-  de 0–5 cm de [SoilGrids/ISRIC](https://files.isric.org/soilgrids/latest/data/phh2o/)
-  (media y cuantiles 5–95), además de arena, limo y arcilla de 5–15 cm. Estas
-  proporciones se almacenan como porcentaje en masa y se muestrean en los centros
-  de celdas H3 forestales; la fuente, unidades, resolución, fecha y hashes SHA-256
-  quedan registrados en DuckDB.
+  [MDT de 200 m del IGN/SCNE](https://servicios.idee.es/wcs-inspire/mdt)
+  (elevación, pendiente, orientación e índice de posición topográfica `tpi_m`
+  en vecindario 5×5) y pH de 0–5 cm de
+  [SoilGrids/ISRIC](https://files.isric.org/soilgrids/latest/data/phh2o/)
+  (media y cuantiles 5–95), además de arena, limo y arcilla de 5–15 cm y
+  carbono orgánico superficial (`soc` 0–5 cm). Estas proporciones se almacenan
+  como porcentaje en masa o g/kg y se muestrean en los centros de celdas H3
+  forestales; la fuente, unidades, resolución, fecha y hashes SHA-256 quedan
+  registrados en DuckDB.
   Las teselas originales se guardan bajo `backend/data/raw/environmental/`.
-- La textura de SoilGrids contribuye hasta 7 de los 35 puntos edáficos: la
-  matriz aplica una regla general y gradual que penaliza valores extremos de
-  arena (>70–90%), limo (>60–80%) y arcilla (>40–60%). Es una heurística
-  experimental, no una preferencia validada de cada especie. Si falta alguna
-  fracción, no se penaliza su ausencia y se mantiene la puntuación anterior
-  basada en pH. La textura no permite inferir por sí sola si el sustrato es
-  silíceo o calizo. Para obtenerla, vuelve a ejecutar la ingesta ambiental y
-  después el exportador experimental.
+- La textura y el carbono orgánico de SoilGrids contribuyen a los 35 puntos
+  edáficos junto con el pH en humus amortiguado según tipo de masa forestal:
+  la matriz aplica una regla general y gradual que penaliza extremos de arena
+  (>70–90%), limo (>60–80%) y arcilla (>40–60%) y valora la riqueza orgánica.
+  Es una heurística experimental, no una preferencia validada de cada especie.
+  Si falta alguna fracción, no se penaliza su ausencia y se mantiene la
+  puntuación anterior basada en pH. La textura no permite inferir por sí sola
+  si el sustrato es silíceo o calizo. Para obtenerla, vuelve a ejecutar la
+  ingesta ambiental y después el exportador experimental.
 - Estas capas tienen procedencia, pero se marcan `sourced_unvalidated`, nunca
   `verified`: la resolución de 200/250 m es mucho más gruesa que algunas
   variables locales, y las entradas no han sido contrastadas con mediciones
@@ -64,13 +68,14 @@ ni una guía de recolección.**
 - Los índices experimentales (hábitat potencial, meteorología reciente e índice
   combinado) se exportan con
   `.\backend\venv\Scripts\python.exe -m backend.src.export_relative_suitability`.
-  Usa el snapshot meteorológico más reciente y escribe los cuatro conjuntos
-  experimentales en `frontend/public/data/experimental/`. Ejecuta el comando
+  Usa el snapshot meteorológico más reciente y escribe los cinco conjuntos
+  experimentales (*Boletus edulis*, *B. aereus*, *B. pinophilus*, *B. reticulatus*
+  y *Lactarius deliciosus* / níscalo) en `frontend/public/data/experimental/`. Ejecuta el comando
   después de actualizar la ingesta meteorológica para refrescar el mapa. El
   exportador validado y el pipeline diario siguen bloqueados para datos
   `sourced_unvalidated`; los snapshots históricos continúan apartados en
   `backend/data/processed/unverified_exports/`.
-- Los cuatro conjuntos experimentales aplican una máscara estática compartida:
+- Los cinco conjuntos experimentales aplican una máscara estática compartida:
   solo exportan hexágonos que no incumplen las exclusiones de hábitat de al
   menos una especie. Las formaciones forestales mixtas cuyo hospedador no se
   puede identificar se conservan como inciertas. El filtro no descarta celdas
@@ -78,28 +83,37 @@ ni una guía de recolección.**
   no borra datos de la base DuckDB.
 - La capa de hábitat potencial no se reduce por el tiempo meteorológico del
   día: representa condiciones estáticas orientativas. La capa de meteorología
-  reciente muestra una señal separada que combina lluvia efectiva con retardo,
-  balance hídrico ($P - ET_0$ con evapotranspiración FAO), temperatura del suelo
-  a 0–7 cm, choque térmico fisiológico y viento desecante, sin interpretarla
-  como presencia o ausencia confirmada.
-- Los snapshots meteorológicos guardan la serie diaria de precipitación de 14 días.
-  La señal meteorológica pondera menos la lluvia del día anterior y más la
-  caída varios días atrás (fase de incubación), ajustando la humedad efectiva
-  según el balance hídrico real frente a la evapotranspiración.
-- Para *Boletus edulis* y *Boletus pinophilus*, el motor detecta el choque térmico
-  (caída brusca de temperatura tras un evento de lluvia suficiente) como estímulo
-  fisiológico favorable para la inducción de primordios, penalizando en cambio
-  las olas de calor otoñales continuas. Para especies termófilas (*Boletus aereus*
-  y *Boletus reticulatus*), el frío prematuro o heladas reducen la señal meteorológica.
+  reciente muestra una señal separada (acoplada multiplicativamente bajo la ley
+  del mínimo) que combina lluvia eficaz ponderada por tiempo térmico sobre
+  28 días, arrastre de sequía previa, riesgo de encharcamiento frío, balance
+  hídrico ($P - ET_0$), temperatura del suelo superficial y radicular (0–28 cm),
+  choque térmico fisiológico, heladas, viento desecante y dormancia invernal de
+  caducifolias, además de mostrar una previsión orientativa a 72 horas y una
+  fase estimada de brotada, sin interpretarla como presencia o ausencia confirmada.
+- Los snapshots meteorológicos guardan la serie diaria de 28 días y previsión
+  de 3 días para los nodos 0,1° que cubren las celdas forestales, con control
+  adaptativo de cuotas Open-Meteo (`X-RateLimit-*`) y poda automática de
+  snapshots antiguos más compactación atómica de DuckDB para mantener el
+  repositorio ligero.
+- Para *Boletus edulis*, *Boletus pinophilus* y *Lactarius deliciosus* (níscalo), el motor detecta el choque térmico
+  (caída brusca de temperatura dentro del rango activo tras lluvia suficiente y
+  sin helada) como estímulo fisiológico favorable para la inducción de primordios,
+  penalizando en cambio el frío paralizante o las olas de calor. *Lactarius deliciosus*
+  amplía además la cobertura a pinares silíceos y calizos (*Pinus sylvestris*,
+  *P. pinaster*, *P. nigra*, *P. uncinata*, *P. pinea*, *P. halepensis*) y tolera
+  ambientes más fríos de finales de otoño e inicio de invierno. Para especies
+  termófilas (*Boletus aereus* y *Boletus reticulatus*), el frío prematuro o las
+  heladas detienen la señal meteorológica.
 - Rachas de viento superiores al umbral de cada especie (40–50 km/h) penalizan
   la señal por riesgo de desecación y aborto de carpóforos en cumbres y laderas.
 - La meteorología experimental se puede actualizar, aunque todavía no se pueda
   ejecutar el pipeline de scores validados, con
   `.\backend\venv\Scripts\python.exe -m backend.src.ingestion.dynamic.meteo_snapshots`.
-  Después, vuelve a ejecutar el exportador experimental. La consulta usa una
-  malla de 0,1° e interpolación IDW-4 con reintentos exponenciales ante sobrecarga;
-  esto suaviza la asignación entre nodos, pero no aporta precisión meteorológica
-  real a escala de hexágono microclimático.
+  Después, vuelve a ejecutar el exportador experimental. La consulta cubre la
+  malla de 0,1° adyacente a masas forestales e interpola mediante IDW-4 con ajuste
+  altitudinal y reintentos adaptativos ante cuotas; esto suaviza la asignación
+  entre nodos, pero no aporta precisión meteorológica real a escala de hexágono
+  microclimático.
 - En formaciones MFE50 reconocibles se interpretan nombres comunes de
   hospedadores. Cuando una formación mixta no permite identificar la especie
   arbórea, el índice la penaliza por incertidumbre en vez de afirmar que el
@@ -193,18 +207,9 @@ tiendas. Necesita HTTPS para instalarse, por eso se recomienda GitHub Pages.
    **Añadir a pantalla de inicio**. En iPhone/iPad, ábrela con Safari, toca
    **Compartir** y elige **Añadir a pantalla de inicio**.
 
-El workflow obtiene el snapshot meteorológico de Open-Meteo, regenera los cuatro
-índices experimentales y publica el sitio cada día a las 07:00 UTC (08:00/09:00
-en la España peninsular, según el horario de invierno/verano). También se ejecuta
-al subir cambios a `main` y se puede lanzar manualmente desde GitHub Actions.
-Los datos nuevos aparecen al abrir o recargar la app con conexión. El modo
-instalable guarda la última versión visitada de la interfaz y los datos que ya
-se consultaron; el mapa base y las actualizaciones necesitan conexión.
-
-Si falla la descarga o el cálculo diario, el workflow restaura los cuatro
-conjuntos de datos válidos anteriores, publica la interfaz y avisa que la
-actualización está pendiente; la app muestra la fecha real de esos datos.
-Revisa el detalle de la ejecución en `Actions` para investigar el ETL. Si los
-datos guardados tampoco pasan la validación, no se publica una versión
-incompleta. Los índices siguen siendo experimentales, no probabilidades ni
-confirmaciones de fructificación.
+El workflow obtiene el snapshot meteorológico de Open-Meteo, regenera los cinco
+índices experimentales y publica el sitio dos veces al día (05:30 y 13:30 UTC).
+También se ejecuta al subir cambios a `main` y se puede lanzar manualmente desde
+GitHub Actions. Si falla la descarga o el cálculo diario, el workflow restaura
+los cinco conjuntos de datos válidos anteriores, publica la interfaz con aviso y
+marca el job como fallido para alertar del error en el ETL.
