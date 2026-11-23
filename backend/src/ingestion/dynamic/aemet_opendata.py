@@ -1,5 +1,6 @@
 """Cliente opcional de AEMET OpenData para corregir lluvia y mínimas de Open-Meteo."""
 from datetime import datetime, timedelta
+import json
 import math
 import os
 import re
@@ -107,9 +108,12 @@ class AemetOpenDataClient:
                 )
             data_resp = requests.get(meta["datos"], timeout=self.timeout_s)
             data_resp.raise_for_status()
-            if not data_resp.encoding or data_resp.encoding.lower() == "iso-8859-1":
-                data_resp.encoding = "latin-1"
-            return data_resp.json()
+            raw_bytes = data_resp.content
+            try:
+                text = raw_bytes.decode("utf-8")
+            except UnicodeDecodeError:
+                text = raw_bytes.decode("latin-1")
+            return json.loads(text)
         raise RuntimeError("AEMET OpenData superó los reintentos por límite de peticiones.")
 
     def fetch_regional_stations(self) -> Dict[str, Dict[str, Any]]:

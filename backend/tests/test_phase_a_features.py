@@ -322,6 +322,40 @@ class PhaseAFeaturesTests(unittest.TestCase):
             self.assertGreater(ed_data["cells"][0]["dcs"], 0.0)
             self.assertEqual(set(res["outputs"].keys()), set(SPECIES))
 
+    def test_aemet_fetch_endpoint_decodes_latin1_accents(self):
+        from backend.src.ingestion.dynamic.aemet_opendata import AemetOpenDataClient
+
+        class FakeResp:
+            def __init__(self, status_code, content_bytes, json_obj=None):
+                self.status_code = status_code
+                self.content = content_bytes
+                self._json = json_obj
+                self.encoding = "ISO-8859-1"
+
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                return self._json
+
+        latin1_bytes = json.dumps(
+            [{"indicativo": "2444", "nombre": "Ávila / Peñaranda"}],
+            ensure_ascii=False,
+        ).encode("latin-1")
+
+        client = AemetOpenDataClient(api_key="dummy-key")
+        with patch.object(
+            client.session,
+            "get",
+            return_value=FakeResp(200, b"{}", {"estado": 200, "datos": "https://aemet.test/data"}),
+        ), patch(
+            "backend.src.ingestion.dynamic.aemet_opendata.requests.get",
+            return_value=FakeResp(200, latin1_bytes),
+        ):
+            parsed = client._fetch_endpoint("/valores/test")
+
+        self.assertEqual(parsed[0]["nombre"], "Ávila / Peñaranda")
+
 
 if __name__ == "__main__":
     unittest.main()

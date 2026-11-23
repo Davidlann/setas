@@ -2463,6 +2463,147 @@
       justify-content: center;
       padding: 4px 6px;
     }
+
+    /* Botón rápido y capas en mapa de Mis zonas habituales */
+    .overlay-toggle-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .overlay-toggle-btn {
+      justify-content: center;
+      padding: 6px 5px;
+      font-size: 10.5px;
+      white-space: nowrap;
+    }
+    .fav-quick-toggle {
+      position: relative;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 12px;
+      color: #514334;
+      background: rgba(251, 248, 241, .96);
+      backdrop-filter: blur(12px);
+      border: 1px solid #e2d8c8;
+      border-radius: 12px;
+      box-shadow: 0 5px 18px rgba(61, 46, 31, .12);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .18s ease;
+    }
+    .fav-quick-toggle:hover,
+    .fav-quick-toggle[aria-expanded="true"] {
+      background: #f4ede0;
+      border-color: #b99a78;
+    }
+    .fav-quick-toggle.has-favs .ui-ico {
+      color: #d97706;
+    }
+    .fav-quick-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: #d97706;
+      color: #fffdf8;
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .fav-quick-count[hidden] { display: none; }
+    .fav-quick-panel {
+      position: fixed;
+      top: 66px;
+      right: 16px;
+      z-index: 62;
+      width: min(360px, calc(100vw - 24px));
+      max-height: min(68dvh, 470px);
+      overflow-y: auto;
+      padding: 13px;
+      color: #514334;
+      background: rgba(251, 248, 241, .98);
+      backdrop-filter: blur(16px);
+      border: 1px solid #dfd3c0;
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(61, 46, 31, .24);
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .fav-quick-panel[hidden] { display: none; }
+    .fav-quick-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .fav-quick-head h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 16px;
+      color: #493b2d;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .fav-quick-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .fav-fit-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 8px;
+      border-radius: 8px;
+      border: 1px solid #cedbc0;
+      background: #eef3e8;
+      color: #3a4f2e;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .fav-fit-btn:hover { background: #e2ebd7; }
+    .fav-fit-btn[hidden] { display: none; }
+    .fav-quick-subbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      color: #71685b;
+    }
+    @media (max-width: 700px) {
+      .fav-quick-toggle {
+        width: 38px;
+        min-height: 38px;
+        padding: 0;
+      }
+      .fav-quick-toggle .fav-quick-label { display: none; }
+      .fav-quick-toggle .fav-quick-count {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        font-size: 9.5px;
+        box-shadow: 0 0 0 2px #fbf8f1;
+      }
+      .fav-quick-panel {
+        top: 106px;
+        left: 10px;
+        right: 10px;
+        width: auto;
+        max-height: min(64dvh, 430px);
+      }
+    }
   </style>
 </head>
 <body>
@@ -2505,6 +2646,11 @@
       </section>
     </div>
     <div class="toolbar-actions">
+      <button id="fav-quick-toggle" class="fav-quick-toggle" type="button" aria-expanded="false" aria-controls="fav-quick-panel" title="Ver y saltar a tus zonas guardadas">
+        <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span class="fav-quick-label">Mis zonas</span>
+        <span id="fav-quick-count" class="fav-quick-count" hidden>0</span>
+      </button>
       <button id="satellite-toggle" class="satellite-toggle" type="button" aria-pressed="false" aria-label="Cambiar mapa base (Mapa, Topo IGN, Satélite PNOA)" title="Cambiar fondo: Mapa · Topo IGN · Satélite PNOA">
         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
         <span id="satellite-toggle-text">Fondo: Mapa</span>
@@ -2515,6 +2661,26 @@
       <button id="install-button" class="install-button" type="button" hidden>Instalar app</button>
     </div>
   </div>
+  <section id="fav-quick-panel" class="fav-quick-panel" aria-label="Tus zonas guardadas" hidden>
+    <div class="fav-quick-head">
+      <h2>
+        <svg class="ui-ico ui-ico-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor"/></svg>
+        Mis zonas guardadas
+      </h2>
+      <div class="fav-quick-head-actions">
+        <button id="btn-fit-favorites" class="fav-fit-btn" type="button" hidden title="Encuadrar todas tus zonas en el mapa">
+          <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          Ver todas
+        </button>
+        <button id="fav-quick-close" class="filters-panel-close" type="button" aria-label="Cerrar zonas guardadas">×</button>
+      </div>
+    </div>
+    <div class="fav-quick-subbar">
+      <span>Toca una zona para centrarla y abrir su ficha hoy.</span>
+      <button id="btn-fav-map-toggle" class="overlay-toggle-btn active" type="button" aria-pressed="true" title="Mostrar u ocultar marcadores y anillos en el mapa">En mapa</button>
+    </div>
+    <div id="fav-quick-list" class="fav-zones-list"></div>
+  </section>
   <button id="menu-backdrop" class="menu-backdrop" type="button" aria-label="Cerrar menú"></button>
   <div id="map-hint" class="map-hint">
     <span>Toca cualquier hexágono del mapa para analizar el monte</span>
@@ -2730,6 +2896,10 @@
         <button id="btn-legal-layer" class="overlay-toggle-btn active" type="button" aria-pressed="true" title="Mostrar parques nacionales y cotos regulados Micocyl">
           <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           PN y Cotos
+        </button>
+        <button id="btn-favorites-layer" class="overlay-toggle-btn active" type="button" aria-pressed="true" title="Mostrar zonas habituales guardadas sobre el mapa">
+          <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Mis zonas
         </button>
         <button id="btn-outings-layer" class="overlay-toggle-btn active" type="button" aria-pressed="true" title="Mostrar tus setales guardados en local">
           <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -3920,6 +4090,7 @@
   let topZonesSort   = 'score';
   let topZonesRadiusKm = 0;
   let showLegalZones = true;
+  let showFavoritesLayer = true;
   let showOutingsLayer = true;
   let legalGeoJsonLoaded = false;
 
@@ -4095,6 +4266,10 @@
     if (map.getLayer('province-labels')) {
       map.setPaintProperty('province-labels', 'text-color', satMode ? '#f8fafc' : '#493b2d');
       map.setPaintProperty('province-labels', 'text-halo-color', satMode ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.94)');
+    }
+    if (map.getLayer('favorite-zones-label')) {
+      map.setPaintProperty('favorite-zones-label', 'text-color', satMode ? '#fef08a' : '#78350f');
+      map.setPaintProperty('favorite-zones-label', 'text-halo-color', satMode ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 253, 248, 0.96)');
     }
   }
 
@@ -4335,6 +4510,7 @@
 
     styleBasemapAndReferenceLabels(basemapMode === 'pnoa');
     loadLegalZonesLayer();
+    refreshFavoritesMapLayer();
     refreshOutingsMapLayer();
   });
 
@@ -4430,6 +4606,195 @@
     } catch {}
   }
 
+  let lastFavoriteMarkerClickMs = 0;
+
+  function setFavoritesLayerVisibility(visible) {
+    showFavoritesLayer = Boolean(visible);
+    ['favorite-zones-halo', 'favorite-zones-ring', 'favorite-zones-circle', 'favorite-zones-label'].forEach(id => {
+      if (map && map.getLayer(id)) {
+        map.setLayoutProperty(id, 'visibility', showFavoritesLayer ? 'visible' : 'none');
+      }
+    });
+    ['btn-favorites-layer', 'btn-fav-map-toggle'].forEach(btnId => {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        btn.classList.toggle('active', showFavoritesLayer);
+        btn.setAttribute('aria-pressed', showFavoritesLayer ? 'true' : 'false');
+      }
+    });
+  }
+
+  function fitAllFavoriteZones() {
+    if (!map || !window.MapaSeteroJournal) return;
+    const favs = window.MapaSeteroJournal.getFavoriteZones().filter(
+      z => Number.isFinite(Number(z.lat)) && Number.isFinite(Number(z.lon))
+    );
+    if (!favs.length) return;
+    if (favs.length === 1) {
+      map.flyTo({ center: [Number(favs[0].lon), Number(favs[0].lat)], zoom: Math.max(map.getZoom(), 12.2), speed: 1.3 });
+      return;
+    }
+    let minLon = Infinity, minLat = Infinity, maxLon = -Infinity, maxLat = -Infinity;
+    for (const z of favs) {
+      const lon = Number(z.lon);
+      const lat = Number(z.lat);
+      if (lon < minLon) minLon = lon;
+      if (lat < minLat) minLat = lat;
+      if (lon > maxLon) maxLon = lon;
+      if (lat > maxLat) maxLat = lat;
+    }
+    map.fitBounds([[minLon, minLat], [maxLon, maxLat]], { padding: 90, maxZoom: 12.2, duration: 900 });
+  }
+
+  function refreshFavoritesMapLayer() {
+    if (!map || !map.getStyle() || !window.MapaSeteroJournal) return;
+    const favs = window.MapaSeteroJournal.getFavoriteZones();
+    const polyFeatures = [];
+    const ptFeatures = [];
+
+    for (const z of favs) {
+      if (!z || !z.h) continue;
+      let lat = Number(z.lat);
+      let lon = Number(z.lon);
+      if ((!Number.isFinite(lat) || !Number.isFinite(lon)) && window.h3) {
+        try {
+          const [hla, hlo] = h3.cellToLatLng(z.h);
+          lat = hla;
+          lon = hlo;
+        } catch {}
+      }
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+
+      if (window.h3) {
+        try {
+          const boundary = h3.cellToBoundary(z.h);
+          const coords = boundary.map(([la, lo]) => [lo, la]);
+          coords.push(coords[0]);
+          polyFeatures.push({
+            type: 'Feature',
+            properties: { h: z.h, name: z.name },
+            geometry: { type: 'Polygon', coordinates: [coords] }
+          });
+        } catch {}
+      }
+
+      const liveCell = typeof lookupFavoriteLiveCell === 'function' ? lookupFavoriteLiveCell(z.h) : null;
+      const scoreNum = liveCell && Number.isFinite(Number(liveCell.cs)) ? Math.round(Number(liveCell.cs)) : null;
+      const mapLabel = scoreNum !== null ? `${z.name} · ${scoreNum}` : z.name;
+      ptFeatures.push({
+        type: 'Feature',
+        properties: { h: z.h, name: z.name, lat, lon, score: scoreNum, mapLabel },
+        geometry: { type: 'Point', coordinates: [lon, lat] }
+      });
+    }
+
+    const polyData = { type: 'FeatureCollection', features: polyFeatures };
+    const ptData = { type: 'FeatureCollection', features: ptFeatures };
+
+    if (map.getSource('favorite-zones-poly')) {
+      map.getSource('favorite-zones-poly').setData(polyData);
+    } else {
+      map.addSource('favorite-zones-poly', { type: 'geojson', data: polyData });
+      const beforeOutings = map.getLayer('user-outings-circle') ? 'user-outings-circle' : undefined;
+      map.addLayer({
+        id: 'favorite-zones-halo',
+        type: 'line',
+        source: 'favorite-zones-poly',
+        layout: { visibility: showFavoritesLayer ? 'visible' : 'none' },
+        paint: {
+          'line-color': '#fffdf8',
+          'line-width': 4.5,
+          'line-opacity': 0.92
+        }
+      }, beforeOutings);
+      map.addLayer({
+        id: 'favorite-zones-ring',
+        type: 'line',
+        source: 'favorite-zones-poly',
+        layout: { visibility: showFavoritesLayer ? 'visible' : 'none' },
+        paint: {
+          'line-color': '#d97706',
+          'line-width': 2.4,
+          'line-opacity': 0.95
+        }
+      }, beforeOutings);
+    }
+
+    if (map.getSource('favorite-zones-pts')) {
+      map.getSource('favorite-zones-pts').setData(ptData);
+    } else {
+      map.addSource('favorite-zones-pts', { type: 'geojson', data: ptData });
+      const beforeOutings = map.getLayer('user-outings-circle') ? 'user-outings-circle' : undefined;
+      const isPnoa = basemapMode === 'pnoa';
+      map.addLayer({
+        id: 'favorite-zones-circle',
+        type: 'circle',
+        source: 'favorite-zones-pts',
+        layout: { visibility: showFavoritesLayer ? 'visible' : 'none' },
+        paint: {
+          'circle-radius': 7,
+          'circle-color': '#f59e0b',
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 2
+        }
+      }, beforeOutings);
+      map.addLayer({
+        id: 'favorite-zones-label',
+        type: 'symbol',
+        source: 'favorite-zones-pts',
+        layout: {
+          visibility: showFavoritesLayer ? 'visible' : 'none',
+          'text-field': ['get', 'mapLabel'],
+          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+          'text-size': 11.5,
+          'text-offset': [0, -1.25],
+          'text-anchor': 'bottom',
+          'text-allow-overlap': true,
+          'text-ignore-placement': false,
+          'text-padding': 4,
+          'text-max-width': 12
+        },
+        paint: {
+          'text-color': isPnoa ? '#fef08a' : '#78350f',
+          'text-halo-color': isPnoa ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 253, 248, 0.96)',
+          'text-halo-width': 2.2
+        }
+      }, beforeOutings);
+
+      const handleFavClick = e => {
+        const now = Date.now();
+        if (now - lastFavoriteMarkerClickMs < 150) return;
+        lastFavoriteMarkerClickMs = now;
+        if (!e.features || !e.features.length) return;
+        const p = e.features[0].properties;
+        const lat = Number(p.lat);
+        const lon = Number(p.lon);
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+          map.flyTo({ center: [lon, lat], zoom: Math.max(map.getZoom(), 12.2), speed: 1.25 });
+        }
+        const live = typeof lookupFavoriteLiveCell === 'function' ? lookupFavoriteLiveCell(p.h) : null;
+        const targetCell = live || (findNearestDataCell(lat, lon, 20)?.cell);
+        if (targetCell) {
+          if (window.MapaSeteroMicro && window.MapaSeteroMicro.getState().active) {
+            const pState = window.MapaSeteroMicro.getState();
+            if (!pState.parentCell || pState.parentCell.h !== targetCell.h) {
+              closeMicroDetailUi();
+            }
+          }
+          selectCell(targetCell);
+        }
+      };
+
+      ['favorite-zones-circle', 'favorite-zones-label'].forEach(layerId => {
+        map.on('click', layerId, handleFavClick);
+        map.on('mouseenter', layerId, () => { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', layerId, () => { map.getCanvas().style.cursor = ''; });
+      });
+    }
+
+    setFavoritesLayerVisibility(showFavoritesLayer);
+  }
+
   function refreshOutingsMapLayer() {
     if (!map || !map.getStyle() || !window.MapaSeteroJournal) return;
     const gj = window.MapaSeteroJournal.buildOutingsGeoJSON();
@@ -4486,6 +4851,15 @@
         }
       });
     });
+  }
+
+  const btnFavoritesLayer = document.getElementById('btn-favorites-layer');
+  if (btnFavoritesLayer) {
+    btnFavoritesLayer.addEventListener('click', () => setFavoritesLayerVisibility(!showFavoritesLayer));
+  }
+  const btnFavMapToggle = document.getElementById('btn-fav-map-toggle');
+  if (btnFavMapToggle) {
+    btnFavMapToggle.addEventListener('click', () => setFavoritesLayerVisibility(!showFavoritesLayer));
   }
 
   const btnOutingsLayer = document.getElementById('btn-outings-layer');
@@ -5137,9 +5511,14 @@
         }
       }, beforeLabelLayer);
 
-      // Click para inspección (sin chocar con micro-detalle o setales)
+      // Click para inspección (sin chocar con micro-detalle, zonas guardadas o setales)
       map.on('click', 'h3-fill', e => {
-        const blockingLayers = ['micro-h3-fill', 'user-outings-circle'].filter(id => map.getLayer(id));
+        const blockingLayers = [
+          'micro-h3-fill',
+          'favorite-zones-circle',
+          'favorite-zones-label',
+          'user-outings-circle'
+        ].filter(id => map.getLayer(id));
         if (blockingLayers.length) {
           const upperHits = map.queryRenderedFeatures(e.point, { layers: blockingLayers });
           if (upperHits && upperHits.length) return;
@@ -7163,8 +7542,44 @@
   const menuBackdrop = document.getElementById('menu-backdrop');
   const filtersToggle = document.getElementById('filters-toggle');
   const filtersPanel = document.getElementById('filters-panel');
+  const favQuickToggle = document.getElementById('fav-quick-toggle');
+  const favQuickPanel = document.getElementById('fav-quick-panel');
+  function openFavQuickPanel() {
+    if (!favQuickPanel || !favQuickToggle) return;
+    closeFilters();
+    if (window.innerWidth < 960) closeMenu();
+    if (typeof renderFavoriteZones === 'function') renderFavoriteZones();
+    favQuickPanel.hidden = false;
+    favQuickToggle.setAttribute('aria-expanded', 'true');
+  }
+  function closeFavQuickPanel() {
+    if (!favQuickPanel || !favQuickToggle) return;
+    favQuickPanel.hidden = true;
+    favQuickToggle.setAttribute('aria-expanded', 'false');
+  }
+  if (favQuickToggle && favQuickPanel) {
+    favQuickToggle.addEventListener('click', () => {
+      if (favQuickPanel.hidden) openFavQuickPanel();
+      else closeFavQuickPanel();
+    });
+    document.getElementById('fav-quick-close')?.addEventListener('click', closeFavQuickPanel);
+    document.getElementById('btn-fit-favorites')?.addEventListener('click', () => {
+      fitAllFavoriteZones();
+      if (window.innerWidth < 768) closeFavQuickPanel();
+    });
+    document.addEventListener('click', event => {
+      if (!favQuickPanel.hidden &&
+          event.target &&
+          document.body.contains(event.target) &&
+          !favQuickPanel.contains(event.target) &&
+          !favQuickToggle.contains(event.target)) {
+        closeFavQuickPanel();
+      }
+    });
+  }
   function openFilters() {
     closeMenu();
+    closeFavQuickPanel();
     filtersPanel.hidden = false;
     document.body.classList.add('filters-open');
     filtersToggle.setAttribute('aria-expanded', 'true');
@@ -7282,118 +7697,155 @@
     return candidates[0] || null;
   }
 
-  function renderFavoriteZones() {
-    const container = document.getElementById('fav-zones-list');
-    if (!container || !window.MapaSeteroJournal) return;
-    container.replaceChildren();
-    const favs = window.MapaSeteroJournal.getFavoriteZones();
-    if (!favs.length) {
-      const empty = document.createElement('p');
-      empty.className = 'top-zones-sub';
-      empty.textContent = 'Aún no has guardado ninguna zona. Toca una celda en el mapa y pulsa «Guardar zona».';
-      container.append(empty);
-      return;
+  function createFavZoneRow(z, liveCell, { closeQuickOnSelect = false } = {}) {
+    const row = document.createElement('div');
+    row.className = 'fav-zone-row';
+
+    const mainBtn = document.createElement('button');
+    mainBtn.type = 'button';
+    mainBtn.className = 'fav-zone-main';
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'fav-zone-name';
+    nameEl.textContent = z.name;
+
+    const metaEl = document.createElement('span');
+    metaEl.className = 'fav-zone-meta';
+    if (liveCell) {
+      const fpInfo = flushPhaseInfo(liveCell.fp);
+      metaEl.replaceChildren(
+        createUiIcon(fpInfo.iconName, 'ui-ico-sm ui-ico-accent'),
+        document.createTextNode(`${formatNumber(liveCell.cs)}/100 · lluvia ${formatNumber(liveCell.p14)} mm`)
+      );
+    } else {
+      metaEl.textContent = 'Cargando datos de la celda…';
+    }
+    mainBtn.append(nameEl, metaEl);
+    mainBtn.addEventListener('click', () => {
+      if (closeQuickOnSelect) closeFavQuickPanel();
+      if (Number.isFinite(z.lat) && Number.isFinite(z.lon)) {
+        map.flyTo({ center: [Number(z.lon), Number(z.lat)], zoom: Math.max(map.getZoom(), 12.2), speed: 1.3 });
+      }
+      const cellToOpen = liveCell || findNearestDataCell(z.lat, z.lon, 15)?.cell;
+      if (cellToOpen) {
+        if (window.MapaSeteroMicro && window.MapaSeteroMicro.getState().active) {
+          const pState = window.MapaSeteroMicro.getState();
+          if (!pState.parentCell || pState.parentCell.h !== cellToOpen.h) {
+            closeMicroDetailUi();
+          }
+        }
+        selectCell(cellToOpen);
+      }
+    });
+
+    const right = document.createElement('div');
+    right.className = 'fav-zone-right';
+
+    if (liveCell) {
+      const scoreVal = Number(liveCell.cs) || 0;
+      const badge = document.createElement('span');
+      badge.className = `top-zone-score ${scoreVal >= 50 ? 'b-ok' : scoreVal > 0 ? 'b-mod' : 'b-no'}`;
+      badge.textContent = `${formatNumber(scoreVal)}`;
+      right.append(badge);
+
+      const trend = formatTrendBadge(liveCell.dcs);
+      if (trend && trend.cls !== 'trend-flat') {
+        const tSpan = document.createElement('span');
+        tSpan.className = `trend-badge ${trend.cls}`;
+        tSpan.textContent = trend.text;
+        right.append(tSpan);
+      }
     }
 
-    for (const z of favs) {
-      const liveCell = lookupFavoriteLiveCell(z.h);
-      const row = document.createElement('div');
-      row.className = 'fav-zone-row';
-
-      const mainBtn = document.createElement('button');
-      mainBtn.type = 'button';
-      mainBtn.className = 'fav-zone-main';
-
-      const nameEl = document.createElement('span');
-      nameEl.className = 'fav-zone-name';
-      nameEl.textContent = z.name;
-
-      const metaEl = document.createElement('span');
-      metaEl.className = 'fav-zone-meta';
-      if (liveCell) {
-        const fpInfo = flushPhaseInfo(liveCell.fp);
-        metaEl.replaceChildren(
-          createUiIcon(fpInfo.iconName, 'ui-ico-sm ui-ico-accent'),
-          document.createTextNode(`${formatNumber(liveCell.cs)}/100 · lluvia ${formatNumber(liveCell.p14)} mm`)
-        );
-      } else {
-        metaEl.textContent = 'Cargando datos de la celda…';
-      }
-      mainBtn.append(nameEl, metaEl);
-      mainBtn.addEventListener('click', () => {
-        if (Number.isFinite(z.lat) && Number.isFinite(z.lon)) {
-          map.flyTo({ center: [Number(z.lon), Number(z.lat)], zoom: Math.max(map.getZoom(), 12.2), speed: 1.3 });
-        }
-        const cellToOpen = liveCell || findNearestDataCell(z.lat, z.lon, 15)?.cell;
-        if (cellToOpen) selectCell(cellToOpen);
-      });
-
-      const right = document.createElement('div');
-      right.className = 'fav-zone-right';
-
-      if (liveCell) {
-        const scoreVal = Number(liveCell.cs) || 0;
-        const badge = document.createElement('span');
-        badge.className = `top-zone-score ${scoreVal >= 50 ? 'b-ok' : scoreVal > 0 ? 'b-mod' : 'b-no'}`;
-        badge.textContent = `${formatNumber(scoreVal)}`;
-        right.append(badge);
-
-        const trend = formatTrendBadge(liveCell.dcs);
-        if (trend && trend.cls !== 'trend-flat') {
-          const tSpan = document.createElement('span');
-          tSpan.className = `trend-badge ${trend.cls}`;
-          tSpan.textContent = trend.text;
-          right.append(tSpan);
-        }
-      }
-
-      const renameBtn = document.createElement('button');
-      renameBtn.type = 'button';
-      renameBtn.className = 'icon-mini-btn';
-      renameBtn.title = 'Renombrar zona';
-      renameBtn.setAttribute('aria-label', `Renombrar ${z.name}`);
-      renameBtn.append(createUiIcon('edit', 'ui-ico-sm'));
-      renameBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = z.name;
-        input.maxLength = 64;
-        input.style.cssText = 'width:100%;font-size:12px;padding:3px 6px;border-radius:6px;border:1px solid #b89e7d;';
-        const commitRename = () => {
-          const newName = input.value.trim() || z.name;
-          window.MapaSeteroJournal.saveFavoriteZone({ ...z, name: newName });
-          renderFavoriteZones();
-        };
-        input.addEventListener('keydown', ev => {
-          if (ev.key === 'Enter') commitRename();
-          if (ev.key === 'Escape') renderFavoriteZones();
-        });
-        input.addEventListener('blur', commitRename);
-        mainBtn.replaceWith(input);
-        input.focus();
-        input.select();
-      });
-
-      const delBtn = document.createElement('button');
-      delBtn.type = 'button';
-      delBtn.className = 'icon-mini-btn';
-      delBtn.title = 'Quitar zona habitual';
-      delBtn.setAttribute('aria-label', `Quitar ${z.name}`);
-      delBtn.append(createUiIcon('close', 'ui-ico-sm'));
-      delBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        window.MapaSeteroJournal.removeFavoriteZone(z.h);
+    const renameBtn = document.createElement('button');
+    renameBtn.type = 'button';
+    renameBtn.className = 'icon-mini-btn';
+    renameBtn.title = 'Renombrar zona';
+    renameBtn.setAttribute('aria-label', `Renombrar ${z.name}`);
+    renameBtn.append(createUiIcon('edit', 'ui-ico-sm'));
+    renameBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = z.name;
+      input.maxLength = 64;
+      input.style.cssText = 'width:100%;font-size:12px;padding:3px 6px;border-radius:6px;border:1px solid #b89e7d;';
+      const commitRename = () => {
+        const newName = input.value.trim() || z.name;
+        window.MapaSeteroJournal.saveFavoriteZone({ ...z, name: newName });
         renderFavoriteZones();
-        if (currentSelectedCellData && currentSelectedCellData.h === z.h) {
-          syncFavoriteButtonState(z.h);
-        }
+      };
+      input.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter') commitRename();
+        if (ev.key === 'Escape') renderFavoriteZones();
       });
+      input.addEventListener('blur', commitRename);
+      mainBtn.replaceWith(input);
+      input.focus();
+      input.select();
+    });
 
-      right.append(renameBtn, delBtn);
-      row.append(mainBtn, right);
-      container.append(row);
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'icon-mini-btn';
+    delBtn.title = 'Quitar zona habitual';
+    delBtn.setAttribute('aria-label', `Quitar ${z.name}`);
+    delBtn.append(createUiIcon('close', 'ui-ico-sm'));
+    delBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      window.MapaSeteroJournal.removeFavoriteZone(z.h);
+      renderFavoriteZones();
+      if (currentSelectedCellData && currentSelectedCellData.h === z.h) {
+        syncFavoriteButtonState(z.h);
+      }
+    });
+
+    right.append(renameBtn, delBtn);
+    row.append(mainBtn, right);
+    return row;
+  }
+
+  function renderFavoriteZones() {
+    if (!window.MapaSeteroJournal) return;
+    const favs = window.MapaSeteroJournal.getFavoriteZones();
+    const sidebarList = document.getElementById('fav-zones-list');
+    const quickList = document.getElementById('fav-quick-list');
+    const quickCount = document.getElementById('fav-quick-count');
+    const quickBtn = document.getElementById('fav-quick-toggle');
+    const fitBtn = document.getElementById('btn-fit-favorites');
+
+    if (quickCount) {
+      quickCount.textContent = String(favs.length);
+      quickCount.hidden = favs.length === 0;
     }
+    if (quickBtn) {
+      quickBtn.classList.toggle('has-favs', favs.length > 0);
+    }
+    if (fitBtn) {
+      fitBtn.hidden = favs.length < 2;
+    }
+
+    const targets = [
+      { el: sidebarList, closeQuick: false },
+      { el: quickList, closeQuick: true }
+    ];
+    for (const target of targets) {
+      if (!target.el) continue;
+      target.el.replaceChildren();
+      if (!favs.length) {
+        const empty = document.createElement('p');
+        empty.className = 'top-zones-sub';
+        empty.textContent = 'Aún no has guardado ninguna zona. Toca una celda en el mapa y pulsa «Guardar zona».';
+        target.el.append(empty);
+        continue;
+      }
+      for (const z of favs) {
+        const liveCell = lookupFavoriteLiveCell(z.h);
+        target.el.append(createFavZoneRow(z, liveCell, { closeQuickOnSelect: target.closeQuick }));
+      }
+    }
+
+    refreshFavoritesMapLayer();
   }
 
   function renderOutingsList() {
@@ -7761,6 +8213,7 @@
 
   function openMenu() {
     closeFilters();
+    closeFavQuickPanel();
     document.body.classList.add('menu-open');
     document.body.classList.toggle('cell-selected', !document.getElementById('cell-card').hidden);
     menuToggle.setAttribute('aria-expanded', 'true');
@@ -7787,6 +8240,9 @@
     if (event.key === 'Escape') {
       if (window.MapaSeteroMicro && window.MapaSeteroMicro.getState().active) {
         closeMicroDetailUi();
+      }
+      if (favQuickPanel && !favQuickPanel.hidden) {
+        closeFavQuickPanel();
       }
       if (document.body.classList.contains('menu-open')) closeMenu();
       if (!filtersPanel.hidden) {

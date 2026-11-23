@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mapa-setero-v18';
+const CACHE_NAME = 'mapa-setero-v19';
 const DATA_PATH = /\/public\/data\/experimental\/(?:cells_base|[a-z]+_[a-z]+)\.json$/;
 const STATIC_ASSET_PATH = /\.(?:webmanifest|svg|png|geojson|js)$|\/public\/data\/micro\/[a-z0-9]+\.json$/;
 
