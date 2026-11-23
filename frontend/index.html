@@ -2364,6 +2364,76 @@
       font-weight: 600;
       cursor: pointer;
     }
+
+    /* Iconos SVG unificados (trazo fino acorde al visor) */
+    .ui-ico {
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+      vertical-align: -2px;
+      flex-shrink: 0;
+    }
+    .ui-ico-sm {
+      width: 12px;
+      height: 12px;
+      vertical-align: -1.5px;
+    }
+    .ui-ico-lg {
+      width: 15px;
+      height: 15px;
+    }
+    .ui-ico-good { color: #16a34a; }
+    .ui-ico-warn { color: #d97706; }
+    .ui-ico-bad { color: #dc2626; }
+    .ui-ico-cold { color: #2563eb; }
+    .ui-ico-star { color: #d97706; }
+    .ui-ico-accent { color: #50663a; }
+    .ui-ico-muted { color: #71685b; }
+
+    .menu-section > summary { gap: 7px; }
+    .overlay-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .outings-toolbar button,
+    .micro-hud-title,
+    .micro-hud-actions a,
+    .micro-hud-actions button,
+    .road-distance-badge,
+    .meteo-chart-title > span,
+    .micro-hud-line {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .micro-hud-line {
+      display: flex;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: 4px 6px;
+    }
+    .fav-zone-meta {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .cell-legal-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+    }
+    .cell-legal-banner[hidden] { display: none; }
+    .cell-legal-banner > .ui-ico { margin-top: 2px; }
+    .cell-summary-list li > .ui-ico { margin-top: 2px; }
+    .micro-pill-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 6px;
+    }
   </style>
 </head>
 <body>
@@ -2628,8 +2698,14 @@
         </button>
       </div>
       <div class="overlay-toggle-row" aria-label="Capas superpuestas">
-        <button id="btn-legal-layer" class="overlay-toggle-btn active" type="button" aria-pressed="true" title="Mostrar parques nacionales y cotos regulados Micocyl">🏛️ PN y Cotos</button>
-        <button id="btn-outings-layer" class="overlay-toggle-btn active" type="button" aria-pressed="true" title="Mostrar tus setales guardados en local">📌 Mis setales</button>
+        <button id="btn-legal-layer" class="overlay-toggle-btn active" type="button" aria-pressed="true" title="Mostrar parques nacionales y cotos regulados Micocyl">
+          <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          PN y Cotos
+        </button>
+        <button id="btn-outings-layer" class="overlay-toggle-btn active" type="button" aria-pressed="true" title="Mostrar tus setales guardados en local">
+          <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Mis setales
+        </button>
       </div>
     </details>
 
@@ -2760,17 +2836,30 @@
       </div>
       <div id="cell-meteo-chart-wrap" class="meteo-chart-box">
         <div class="meteo-chart-title">
-          <span>📈 Evolución 28 días + previsión 72 h</span>
+          <span>
+            <svg class="ui-ico ui-ico-sm ui-ico-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Evolución 28 días + previsión 72 h
+          </span>
         </div>
         <div id="cell-meteo-chart"></div>
       </div>
       <div class="cell-quick-actions" aria-label="Acciones rápidas de celda">
-        <button id="btn-fav-zone" class="quick-action-btn" type="button" title="Guardar en Mis zonas habituales">⭐ Guardar zona</button>
-        <button id="btn-add-outing" class="quick-action-btn" type="button" title="Registrar setal en diario privado local">📌 Setal aquí</button>
-        <button id="btn-export-gpx" class="quick-action-btn" type="button" title="Descargar punto GPS en formato GPX">⬇️ GPX</button>
+        <button id="btn-fav-zone" class="quick-action-btn" type="button" title="Guardar en Mis zonas habituales">
+          <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Guardar zona
+        </button>
+        <button id="btn-add-outing" class="quick-action-btn" type="button" title="Registrar setal en diario privado local">
+          <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Setal aquí
+        </button>
+        <button id="btn-export-gpx" class="quick-action-btn" type="button" title="Descargar punto GPS en formato GPX">
+          <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          GPX
+        </button>
       </div>
       <button id="btn-micro-detail" class="micro-action-btn" type="button">
-        <span>🔍 Ver micro-detalle: vertientes y árboles (7 o 49 zonas)</span>
+        <svg class="ui-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        <span>Ver micro-detalle: vertientes y árboles (7 o 49 zonas)</span>
       </button>
       <div class="info-item info-wide status-neutral" id="card-location" hidden>
         <span class="info-item-val" id="c-location">—</span>
@@ -2810,7 +2899,8 @@
         </div>
       </div>
       <button id="btn-compare-cell" class="compare-action-btn" type="button">
-        <span>⚖️ Comparar esta celda con otra</span>
+        <svg class="ui-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="3" x2="12" y2="21"/><polyline points="4 8 12 4 20 8"/><path d="M2 14h6l-3-6-3 6z"/><path d="M16 14h6l-3-6-3 6z"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
+        <span>Comparar esta celda con otra</span>
       </button>
       <details id="cell-extra-details" class="menu-section cell-extra">
         <summary>Terreno, suelo y detalle meteorológico (10 datos)</summary>
@@ -2904,7 +2994,10 @@
     </div>
 
     <details id="fav-zones-section" class="menu-section" open>
-      <summary>⭐ Mis zonas habituales</summary>
+      <summary>
+        <svg class="ui-ico ui-ico-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Mis zonas habituales
+      </summary>
       <div class="menu-section-content">
         <p class="outings-privacy-note">Tus zonas guardadas permanecen solo en este navegador. Toca cualquiera para consultar su índice hoy:</p>
         <div id="fav-zones-list" class="fav-zones-list"></div>
@@ -2912,7 +3005,10 @@
     </details>
 
     <details id="top-zones-section" class="menu-section" open>
-      <summary>🏆 Zonas más favorables hoy</summary>
+      <summary>
+        <svg class="ui-ico ui-ico-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+        Zonas más favorables hoy
+      </summary>
       <div class="menu-section-content">
         <div class="top-zones-controls">
           <select id="top-zones-sort" class="top-zones-select" aria-label="Ordenar mejores zonas">
@@ -2931,12 +3027,21 @@
     </details>
 
     <details id="outings-section" class="menu-section">
-      <summary>📔 Mis setales y diario local</summary>
+      <summary>
+        <svg class="ui-ico ui-ico-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Mis setales y diario local
+      </summary>
       <div class="menu-section-content">
         <p class="outings-privacy-note">Privado en este navegador (no se sube a servidores). Haz copia de seguridad en JSON si cambias de dispositivo.</p>
         <div class="outings-toolbar">
-          <button id="btn-outings-export" type="button">⬇️ Exportar JSON</button>
-          <button id="btn-outings-import" type="button">⬆️ Importar JSON</button>
+          <button id="btn-outings-export" type="button">
+            <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar JSON
+          </button>
+          <button id="btn-outings-import" type="button">
+            <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Importar JSON
+          </button>
           <input id="outings-import-input" type="file" accept=".json,application/json" hidden />
         </div>
         <div id="outings-list" class="outings-list"></div>
@@ -2944,7 +3049,10 @@
     </details>
 
     <details id="species-guides-section" class="menu-section" open>
-      <summary>📖 Guía rápida de especies</summary>
+      <summary>
+        <svg class="ui-ico ui-ico-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Guía rápida de especies
+      </summary>
       <div class="guide-buttons">
         <button class="guide-btn" type="button" data-guide="boletus_edulis">Boletus edulis</button>
         <button class="guide-btn" type="button" data-guide="boletus_pinophilus">Boletus pinophilus</button>
@@ -3022,20 +3130,34 @@
     </div>
     <div id="micro-detail-hud" class="micro-hud" hidden aria-live="polite">
       <div class="micro-hud-head">
-        <span id="micro-hud-title" class="micro-hud-title">🔍 Micro-detalle</span>
+        <span id="micro-hud-title" class="micro-hud-title">
+          <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          Micro-detalle
+        </span>
         <div class="micro-hud-pills">
           <button id="micro-res-9" class="micro-pill-btn active" type="button">7 sub-zonas</button>
           <button id="micro-res-10" class="micro-pill-btn" type="button">49 micro-zonas</button>
           <button id="micro-bg-topo" class="micro-pill-btn" type="button" title="Cambiar fondo a Topo IGN">Topo IGN</button>
           <button id="micro-bg-pnoa" class="micro-pill-btn" type="button" title="Cambiar fondo a Satélite PNOA">PNOA</button>
-          <button id="micro-hud-close" class="micro-pill-btn micro-pill-close" type="button" title="Salir del micro-detalle (Esc)">✕</button>
+          <button id="micro-hud-close" class="micro-pill-btn micro-pill-close" type="button" title="Salir del micro-detalle (Esc)" aria-label="Salir del micro-detalle">
+            <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
         </div>
       </div>
       <div id="micro-hud-body" class="micro-hud-body">Calculando vertientes, árboles MFE50 y suelo…</div>
       <div class="micro-hud-actions">
-        <a id="micro-sub-gmaps" href="#" target="_blank" rel="noopener noreferrer">🗺️ Cómo llegar al rodal</a>
-        <button id="micro-sub-gpx" type="button">⬇️ GPX del rodal</button>
-        <button id="micro-sub-outing" type="button">📌 Setal aquí</button>
+        <a id="micro-sub-gmaps" href="#" target="_blank" rel="noopener noreferrer">
+          <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          Cómo llegar al rodal
+        </a>
+        <button id="micro-sub-gpx" type="button">
+          <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          GPX del rodal
+        </button>
+        <button id="micro-sub-outing" type="button">
+          <svg class="ui-ico ui-ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Setal aquí
+        </button>
       </div>
     </div>
     <div id="map-loading" class="map-loading" role="status" aria-live="polite">
@@ -3062,6 +3184,50 @@
   <script src="./user_journal.js"></script>
   <script src="./micro_detail.js"></script>
   <script>
+  const UI_ICON_PATHS = {
+    pin: '<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+    car: '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1 .4-1 1v7c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
+    star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+    'star-filled': '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor"/>',
+    download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+    edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    close: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+    'search-plus': '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>',
+    mushroom: '<path d="M4 13c0-5 3.6-9 8-9s8 4 8 9H4z"/><path d="M10 13v6a2 2 0 0 0 4 0v-6"/>',
+    sprout: '<path d="M7 20h10"/><path d="M12 20v-9"/><path d="M12 11c0-4-3.5-6-7-5 0 3.5 2.5 5 7 5z"/><path d="M12 13c0-3.5 3-5.5 6.5-4.5 0 3-2 4.5-6.5 4.5z"/>',
+    leaf: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>',
+    droplet: '<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>',
+    snowflake: '<line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/><path d="m20 16-4-4 4-4"/><path d="m4 8 4 4-4 4"/><path d="m16 4-4 4-4-4"/><path d="m8 20 4-4 4 4"/>',
+    thermometer: '<path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+    'cloud-rain': '<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M8 19v2"/><path d="M12 17v4"/><path d="M16 19v2"/>',
+    calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+    ban: '<circle cx="12" cy="12" r="9"/><line x1="5.6" y1="5.6" x2="18.4" y2="18.4"/>',
+    info: '<circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+    'check-circle': '<circle cx="12" cy="12" r="9"/><polyline points="8.5 12.5 11 15 15.5 9.5"/>',
+    'alert-triangle': '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    check: '<polyline points="20 6 9 17 4 12"/>',
+    permit: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6.5 15c.6-1.2 4.4-1.2 5 0"/><line x1="14" y1="10" x2="18.5" y2="10"/><line x1="14" y1="14" x2="18.5" y2="14"/>',
+    'dot-good': '<circle cx="12" cy="12" r="7" fill="currentColor" stroke="none"/>',
+    'dot-warn': '<circle cx="12" cy="12" r="7" fill="currentColor" stroke="none"/>',
+    'dot-bad': '<circle cx="12" cy="12" r="7" fill="currentColor" stroke="none"/>',
+    tree: '<polygon points="12 2 19 12 15 12 20 19 4 19 9 12 5 12 12 2"/><line x1="12" y1="19" x2="12" y2="22"/>',
+    flask: '<path d="M10 2v7.31L4.66 17.5A2 2 0 0 0 6.32 20.5h11.36a2 2 0 0 0 1.66-3L14 9.31V2"/><line x1="8.5" y1="2" x2="15.5" y2="2"/>',
+    mountain: '<path d="m8 3 4 8 5-5 5 15H2L8 3z"/>'
+  };
+
+  function uiIconHtml(name, extraClass = '') {
+    const inner = UI_ICON_PATHS[name] || UI_ICON_PATHS.info;
+    const cls = extraClass ? `ui-ico ${extraClass}` : 'ui-ico';
+    return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+  }
+
+  function createUiIcon(name, extraClass = '') {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = uiIconHtml(name, extraClass);
+    return tpl.content.firstElementChild;
+  }
+
   const filtersPanelContent = document.getElementById('filters-panel-content');
   ['prov-row', 'species-control', 'layer-section', 'filters-section', 'loading']
     .forEach(id => filtersPanelContent.appendChild(document.getElementById(id)));
@@ -3338,7 +3504,7 @@
       el.title = 'Tu ubicación actual';
       userLocationMarker = new maplibregl.Marker({ element: el })
         .setLngLat([coords.lon, coords.lat])
-        .setPopup(new maplibregl.Popup({ offset: 14, closeButton: false }).setHTML('<div style="font-size:12px;font-weight:700;color:#1d4ed8;">📍 Tu ubicación</div>'))
+        .setPopup(new maplibregl.Popup({ offset: 14, closeButton: false }).setHTML(`<div style="display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:#1d4ed8;">${uiIconHtml('pin', 'ui-ico-sm')}<span>Tu ubicación</span></div>`))
         .addTo(map);
     } else {
       userLocationMarker.setLngLat([coords.lon, coords.lat]);
@@ -3387,7 +3553,10 @@
           const hours = Math.floor(durMin / 60);
           const mins = durMin % 60;
           const timeStr = hours > 0 ? `${hours} h ${mins} min` : `${mins} min`;
-          badge.textContent = `🚗 ${distKm} km · ${timeStr} en coche`;
+          badge.replaceChildren(
+            createUiIcon('car', 'ui-ico-sm'),
+            document.createTextNode(`${distKm} km · ${timeStr} en coche`)
+          );
           return;
         }
       }
@@ -5476,7 +5645,7 @@
 
       cellPopup = new maplibregl.Popup({ offset: 12, closeButton: false, className: 'map-cell-popup' })
         .setLngLat([Number(resolvedCell.lon), Number(resolvedCell.lat)])
-        .setHTML(`<div style="font-size:12px; font-weight:700; color:#493b2d; line-height:1.35; padding:2px;">📍 ${zoneTitle}<div style="font-size:10px; font-weight:500; color:#71685b;">${zoneDist} · Índice: <strong>${scoreLabel}</strong></div></div>`)
+        .setHTML(`<div style="font-size:12px; font-weight:700; color:#493b2d; line-height:1.35; padding:2px;"><div style="display:flex;align-items:center;gap:4px;">${uiIconHtml('pin', 'ui-ico-sm ui-ico-accent')}<span>${escapeHtml(zoneTitle)}</span></div><div style="font-size:10px; font-weight:500; color:#71685b;">${zoneDist} · Índice: <strong>${scoreLabel}</strong></div></div>`)
         .addTo(map);
     }
   }
@@ -5549,18 +5718,18 @@
 
   function flushPhaseInfo(fp) {
     const mapInfo = {
-      peak_flush: { cls: 'fp-good', icon: '🍄', label: 'Florada activa (botones y adultos)' },
-      emerging_buttons: { cls: 'fp-good', icon: '🌱', label: 'Posible salida de botones' },
-      mature_tail: { cls: 'fp-warn', icon: '🍂', label: 'Cola de brotada (posibles crecidos, pocos botones)' },
-      moderate_active: { cls: 'fp-warn', icon: '🍄', label: 'Actividad moderada' },
-      incubating: { cls: 'fp-warn', icon: '💧', label: 'Incubando tras lluvia reciente' },
-      cold_stalled: { cls: 'fp-bad', icon: '❄️', label: 'Frenado por frío o helada' },
-      dormant_host: { cls: 'fp-bad', icon: '🍁', label: 'Caducifolio en reposo otoñal' },
-      dry: { cls: 'fp-bad', icon: '☀️', label: 'Monte seco' },
-      off_season: { cls: 'fp-bad', icon: '📅', label: 'Fuera de época' },
-      excluded: { cls: 'fp-bad', icon: '⛔', label: 'Hábitat no compatible' }
+      peak_flush: { cls: 'fp-good', iconName: 'mushroom', label: 'Florada activa (botones y adultos)' },
+      emerging_buttons: { cls: 'fp-good', iconName: 'sprout', label: 'Posible salida de botones' },
+      mature_tail: { cls: 'fp-warn', iconName: 'leaf', label: 'Cola de brotada (posibles crecidos, pocos botones)' },
+      moderate_active: { cls: 'fp-warn', iconName: 'mushroom', label: 'Actividad moderada' },
+      incubating: { cls: 'fp-warn', iconName: 'droplet', label: 'Incubando tras lluvia reciente' },
+      cold_stalled: { cls: 'fp-bad', iconName: 'snowflake', label: 'Frenado por frío o helada' },
+      dormant_host: { cls: 'fp-bad', iconName: 'leaf', label: 'Caducifolio en reposo otoñal' },
+      dry: { cls: 'fp-bad', iconName: 'sun', label: 'Monte seco' },
+      off_season: { cls: 'fp-bad', iconName: 'calendar', label: 'Fuera de época' },
+      excluded: { cls: 'fp-bad', iconName: 'ban', label: 'Hábitat no compatible' }
     };
-    return mapInfo[fp] || { cls: 'fp-neutral', icon: 'ℹ️', label: 'Condiciones mixtas' };
+    return mapInfo[fp] || { cls: 'fp-neutral', iconName: 'info', label: 'Condiciones mixtas' };
   }
 
   function forecastOutlookText(p) {
@@ -5692,7 +5861,7 @@
     if (cell.fp) {
       const fpInfo = flushPhaseInfo(cell.fp);
       const fpStatus = fpInfo.cls === 'fp-good' ? 'good' : fpInfo.cls === 'fp-bad' ? 'bad' : 'uncertain';
-      checksList.push({ label: 'Fase de brotada', status: fpStatus, text: `${fpInfo.icon} ${fpInfo.label}.` });
+      checksList.push({ label: 'Fase de brotada', status: fpStatus, text: `${fpInfo.label}.` });
     }
     const fcText = forecastOutlookText(cell);
     if (fcText) {
@@ -5734,7 +5903,11 @@
       const mark = document.createElement('span');
       mark.className = 'species-check-mark';
       mark.setAttribute('aria-hidden', 'true');
-      mark.textContent = check.status === 'good' ? '✓' : check.status === 'bad' ? '×' : '?';
+      if (check.status === 'good') {
+        mark.append(createUiIcon('check', 'ui-ico-sm'));
+      } else {
+        mark.textContent = check.status === 'bad' ? '×' : '?';
+      }
       const description = document.createElement('span');
       const label = document.createElement('span');
       label.className = 'species-check-label';
@@ -5795,7 +5968,10 @@
       if (p.fp) {
         const fpInfo = flushPhaseInfo(p.fp);
         flushPill.className = `flush-phase-pill ${fpInfo.cls}`;
-        flushPill.textContent = `${fpInfo.icon} ${fpInfo.label}`;
+        flushPill.replaceChildren(
+          createUiIcon(fpInfo.iconName, 'ui-ico-sm'),
+          document.createTextNode(fpInfo.label)
+        );
         flushPill.hidden = false;
       } else {
         flushPill.hidden = true;
@@ -5807,13 +5983,22 @@
     box.classList.remove('sum-good', 'sum-warn', 'sum-bad');
     if (cs >= 58 && ws >= 48 && isActivePhase) {
       box.classList.add('sum-good');
-      title.textContent = '🟢 Buen sitio para buscar hoy';
+      title.replaceChildren(
+        createUiIcon('dot-good', 'ui-ico-sm ui-ico-good'),
+        document.createTextNode('Buen sitio para buscar hoy')
+      );
     } else if (cs >= 25 && ws >= 20 && !isBlockedPhase) {
       box.classList.add('sum-warn');
-      title.textContent = '🟡 Sitio regular hoy (puede haber alguna suelta)';
+      title.replaceChildren(
+        createUiIcon('dot-warn', 'ui-ico-sm ui-ico-warn'),
+        document.createTextNode('Sitio regular hoy (puede haber alguna suelta)')
+      );
     } else {
       box.classList.add('sum-bad');
-      title.textContent = '🔴 Mal sitio para buscar hoy';
+      title.replaceChildren(
+        createUiIcon('dot-bad', 'ui-ico-sm ui-ico-bad'),
+        document.createTextNode('Mal sitio para buscar hoy')
+      );
     }
 
     const pros = [];
@@ -5913,19 +6098,27 @@
     list.replaceChildren();
     const fcNote = forecastOutlookText(p);
     const items = [
-      ...cons.slice(0, 3).map(t => ({ icon: '⚠️', text: t })),
-      ...pros.slice(0, 3).map(t => ({ icon: '✅', text: t }))
+      ...cons.slice(0, 3).map(t => ({ iconName: 'alert-triangle', iconCls: 'ui-ico-sm ui-ico-warn', text: t })),
+      ...pros.slice(0, 3).map(t => ({ iconName: 'check-circle', iconCls: 'ui-ico-sm ui-ico-good', text: t }))
     ];
     if (fcNote) {
-      const fcIcon = p.fc_out === 'snow_risk' ? '❄️' : p.fc_out === 'frost_risk' ? '🥶' : '🌦️';
-      items.push({ icon: fcIcon, text: fcNote });
+      const fcIcon = p.fc_out === 'snow_risk'
+        ? 'snowflake'
+        : p.fc_out === 'frost_risk' ? 'thermometer' : 'cloud-rain';
+      items.push({ iconName: fcIcon, iconCls: 'ui-ico-sm ui-ico-cold', text: fcNote });
     }
     if (!items.length) {
-      items.push({ icon: ws >= 50 ? '✅' : '⚠️', text: 'Condiciones intermedias en el bosque y el tiempo de estos días.' });
+      items.push({
+        iconName: ws >= 50 ? 'check-circle' : 'alert-triangle',
+        iconCls: ws >= 50 ? 'ui-ico-sm ui-ico-good' : 'ui-ico-sm ui-ico-warn',
+        text: 'Condiciones intermedias en el bosque y el tiempo de estos días.'
+      });
     }
     for (const item of items) {
       const li = document.createElement('li');
-      li.textContent = `${item.icon} ${item.text}`;
+      const txtSpan = document.createElement('span');
+      txtSpan.textContent = item.text;
+      li.append(createUiIcon(item.iconName, item.iconCls), txtSpan);
       list.append(li);
     }
   }
@@ -5983,21 +6176,25 @@
     if (legalBanner) {
       legalBanner.replaceChildren();
       legalBanner.hidden = false;
+      const bodySpan = document.createElement('span');
       if (p.leg === 'national_park') {
         legalBanner.className = 'cell-legal-banner legal-ban';
-        legalBanner.textContent = `⛔ Parque Nacional (${p.leg_n || 'OAPN'}): recolección generalmente prohibida o restringida. Consulta la normativa oficial del parque.`;
+        bodySpan.textContent = `Parque Nacional (${p.leg_n || 'OAPN'}): recolección generalmente prohibida o restringida. Consulta la normativa oficial del parque.`;
+        legalBanner.append(createUiIcon('ban', 'ui-ico-sm ui-ico-bad'), bodySpan);
       } else if (p.leg === 'regulated_coto') {
         legalBanner.className = 'cell-legal-banner legal-coto';
-        const txt = document.createTextNode(`🪪 Monte acotado (${p.leg_n || 'CyL'}): requiere permiso previo. `);
+        bodySpan.append(document.createTextNode(`Monte acotado (${p.leg_n || 'CyL'}): requiere permiso previo. `));
         const lnk = document.createElement('a');
         lnk.href = 'https://www.micocyl.es';
         lnk.target = '_blank';
         lnk.rel = 'noopener noreferrer';
         lnk.textContent = 'Permisos Micocyl ↗';
-        legalBanner.append(txt, lnk);
+        bodySpan.append(lnk);
+        legalBanner.append(createUiIcon('permit', 'ui-ico-sm ui-ico-warn'), bodySpan);
       } else {
         legalBanner.className = 'cell-legal-banner legal-info';
-        legalBanner.textContent = 'ℹ️ Fuera de Parque Nacional y de coto perimetral Micocyl en capa oficial; respeta siempre topes locales y fincas privadas.';
+        bodySpan.textContent = 'Fuera de Parque Nacional y de coto perimetral Micocyl en capa oficial; respeta siempre topes locales y fincas privadas.';
+        legalBanner.append(createUiIcon('info', 'ui-ico-sm ui-ico-muted'), bodySpan);
       }
     }
 
@@ -6013,8 +6210,8 @@
       const mActive = Boolean(window.MapaSeteroMicro && window.MapaSeteroMicro.getState().active && window.MapaSeteroMicro.getState().parentCell?.h === p.h);
       btnMicro.classList.toggle('active', mActive);
       btnMicro.querySelector('span').textContent = mActive
-        ? '🔍 Micro-detalle activo (ver en mapa)'
-        : '🔍 Ver micro-detalle: vertientes y árboles (7 o 49 zonas)';
+        ? 'Micro-detalle activo (ver en mapa)'
+        : 'Ver micro-detalle: vertientes y árboles (7 o 49 zonas)';
     }
 
     // Ubicación y zona de la celda
@@ -6708,7 +6905,7 @@
       if (cellPopup) cellPopup.remove();
       cellPopup = new maplibregl.Popup({ offset: 12, closeButton: false, className: 'map-cell-popup' })
         .setLngLat([lon, lat])
-        .setHTML(`<div style="font-size:12px; font-weight:700; color:#493b2d; line-height:1.35; padding:2px;">📍 ${escapeHtml(label)}<div style="font-size:10px; font-weight:500; color:#71685b;">Ubicación fuera del área de celdas micológicas actuales (Soria, Madrid, Segovia, Guadalajara, Burgos).</div></div>`)
+        .setHTML(`<div style="font-size:12px; font-weight:700; color:#493b2d; line-height:1.35; padding:2px;"><div style="display:flex;align-items:center;gap:4px;">${uiIconHtml('pin', 'ui-ico-sm ui-ico-accent')}<span>${escapeHtml(label)}</span></div><div style="font-size:10px; font-weight:500; color:#71685b;">Ubicación fuera del área de celdas micológicas actuales (Soria, Madrid, Segovia, Guadalajara, Burgos).</div></div>`)
         .addTo(map);
     }
   }
@@ -7030,7 +7227,10 @@
     if (!btn || !window.MapaSeteroJournal) return;
     const isFav = Boolean(cellH && window.MapaSeteroJournal.isCellFavorite(cellH));
     btn.classList.toggle('is-fav', isFav);
-    btn.textContent = isFav ? '★ Guardada' : '⭐ Guardar zona';
+    btn.replaceChildren(
+      createUiIcon(isFav ? 'star-filled' : 'star', isFav ? 'ui-ico-sm ui-ico-star' : 'ui-ico-sm'),
+      document.createTextNode(isFav ? 'Guardada' : 'Guardar zona')
+    );
   }
 
   function lookupFavoriteLiveCell(h) {
@@ -7054,7 +7254,7 @@
     if (!favs.length) {
       const empty = document.createElement('p');
       empty.className = 'top-zones-sub';
-      empty.textContent = 'Aún no has guardado ninguna zona. Toca una celda en el mapa y pulsa «⭐ Guardar zona».';
+      empty.textContent = 'Aún no has guardado ninguna zona. Toca una celda en el mapa y pulsa «Guardar zona».';
       container.append(empty);
       return;
     }
@@ -7076,7 +7276,10 @@
       metaEl.className = 'fav-zone-meta';
       if (liveCell) {
         const fpInfo = flushPhaseInfo(liveCell.fp);
-        metaEl.textContent = `${fpInfo.icon} ${formatNumber(liveCell.cs)}/100 · lluvia ${formatNumber(liveCell.p14)} mm`;
+        metaEl.replaceChildren(
+          createUiIcon(fpInfo.iconName, 'ui-ico-sm ui-ico-accent'),
+          document.createTextNode(`${formatNumber(liveCell.cs)}/100 · lluvia ${formatNumber(liveCell.p14)} mm`)
+        );
       } else {
         metaEl.textContent = 'Cargando datos de la celda…';
       }
@@ -7113,7 +7316,7 @@
       renameBtn.className = 'icon-mini-btn';
       renameBtn.title = 'Renombrar zona';
       renameBtn.setAttribute('aria-label', `Renombrar ${z.name}`);
-      renameBtn.textContent = '✎';
+      renameBtn.append(createUiIcon('edit', 'ui-ico-sm'));
       renameBtn.addEventListener('click', e => {
         e.stopPropagation();
         const input = document.createElement('input');
@@ -7141,7 +7344,7 @@
       delBtn.className = 'icon-mini-btn';
       delBtn.title = 'Quitar zona habitual';
       delBtn.setAttribute('aria-label', `Quitar ${z.name}`);
-      delBtn.textContent = '×';
+      delBtn.append(createUiIcon('close', 'ui-ico-sm'));
       delBtn.addEventListener('click', e => {
         e.stopPropagation();
         window.MapaSeteroJournal.removeFavoriteZone(z.h);
@@ -7165,7 +7368,7 @@
     if (!list.length) {
       const empty = document.createElement('p');
       empty.className = 'top-zones-sub';
-      empty.textContent = 'Sin apuntes aún. Abre cualquier celda o rodal y pulsa «📌 Setal aquí».';
+      empty.textContent = 'Sin apuntes aún. Abre cualquier celda o rodal y pulsa «Setal aquí».';
       container.append(empty);
       return;
     }
@@ -7203,7 +7406,7 @@
       gpxBtn.type = 'button';
       gpxBtn.className = 'icon-mini-btn';
       gpxBtn.title = 'Descargar GPX';
-      gpxBtn.textContent = '⬇';
+      gpxBtn.append(createUiIcon('download', 'ui-ico-sm'));
       gpxBtn.addEventListener('click', () => {
         window.MapaSeteroJournal.downloadGpxWaypoint({
           name: o.name,
@@ -7216,7 +7419,7 @@
       delBtn.type = 'button';
       delBtn.className = 'icon-mini-btn';
       delBtn.title = 'Borrar apunte';
-      delBtn.textContent = '×';
+      delBtn.append(createUiIcon('close', 'ui-ico-sm'));
       delBtn.addEventListener('click', () => {
         window.MapaSeteroJournal.removeOuting(o.id);
         renderOutingsList();
@@ -7261,9 +7464,14 @@
 
     const state = window.MapaSeteroMicro ? window.MapaSeteroMicro.getState() : { resolution: 9 };
     if (titleEl) {
-      titleEl.textContent = state.resolution === 10
-        ? '🔍 Micro-detalle: 49 zonas (~1,5 ha)'
-        : '🔍 Micro-detalle: 7 sub-zonas (~10,5 ha)';
+      titleEl.replaceChildren(
+        createUiIcon('search-plus', 'ui-ico-sm ui-ico-accent'),
+        document.createTextNode(
+          state.resolution === 10
+            ? 'Micro-detalle: 49 zonas (~1,5 ha)'
+            : 'Micro-detalle: 7 sub-zonas (~10,5 ha)'
+        )
+      );
     }
 
     const resBtn9 = document.getElementById('micro-res-9');
@@ -7280,8 +7488,16 @@
     line1.append(strong1, document.createTextNode(` — ${aspText} · ${subcell.elev} m · Sol ×${formatNumber(subcell.solarFactor)}`));
 
     const line2 = document.createElement('div');
+    line2.className = 'micro-hud-line';
     const treeDesc = subcell.tree ? `${forestNameEs(subcell.tree)} (${subcell.cc}% copa)` : 'Sin arbolado MFE50';
-    line2.textContent = `🌳 ${treeDesc} · 🧪 pH ${formatNumber(subcell.ph)} (${subcell.lithLabel || 'Sin dato'}) · ⛰️ ${subcell.demSource || ''}`;
+    line2.append(
+      createUiIcon('tree', 'ui-ico-sm ui-ico-accent'),
+      document.createTextNode(`${treeDesc} ·`),
+      createUiIcon('flask', 'ui-ico-sm ui-ico-muted'),
+      document.createTextNode(`pH ${formatNumber(subcell.ph)} (${subcell.lithLabel || 'Sin dato'}) ·`),
+      createUiIcon('mountain', 'ui-ico-sm ui-ico-muted'),
+      document.createTextNode(`${subcell.demSource || ''}`)
+    );
 
     const line3 = document.createElement('div');
     line3.style.cssText = 'color:#6b5f52;font-size:11px;margin-top:2px;';
@@ -7320,7 +7536,7 @@
       const btnMicro = document.getElementById('btn-micro-detail');
       if (btnMicro) {
         btnMicro.classList.add('active');
-        btnMicro.querySelector('span').textContent = '🔍 Micro-detalle activo (ver en mapa)';
+        btnMicro.querySelector('span').textContent = 'Micro-detalle activo (ver en mapa)';
       }
     } catch (err) {
       if (bodyEl) bodyEl.textContent = `No se pudo cargar el micro-detalle (${err && err.message ? err.message : 'error'}).`;
@@ -7337,7 +7553,7 @@
     const btnMicro = document.getElementById('btn-micro-detail');
     if (btnMicro) {
       btnMicro.classList.remove('active');
-      btnMicro.querySelector('span').textContent = '🔍 Ver micro-detalle: vertientes y árboles (7 o 49 zonas)';
+      btnMicro.querySelector('span').textContent = 'Ver micro-detalle: vertientes y árboles (7 o 49 zonas)';
     }
     applyH3FillOpacity();
   }
