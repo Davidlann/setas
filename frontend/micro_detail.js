@@ -407,8 +407,8 @@
         type: 'line',
         source: 'micro-h3',
         paint: {
-          'line-color': ['case', ['==', ['get', 'h'], ['coalesce', selectedSubH, '']], '#ffffff', 'rgba(255,255,255,0.85)'],
-          'line-width': ['case', ['==', ['get', 'h'], ['coalesce', selectedSubH, '']], 3.2, 1.4]
+          'line-color': 'rgba(255,255,255,0.85)',
+          'line-width': 1.4
         }
       });
       map.addLayer({

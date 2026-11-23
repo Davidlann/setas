@@ -2231,21 +2231,38 @@
 
     /* HUD flotante de micro-detalle */
     .micro-hud {
-      position: absolute;
-      left: 12px;
-      right: 12px;
-      bottom: 44px;
-      z-index: 9;
-      max-width: 560px;
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: 18px;
+      z-index: 35;
+      max-width: 580px;
       margin: 0 auto;
-      background: rgba(252, 249, 244, 0.96);
-      backdrop-filter: blur(8px);
+      background: rgba(252, 249, 244, 0.97);
+      backdrop-filter: blur(10px);
       border: 1px solid #cfc4b2;
-      border-radius: 12px;
-      box-shadow: 0 10px 26px rgba(32, 24, 16, 0.22);
-      padding: 10px 12px;
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(32, 24, 16, 0.24);
+      padding: 11px 13px;
       color: #3c3024;
       font-size: 12px;
+      transition: left .24s ease;
+    }
+    .micro-hud[hidden] { display: none; }
+    body.micro-detail-active .map-overlay-controls {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    body.micro-detail-active .map-hint {
+      display: none;
+    }
+    @media (min-width: 960px) {
+      body.menu-open .micro-hud {
+        left: 428px;
+        right: 16px;
+        max-width: min(580px, calc(100vw - 444px));
+      }
     }
     .micro-hud-head {
       display: flex;
@@ -2281,6 +2298,18 @@
       border-color: #2d3a22;
       color: #fffdf8;
     }
+    .micro-pill-select {
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid #cfc4b2;
+      background: #f4efe6;
+      color: #2d3a22;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      max-width: 155px;
+    }
     .micro-pill-close {
       background: #fee2e2;
       border-color: #fca5a5;
@@ -2310,9 +2339,9 @@
     }
     @media (max-width: 768px) {
       .micro-hud {
-        bottom: 10px;
-        left: 8px;
-        right: 8px;
+        bottom: 12px;
+        left: 10px;
+        right: 10px;
         padding: 9px 10px;
       }
     }
@@ -3135,6 +3164,13 @@
           Micro-detalle
         </span>
         <div class="micro-hud-pills">
+          <select id="micro-species-select" class="micro-pill-select" aria-label="Especie en micro-detalle">
+            <option value="boletus_edulis">B. edulis</option>
+            <option value="boletus_pinophilus">B. pinophilus</option>
+            <option value="boletus_aereus">B. aereus</option>
+            <option value="boletus_reticulatus">B. reticulatus</option>
+            <option value="lactarius_deliciosus">Níscalo</option>
+          </select>
           <button id="micro-res-9" class="micro-pill-btn active" type="button">7 sub-zonas</button>
           <button id="micro-res-10" class="micro-pill-btn" type="button">49 micro-zonas</button>
           <button id="micro-bg-topo" class="micro-pill-btn" type="button" title="Cambiar fondo a Topo IGN">Topo IGN</button>
@@ -7517,16 +7553,24 @@
     const dataset = speciesDatasets.get(activeSpeciesId);
     if (!dataset) return;
 
+    document.body.classList.add('micro-detail-active');
+    if (cellPopup) {
+      cellPopup.remove();
+      cellPopup = null;
+    }
+
     const hud = document.getElementById('micro-detail-hud');
     const bodyEl = document.getElementById('micro-hud-body');
+    const spSel = document.getElementById('micro-species-select');
     const resBtn9 = document.getElementById('micro-res-9');
     const resBtn10 = document.getElementById('micro-res-10');
+    if (spSel) spSel.value = activeSpeciesId;
     if (resBtn9) resBtn9.classList.toggle('active', resolution === 9);
     if (resBtn10) resBtn10.classList.toggle('active', resolution === 10);
     if (hud) hud.hidden = false;
     if (bodyEl) bodyEl.textContent = 'Cargando rodales MFE50, suelo y elevación detallada (~15 m)…';
 
-    if (window.innerWidth <= 768 && document.body.classList.contains('menu-open')) {
+    if (window.innerWidth < 960 && document.body.classList.contains('menu-open')) {
       closeMenu();
     }
 
@@ -7545,6 +7589,7 @@
 
   function closeMicroDetailUi() {
     currentSelectedMicroSubcell = null;
+    document.body.classList.remove('micro-detail-active');
     if (window.MapaSeteroMicro) {
       window.MapaSeteroMicro.closeMicroDetail(map);
     }
@@ -7621,6 +7666,18 @@
   if (btnMicroDetail) {
     btnMicroDetail.addEventListener('click', () => openMicroDetailUi(9));
   }
+  document.getElementById('micro-species-select')?.addEventListener('change', e => {
+    const val = e.target.value;
+    if (!val || !SPECIES_IDS.includes(val)) return;
+    selectedSpecies = [val];
+    setCustomQuickSpecies(val);
+    speciesPicker.querySelectorAll('input').forEach(input => {
+      input.checked = selectedSpecies.includes(input.value);
+    });
+    speciesSelectionCount.textContent = '1 especie seleccionada';
+    selectAllSpeciesButton.textContent = 'Seleccionar todas';
+    loadSpecies(selectedSpecies);
+  });
   document.getElementById('micro-res-9')?.addEventListener('click', () => openMicroDetailUi(9));
   document.getElementById('micro-res-10')?.addEventListener('click', () => openMicroDetailUi(10));
   document.getElementById('micro-bg-topo')?.addEventListener('click', () => setBasemapMode(basemapMode === 'topo' ? 'map' : 'topo'));
